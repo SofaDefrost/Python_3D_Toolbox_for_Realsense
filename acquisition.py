@@ -3,8 +3,8 @@
 """
 Created on Fri Jul 21 16:09:11 2023
 
-"Mode d'emploi : l'utilisateur devra cliquer sur la touche 'e' pour enregistrer le nuage de points au format PLY, 
-sur la touche 's' pour enregistrer l'image optique, et sur la touche 'q' pour arrêter l'acquisition."
+"Mode d'emploi : l'utilisateur devra cliquer sur la touche 's' pour enregistrer le nuage de points au format PLY, et
+l'image optique, et sur la touche 'q' pour arrêter l'acquisition."
 
 """
 """Ce programme est une application de visualisation de nuage de points à partir des données en temps réel provenant d'une caméra RealSense. 
@@ -370,7 +370,4 @@ def run_acquisition(point_cloud, image):
     # Stop streaming
     pipeline.stop()
 
-# Exécution de la fonction run_acquisition avec les noms de fichiers appropriés
-point_cloud_name = "pc.ply"
-color_image_name = "image.png"
-run_acquisition(point_cloud_name, color_image_name)
+
