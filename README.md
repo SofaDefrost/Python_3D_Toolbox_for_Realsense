@@ -1,4 +1,4 @@
-## RealSense A MAJ (test)!
+## RealSense A MAJ !
 
 # Mode d'emploi 
 

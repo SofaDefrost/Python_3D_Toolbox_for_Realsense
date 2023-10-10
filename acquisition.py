@@ -365,14 +365,4 @@ def points_and_colors_realsense():
 
     return vertices, color_image
 
-print("Une petite démo:\nUne première version :")
 
-point_cloud_name = "demo.ply"
-color_image_name = "demo.png"
-
-run_acquisition(point_cloud_name, color_image_name)
-
-print("Fichier .ply et .png exportés !\nUne deuxième version :\nPoints et couleurs capturés :")
-
-print(points_and_colors_realsense()[0])
-print(points_and_colors_realsense()[1])
