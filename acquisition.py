@@ -1,47 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jul 21 16:09:11 2023
-
-"Mode d'emploi : l'utilisateur devra cliquer sur la touche 's' pour enregistrer le nuage de points au format PLY, et
-l'image optique, et sur la touche 'q' pour arrêter l'acquisition."
-
-"""
-"""Ce programme est une application de visualisation de nuage de points à partir des données en temps réel provenant d'une caméra RealSense. 
-Voici une description et le rôle de chaque fonction dans le programme :
-
-   1- AppState: C'est une classe qui stocke l'état actuel de l'application, tel que l'orientation de la vue, l'échelle, la position de la caméra, etc.
-
-   2- reset: Une méthode de la classe AppState qui réinitialise les paramètres de la caméra à leur valeur par défaut.
-
-   3- rotation (propriété): Une propriété de la classe AppState qui retourne la matrice de rotation en fonction des angles de pitch et yaw (inclinaison et lacet).
-
-   4- pivot (propriété): Une propriété de la classe AppState qui retourne le pivot de la caméra en fonction de la distance et de la translation.
-
-   5- mouse_cb: Une fonction qui gère les événements de la souris pour contrôler la caméra, tels que la rotation, la translation et le zoom.
-
-   6- project: Une fonction qui effectue une projection perspective des points 3D sur l'écran 2D, en fonction des intrinsèques de la caméra.
-
-   7- view: Une fonction qui effectue une transformation de vue des points 3D en fonction de la position et de l'orientation de la caméra.
-
-   8- line3d: Une fonction qui trace une ligne 3D à partir de deux points dans l'espace et les projette sur l'écran pour affichage.
-
-   9- grid: Une fonction qui affiche une grille 3D pour aider à la visualisation de la scène.
-
-   10- axes: Une fonction qui affiche les axes x, y, z dans la scène.
-
-   11- frustum: Une fonction qui affiche le frustum de la caméra (le volume visible) en fonction des intrinsèques de la caméra.
-
-   12- pointcloud: Une fonction qui affiche le nuage de points en effectuant l'uv-mapping pour la couleur des points à partir de l'image couleur correspondante.
-
-   13- run_acquisition: La fonction principale du programme. Elle configure les flux de données de la caméra RealSense, gère les événements de la souris et affiche le nuage de points 
-    en utilisant les fonctions décrites ci-dessus."""
-
 import math
 import time
 import cv2
-import numpy as np
 import pyrealsense2 as rs
+import numpy as np
 
 class AppState:
 
@@ -370,4 +331,48 @@ def run_acquisition(point_cloud, image):
     # Stop streaming
     pipeline.stop()
 
+def points_and_colors_realsense():
+    # Crée une liste qui représente le nuage de point ainsi que les couleurs associées vu par la caméra Realsense et la met dans un format lisible pour l'intégration sofa
+    try:
+        # Create a context object. This object owns the handles to all connected realsense devices
+        pipeline = rs.pipeline()
 
+        # Configure streams
+        config = rs.config()
+        config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+        config.enable_stream(rs.stream.color, 640, 480, rs.format.rgb8, 30)
+
+        # Start streaming
+        pipeline.start(config)
+        # This call waits until a new coherent set of frames is available on a device
+        # Calls to get_frame_data(...) and get_frame_timestamp(...) on a device will return stable values until wait_for_frames(...) is called
+        frames = pipeline.wait_for_frames()
+        depth_frame = frames.get_depth_frame()
+        color_frame = frames.get_color_frame()
+        
+        # Get the 3D and 2D coordinates
+        pc = rs.pointcloud()
+        pc.map_to(depth_frame)
+        points = pc.calculate(depth_frame)
+
+        # Convert the coordinates to NumPy arrays
+        vertices = np.array(points.get_vertices()) # Les vertices correpondent à nos coordonnées 3D
+        color_image = np.array(color_frame.get_data())
+
+    except Exception as e:
+        print(e)
+        pass
+
+    return vertices, color_image
+
+print("Une petite démo:\nUne première version :")
+
+point_cloud_name = "demo.ply"
+color_image_name = "demo.png"
+
+run_acquisition(point_cloud_name, color_image_name)
+
+print("Fichier .ply et .png exportés !\nUne deuxième version :\nPoints et couleurs capturés :")
+
+print(points_and_colors_realsense()[0])
+print(points_and_colors_realsense()[1])
