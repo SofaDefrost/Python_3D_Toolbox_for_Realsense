@@ -1,8 +1,8 @@
-## RealSense
+# RealSense
 
 Ce dépôt fourni tout un ensemble de fonctions utiles pour les caméras Intel Realsense (acquisition, filtrage...)
 
-# Organisation du code
+## Organisation du code
 *(voir la partie ci-après pour des explications sur le fonctionnement des fonctions)*
 
 Le fichier *acquisition.py* contient les fonctions *run_acquisition* et *points_and_colors_realsense*.
@@ -11,7 +11,7 @@ Le fichier *filtre_hsv_realsense.py* contient la fonction *determinemaskhsv*.
 
 Le fichier *main.py* effectue une démonstration de ces fonctions.
 
-# Mode d'emploi et explications
+## Mode d'emploi et explications
 
 Pour tester le code, il faut exécuter le code python *main.py* :
 
