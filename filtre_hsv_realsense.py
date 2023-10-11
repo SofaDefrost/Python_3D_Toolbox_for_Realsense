@@ -34,7 +34,7 @@ class AppState:
     def pivot(self):
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
-def determinemask(nameimageexportee='image.png'):
+def determinemaskhsv(nameimageexportee='image.png'):
     # Permet de déterminer le masque hsv d'une image avec une interface graphique
     state = AppState()
 

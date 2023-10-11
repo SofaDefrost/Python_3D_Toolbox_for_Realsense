@@ -14,4 +14,4 @@ print(aq.points_and_colors_realsense()[0])
 print(aq.points_and_colors_realsense()[1])
 
 print("Dernière démo:\nMasque hsv:")
-print(filtre.determinemask())
+print(filtre.determinemaskhsv())
