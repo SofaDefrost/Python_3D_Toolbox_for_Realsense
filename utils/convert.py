@@ -12,31 +12,27 @@ def ply_to_points(file_path):
 
     return points
 
-def export_ply(points, filename):
-    #Permet d'exporter un nuage de point en .ply
-
-    num_points = points.shape[0]  # Nombre de points
-    num_dimensions = points.shape[1]  # Nombre de dimensions par point
-
-    if num_dimensions < 3:
-        print("Le format PLY nécessite au moins 3 dimensions (x, y, z).")
-        return
-
-    with open(filename, 'w') as ply_file:
+def create_ply_file(points, colors, output_filename):
+    if len(points) != len(colors):
+        raise ValueError("Le nombre de points doit correspondre au nombre de couleurs.")
+    
+    with open(output_filename, 'w') as ply_file:
         # Écriture de l'en-tête PLY
         ply_file.write("ply\n")
         ply_file.write("format ascii 1.0\n")
-        ply_file.write("element vertex {}\n".format(num_points))
+        ply_file.write("element vertex {}\n".format(len(points)))
         ply_file.write("property float x\n")
         ply_file.write("property float y\n")
         ply_file.write("property float z\n")
+        ply_file.write("property uchar red\n")
+        ply_file.write("property uchar green\n")
+        ply_file.write("property uchar blue\n")
         ply_file.write("end_header\n")
 
-        # Écriture des coordonnées des points
-        for i in range(num_points):
-            x, y, z = points[i][:3]  # Assurez-vous que les coordonnées sont 3D (x, y, z)
-            ply_file.write(f"{x} {y} {z}\n")
-
-    print(f"Le nuage de points a été exporté en format PLY dans le fichier '{filename}'.")
-
-    
+        # Écriture des données de points et couleurs
+        for point, color in zip(points, colors):
+            x, y, z = point
+            r, g, b = color
+            ply_file.write(f"{x} {y} {z} {r} {g} {b}\n")
+            
+        print(f"Le fichier '{output_filename}' a été créé.")

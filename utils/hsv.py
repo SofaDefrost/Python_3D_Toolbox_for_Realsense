@@ -54,4 +54,4 @@ def mask(nuagespoints, colorspoints, maskhsv):
     # Filtrage des points et des couleurs
     points = points[mask]
     colors = colors[mask]
-    return points, colors
+    return np.array(points), np.array(colors)
