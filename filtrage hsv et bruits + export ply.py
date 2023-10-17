@@ -35,7 +35,6 @@ mask=filtre.determinemaskhsv()
 vertices,colors = get.points_and_colors_realsense()
 # On converit les couleurs dans un bon format (ie on met l'image en ligne)
 colors_sofa = colors_relasense_sofa(colors)
-cv.create_ply_file(vertices,colors_sofa,"acquiistion.ply")
 # On applique le masque
 new_points , new_colors = apply_hsv.mask(vertices,colors_sofa,mask)
 new_points_sofa=points_realsense_sofa(new_points) # Attention 
