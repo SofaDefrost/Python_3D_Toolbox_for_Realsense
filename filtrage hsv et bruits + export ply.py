@@ -37,9 +37,11 @@ vertices,colors = get.points_and_colors_realsense()
 colors_sofa = colors_relasense_sofa(colors)
 # On applique le masque
 new_points , new_colors = apply_hsv.mask(vertices,colors_sofa,mask)
+
 new_points_sofa=points_realsense_sofa(new_points) # Attention 
 # On extrait la partie que l'on veut
 new_points_surface=[sous_liste[:3] for sous_liste in new_points_sofa]
+
 # On filtre le bruit
 final_points, final_color = bruit.interface_de_filtrage_de_points(np.array(new_points_surface),new_colors)
 # On enregistre on format .ply
