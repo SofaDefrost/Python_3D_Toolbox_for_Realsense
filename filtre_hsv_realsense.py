@@ -136,7 +136,8 @@ def determinemaskhsv(nameimageexportee='image.png'):
             color_frame = frames.get_color_frame()
 
             frame = np.asanyarray(color_frame.get_data())
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            bgr_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            hsv = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2HSV)
             l_h = cv2.getTrackbarPos("L-H", "Trackbars")
             l_s = cv2.getTrackbarPos("L-S", "Trackbars")
             l_v = cv2.getTrackbarPos("L-V", "Trackbars")
@@ -148,7 +149,9 @@ def determinemaskhsv(nameimageexportee='image.png'):
             upper_blue = np.array([u_h, u_s, u_v])
 
             mask = cv2.inRange(hsv,lower_blue,upper_blue)
-            result = cv2.bitwise_and(frame, frame, mask=mask)
+            result_BGR = cv2.bitwise_and(frame, frame, mask=mask)
+            result = cv2.cvtColor(result_BGR, cv2.COLOR_BGR2RGB)
+
             cv2.imshow("mask", mask)
             cv2.imshow("result", result)
 
