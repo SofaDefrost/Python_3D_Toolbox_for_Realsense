@@ -36,3 +36,22 @@ def create_ply_file(points, colors, output_filename):
             ply_file.write(f"{x} {y} {z} {r} {g} {b}\n")
             
         print(f"Le fichier '{output_filename}' a été créé.")
+
+def create_ply_file_without_colors(points, output_filename):
+
+    # Ouvre le fichier de sortie en mode écriture.
+    with open(output_filename, 'w') as ply_file:
+        # Écrit l'en-tête PLY.
+        ply_file.write("ply\n")
+        ply_file.write("format ascii 1.0\n")
+        ply_file.write("element vertex {}\n".format(len(points)))
+        ply_file.write("property float x\n")
+        ply_file.write("property float y\n")
+        ply_file.write("property float z\n")
+        ply_file.write("end_header\n")
+
+        # Écrit les coordonnées des points dans le fichier.
+        for point in points:
+            ply_file.write("{} {} {}\n".format(point[0], point[1], point[2]))
+
+
