@@ -1,16 +1,13 @@
 import numpy as np
-from plyfile import PlyData
+import open3d as o3d
 
-def ply_to_points(file_path):
-    # prend un fichier .ply et le converti en nuage de points 
-    plydata = PlyData.read(file_path)
-    x = plydata['vertex']['x']
-    y = plydata['vertex']['y']
-    z = plydata['vertex']['z']
+def ply_to_points_and_colors(file_path):
+    # prend un fichier .ply et le converti en nuage de points et en couleur format RGB entre 0 et 255
+    ply_data = o3d.io.read_point_cloud(file_path)
+    points = np.array(ply_data.points)
+    colors = np.array(ply_data.colors)* 255
 
-    points = np.vstack((x, y, z)).T
-
-    return points
+    return points, colors
 
 def create_ply_file(points, colors, output_filename):
     if len(points) != len(colors):
