@@ -120,7 +120,7 @@ def determinemaskhsv(nameimageexportee='image.png'):
         np.clip(u, 0, ch - 1, out=u)
         np.clip(v, 0, cw - 1, out=v)
 
-        out[i[m], j[m]] = color[u[m], v[m]]
+        out[i[m], j[m]] = color[u[m], v[m]][:, ::-1]
 
     out = np.empty((h, w, 3), dtype=np.uint8)
 
@@ -212,8 +212,11 @@ def determinemaskhsv(nameimageexportee='image.png'):
         cv2.setWindowTitle(
             state.WIN_NAME, "RealSense (%dx%d) %dFPS (%.2fms) %s" %
                             (w, h, 1.0 / dt, dt * 1000, "PAUSED" if state.paused else ""))
+        
 
         cv2.imshow(state.WIN_NAME, out)
+
+        
         key = cv2.waitKey(1)
 
         if key == ord("p"):
@@ -230,3 +233,5 @@ def determinemaskhsv(nameimageexportee='image.png'):
     pipeline.stop()
     cv2.destroyAllWindows()
     return lower_blue,upper_blue
+
+determinemaskhsv()
