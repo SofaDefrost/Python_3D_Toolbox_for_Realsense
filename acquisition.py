@@ -331,7 +331,7 @@ def run_acquisition(point_cloud, image):
     # Stop streaming
     pipeline.stop()
 
-def points_and_colors_realsense():
+def points_and_colors_realsense(image_name="image.png"):
     # Crée une liste qui représente le nuage de point ainsi que les couleurs associées vu par la caméra Realsense et la met dans un format lisible pour l'intégration sofa
     try:
         # Create a context object. This object owns the handles to all connected realsense devices
@@ -359,6 +359,7 @@ def points_and_colors_realsense():
         vertices = np.array(points.get_vertices()) # Les vertices correpondent à nos coordonnées 3D
         color_image = np.array(color_frame.get_data())
 
+        cv2.imwrite(image_name, color_image)
     except Exception as e:
         print(e)
         pass

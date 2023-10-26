@@ -233,5 +233,3 @@ def determinemaskhsv(nameimageexportee='image.png'):
     pipeline.stop()
     cv2.destroyAllWindows()
     return lower_blue,upper_blue
-
-determinemaskhsv()
