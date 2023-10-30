@@ -8,13 +8,13 @@ def interface_hsv_image(image_path):
     # Fonction pour mettre à jour le masque en fonction des curseurs HSV
     def update_mask_hsv(x):
         global lower_hsv, upper_hsv, mask, result
-        lower_hsv = np.array([cv2.getTrackbarPos('Hue_L', 'HSV Interface'),
-                            cv2.getTrackbarPos('Saturation_L', 'HSV Interface'),
-                            cv2.getTrackbarPos('Value_L', 'HSV Interface')])
+        lower_hsv = np.array([cv2.getTrackbarPos('H_L', 'HSV Interface'),
+                            cv2.getTrackbarPos('S_L', 'HSV Interface'),
+                            cv2.getTrackbarPos('V_L', 'HSV Interface')])
         
-        upper_hsv = np.array([cv2.getTrackbarPos('Hue_U', 'HSV Interface'),
-                            cv2.getTrackbarPos('Saturation_U', 'HSV Interface'),
-                            cv2.getTrackbarPos('Value_U', 'HSV Interface')])
+        upper_hsv = np.array([cv2.getTrackbarPos('H_U', 'HSV Interface'),
+                            cv2.getTrackbarPos('S_U', 'HSV Interface'),
+                            cv2.getTrackbarPos('V_U', 'HSV Interface')])
 
         mask = cv2.inRange(hsv_img, lower_hsv, upper_hsv)
         cv2.imshow('HSV Mask', mask)
@@ -22,6 +22,7 @@ def interface_hsv_image(image_path):
         # Appliquer le masque sur l'image originale
         result = cv2.bitwise_and(image, image, mask=mask)
         cv2.imshow('Result', result)
+        return lower_hsv, upper_hsv
 
     # Charger votre image
     image = cv2.imread(image_path)
@@ -38,12 +39,12 @@ def interface_hsv_image(image_path):
         cv2.namedWindow('Result')
 
         # Créer les curseurs pour les composantes HSV
-        cv2.createTrackbar('Hue_L', 'HSV Interface', 0, 179, update_mask_hsv)
-        cv2.createTrackbar('Saturation_L', 'HSV Interface', 0, 255, update_mask_hsv)
-        cv2.createTrackbar('Value_L', 'HSV Interface', 0, 255, update_mask_hsv)
-        cv2.createTrackbar('Hue_U', 'HSV Interface', 179, 179, update_mask_hsv)
-        cv2.createTrackbar('Saturation_U', 'HSV Interface', 255, 255, update_mask_hsv)
-        cv2.createTrackbar('Value_U', 'HSV Interface', 255, 255, update_mask_hsv)
+        cv2.createTrackbar('H_L', 'HSV Interface', 0, 179, update_mask_hsv)
+        cv2.createTrackbar('S_L', 'HSV Interface', 0, 255, update_mask_hsv)
+        cv2.createTrackbar('V_L', 'HSV Interface', 0, 255, update_mask_hsv)
+        cv2.createTrackbar('H_U', 'HSV Interface', 179, 179, update_mask_hsv)
+        cv2.createTrackbar('S_U', 'HSV Interface', 255, 255, update_mask_hsv)
+        cv2.createTrackbar('V_U', 'HSV Interface', 255, 255, update_mask_hsv)
 
         # Initialiser les plages HSV
         lower_hsv = np.array([0, 0, 0])
@@ -56,7 +57,7 @@ def interface_hsv_image(image_path):
 
         while True:
             # Mettre à jour le masque en fonction des curseurs
-            update_mask_hsv(0)
+            lower_hsv, upper_hsv= update_mask_hsv(0)
             
             # Afficher les trois fenêtres
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -64,4 +65,5 @@ def interface_hsv_image(image_path):
 
         # Une fois que l'utilisateur appuie sur 'q', renvoyer le masque
         cv2.destroyAllWindows()
+        print('Masque exporté ! ')
         return lower_hsv, upper_hsv
