@@ -1,6 +1,8 @@
 import open3d as o3d
 import numpy as np
 
+# Fonction qui permet de supprimer dans un nuage de points, les poins en dessous d'un seuil en z.
+
 def remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold):
     # Charger le fichier PLY
     point_cloud = o3d.io.read_point_cloud(input_ply_file)
