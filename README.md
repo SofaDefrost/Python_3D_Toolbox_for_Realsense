@@ -1,6 +1,6 @@
 # RealSense
 
-Ce dépôt fourni tout un ensemble de fonctions utiles pour les caméras Intel Realsense (acquisition, filtrage...)
+Ce dépôt fourni tout un ensemble de fonctions utiles pour les caméras Intel Realsense (acquisition, filtrage...) ainsi qu'un répertoire *Utils* qui regroupe un ensemble de script python utiles en computer vison mais dont l'usage n'est pas reservé au travaux sur les caméra RealSense. 
 
 ## Organisation du code
 *(voir la partie ci-après pour des explications sur le fonctionnement des fonctions)*
@@ -10,6 +10,8 @@ Le fichier *acquisition.py* contient les fonctions *run_acquisition* et *points_
 Le fichier *filtre_hsv_realsense.py* contient la fonction *determinemaskhsv*.
 
 Le fichier *main.py* effectue une démonstration de ces fonctions.
+
+Le fichier *filtrage hsv et bruits + export ply.py* est un fichier d'exemple qui permet à partir d'une caméra RealSense de faire une acquisition, d'effectuer un filtrage hsv et anti bruit et d'exporter le tout au format *.ply*.
 
 ## Mode d'emploi et explications
 

@@ -50,5 +50,3 @@ def create_ply_file_without_colors(points, output_filename):
         # Écrit les coordonnées des points dans le fichier.
         for point in points:
             ply_file.write("{} {} {}\n".format(point[0], point[1], point[2]))
-
-
