@@ -2,6 +2,8 @@
 
 Ce dépôt fourni tout un ensemble de fonctions utiles pour les caméras Intel Realsense (acquisition, filtrage...) ainsi qu'un répertoire *Utils* qui regroupe un ensemble de script python utiles en computer vison mais dont l'usage n'est pas reservé au travaux sur les caméra RealSense. 
 
+Auteur : Thibaud
+
 ## Organisation du code
 *(voir la partie ci-après pour des explications sur le fonctionnement des fonctions)*
 
