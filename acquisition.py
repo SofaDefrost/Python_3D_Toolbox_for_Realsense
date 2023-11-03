@@ -367,3 +367,29 @@ def points_and_colors_realsense(image_name="image.png"):
     return vertices, color_image
 
 
+### Pour faire des acquisitions en masse
+
+import utils.convert as cv
+
+def colors_relasense_sofa(colors):
+    # Permet de convertir les couleurs de la caméra realsense  en un format lisible par Sofa (ie on met l'image en ligne)
+    l=len(colors)*len(colors[0])
+    new_colors=np.asarray([(0,0,0) for i in range(l)])
+    indice=0
+    for i in range(len(colors)):
+        for j in range(len(colors[0])):
+            new_colors[indice]=colors[i][j]
+            indice+=1
+    return np.array(new_colors)
+
+name_object="_test_"
+name_folder="labo_biologie/acquisition_en_masse/"
+name_acquisition_thibaud=name_folder+name_object+"_Thibaud"
+name_acquisition_tinhinane=name_folder+name_object+"_Tinhinane"
+i=0
+while True:
+    run_acquisition(name_acquisition_tinhinane+str(i)+".ply",name_acquisition_tinhinane+str(i)+".png")
+    points,couleurs=points_and_colors_realsense(name_acquisition_thibaud+str(i)+".png")
+    couleurs=colors_relasense_sofa(couleurs)
+    cv.create_ply_file(points, couleurs, name_acquisition_thibaud+str(i)+".ply")
+    i+=1
