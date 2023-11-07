@@ -358,14 +358,13 @@ def points_and_colors_realsense(image_name="image.png"):
         # Convert the coordinates to NumPy arrays
         vertices = np.array(points.get_vertices()) # Les vertices correpondent à nos coordonnées 3D
         color_image = np.array(color_frame.get_data())
-
-        cv2.imwrite(image_name, color_image)
+        color_image_rgb = np.array([[[point[2], point[1], point[0]] for point in ligne] for ligne in color_image])
+        cv2.imwrite(image_name, color_image_rgb)
     except Exception as e:
         print(e)
         pass
 
-    return vertices, color_image
-
+    return vertices, color_image_rgb
 
 # ### Pour faire des acquisitions en masse
 
