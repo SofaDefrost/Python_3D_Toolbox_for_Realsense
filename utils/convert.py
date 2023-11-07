@@ -1,5 +1,6 @@
 import numpy as np
 import open3d as o3d
+from PIL import Image
 
 def ply_to_points_and_colors(file_path):
     # prend un fichier .ply et le converti en nuage de points et en couleur format RGB entre 0 et 255
@@ -50,3 +51,15 @@ def create_ply_file_without_colors(points, output_filename):
         # Écrit les coordonnées des points dans le fichier.
         for point in points:
             ply_file.write("{} {} {}\n".format(point[0], point[1], point[2]))
+
+def creer_image_a_partir_de_liste(liste_pixels, largeur, hauteur, nom_fichier_sortie):
+    # Création de l'image à partir de la liste de pixels
+    image = Image.new("RGB", (largeur, hauteur))
+    
+    # Remplissage de l'image avec les pixels de la liste
+    pixel_data = [tuple(pixel) for pixel in liste_pixels]  # Convertit les listes en tuples
+    image.putdata(pixel_data)
+    
+    # Sauvegarde de l'image
+    image.save(nom_fichier_sortie)
+    
