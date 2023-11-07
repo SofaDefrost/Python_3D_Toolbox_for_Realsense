@@ -364,7 +364,7 @@ def points_and_colors_realsense(image_name="image.png"):
         print(e)
         pass
 
-    return vertices, color_image_rgb
+    return vertices, color_image
 
 # ### Pour faire des acquisitions en masse
 
