@@ -2,8 +2,6 @@
 
 Ce dépôt fourni tout un ensemble de fonctions utiles pour les caméras Intel Realsense (acquisition, filtrage...) ainsi qu'un répertoire *Utils* qui regroupe un ensemble de script python utiles en computer vison mais dont l'usage n'est pas reservé au travaux sur les caméra RealSense. 
 
-Auteur : Thibaud
-
 ## Organisation du code
 *(voir la partie ci-après pour des explications sur le fonctionnement des fonctions)*
 
@@ -19,8 +17,8 @@ Le fichier *filtrage hsv et bruits + export ply.py* est un fichier d'exemple qui
 
 Pour tester le code, il faut exécuter le code python *main.py* :
 
-```
-consolepython3 main.py
+```console
+python3 main.py
 ```
 
 Trois démonstrations vont alors s'effectuer :
@@ -37,3 +35,7 @@ Librairies python nécessaires : pyrealsense2 et cv2
 pip3 install pyrealsense2
 pip3 install opencv-python
 ```
+
+To get more information and exemple about the RealSense with python : https://dev.intelrealsense.com/docs/python2
+
+Auteurs : Thibaud, Tinhinane
