@@ -62,4 +62,27 @@ def creer_image_a_partir_de_liste(liste_pixels, largeur, hauteur, nom_fichier_so
     
     # Sauvegarde de l'image
     image.save(nom_fichier_sortie)
-    
+
+def image_en_liste(chemin_image):
+    """
+    Convertit une image en une liste de pixels.
+
+    Parameters:
+    - chemin_image (str): Chemin vers le fichier image.
+
+    Returns:
+    - liste_pixels (list): Liste de pixels.
+    """
+    # Ouvrir l'image avec Pillow
+    image = Image.open(chemin_image)
+
+    # Obtenir les dimensions de l'image
+    largeur, hauteur = image.size
+
+    # Obtenir les pixels de l'image sous forme de liste
+    liste_pixels = list(image.getdata())
+
+    # Reshape la liste pour correspondre aux dimensions de l'image
+    liste_pixels = [liste_pixels[i:i+largeur] for i in range(0, len(liste_pixels), largeur)]
+
+    return liste_pixels
