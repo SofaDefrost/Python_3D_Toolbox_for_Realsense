@@ -89,3 +89,21 @@ def image_en_liste(chemin_image):
     liste_pixels_rgb = [tuple(pixel[:-1]) for ligne in tableau_image for pixel in ligne]
 
     return liste_pixels_rgb
+
+def convert_map_to_ply(map_file, ply_file):
+    # Lire le fichier .map
+    with open(map_file, 'r') as f:
+        lines = f.readlines()
+
+    # Extraire les coordonnées XYZ
+    points = [list(map(float, line.strip().split())) for line in lines]
+
+    # Convertir la liste en tableau NumPy
+    points_np = np.array(points, dtype=np.float32)
+
+    # Créer un nuage de points Open3D
+    point_cloud = o3d.geometry.PointCloud()
+    point_cloud.points = o3d.utility.Vector3dVector(points_np[:, :3])
+
+    # Sauvegarder le nuage de points au format .ply
+    o3d.io.write_point_cloud(ply_file, point_cloud)
