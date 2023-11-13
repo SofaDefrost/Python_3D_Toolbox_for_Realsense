@@ -65,24 +65,27 @@ def creer_image_a_partir_de_liste(liste_pixels, largeur, hauteur, nom_fichier_so
 
 def image_en_liste(chemin_image):
     """
-    Convertit une image en une liste de pixels.
+    Convertit une image en une liste de pixels (composantes RVB).
 
     Parameters:
     - chemin_image (str): Chemin vers le fichier image.
 
     Returns:
-    - liste_pixels (list): Liste de pixels.
+    - liste_pixels (list): Liste de pixels (composantes RVB).
     """
     # Ouvrir l'image avec Pillow
     image = Image.open(chemin_image)
 
+    # Convertir l'image en tableau NumPy
+    tableau_image = np.array(image)
+
     # Obtenir les dimensions de l'image
-    largeur, hauteur = image.size
+    largeur, hauteur, _ = tableau_image.shape
 
-    # Obtenir les pixels de l'image sous forme de liste
-    liste_pixels = list(image.getdata())
+    # Reshape le tableau pour correspondre aux dimensions de l'image
+    tableau_image = tableau_image.reshape((hauteur, largeur, -1))
 
-    # Reshape la liste pour correspondre aux dimensions de l'image
-    liste_pixels = [liste_pixels[i:i+largeur] for i in range(0, len(liste_pixels), largeur)]
+    # Extraire les composantes RVB
+    liste_pixels_rgb = [tuple(pixel[:-1]) for ligne in tableau_image for pixel in ligne]
 
-    return liste_pixels
+    return liste_pixels_rgb
