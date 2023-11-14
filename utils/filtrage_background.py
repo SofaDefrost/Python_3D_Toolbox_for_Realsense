@@ -21,8 +21,8 @@ def remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold):
     o3d.io.write_point_cloud(output_ply_file, filtered_point_cloud)
 
 # Exemple d'utilisation de la fonction
-input_ply_file = "foie_spectrometre.ply"  # Remplacez par votre propre fichier PLY
-output_ply_file = "output.ply"  # Fichier de sortie filtré
-z_threshold = 0.7  # Valeur de seuil Z à partir de laquelle supprimer les points
+input_ply_file = "foie_de_boeuf_de_dos.ply"  # Remplacez par votre propre fichier PLY
+output_ply_file = "foie_de_boeuf_de_dos_sans_back.ply"  # Fichier de sortie filtré
+z_threshold = -0.1  # Valeur de seuil Z à partir de laquelle supprimer les points
 
 remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold)
