@@ -21,12 +21,14 @@ def reduction_densite_pc(input_file, output_file, densite):
 
     # Extraire les points sélectionnés
     points_reduits = points[indices_a_conserver, :]
-    colors_reduits = colors[indices_a_conserver, :]
+    if len(colors)!=0:
+        colors_reduits = colors[indices_a_conserver, :]
 
     # Créer un nouveau nuage de points avec les points réduits et les couleurs correspondantes
     cloud_reduit = o3d.geometry.PointCloud()
     cloud_reduit.points = o3d.utility.Vector3dVector(points_reduits)
-    cloud_reduit.colors = o3d.utility.Vector3dVector(colors_reduits)
+    if len(colors)!=0:
+        cloud_reduit.colors = o3d.utility.Vector3dVector(colors_reduits)
 
     # Sauvegarder le nuage de points réduit
     o3d.io.write_point_cloud(output_file, cloud_reduit)
