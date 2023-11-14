@@ -10,6 +10,9 @@ def reduction_densite_pc(input_file, output_file, densite):
     # Convertir le nuage de points en un tableau NumPy
     points = np.asarray(cloud.points)
 
+    # Convertir les couleurs du nuage de points en un tableau NumPy
+    colors = np.asarray(cloud.colors)
+
     # Calculer le nombre de points à conserver
     nombre_points = int(len(points) * densite)
 
@@ -18,10 +21,12 @@ def reduction_densite_pc(input_file, output_file, densite):
 
     # Extraire les points sélectionnés
     points_reduits = points[indices_a_conserver, :]
+    colors_reduits = colors[indices_a_conserver, :]
 
-    # Créer un nouveau nuage de points avec les points réduits
+    # Créer un nouveau nuage de points avec les points réduits et les couleurs correspondantes
     cloud_reduit = o3d.geometry.PointCloud()
     cloud_reduit.points = o3d.utility.Vector3dVector(points_reduits)
+    cloud_reduit.colors = o3d.utility.Vector3dVector(colors_reduits)
 
     # Sauvegarder le nuage de points réduit
     o3d.io.write_point_cloud(output_file, cloud_reduit)
