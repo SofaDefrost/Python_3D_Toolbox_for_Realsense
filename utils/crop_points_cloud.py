@@ -3,13 +3,14 @@
 """
 Created on Wed Jul 26 15:02:23 2023
 
-@author: tinhinane
+@author: Tinhinane and Thibaud
 """
 
 import cv2
 import numpy as np 
 
 def crop_points_cloud(image_path,points_cloud,couleurs,h):
+# Fonction permttant de couper un nuage de point à partir de sa projection 2D (image). h correspond à la longueur de l'image.
     # Variables globales pour stocker les coordonnées des clics souris
     start_x, start_y = -1, -1
     end_x, end_y = -1, -1
@@ -46,7 +47,7 @@ def crop_points_cloud(image_path,points_cloud,couleurs,h):
     cv2.setMouseCallback("Cropping", mouse_click)
 
     # Instructions pour l'utilisateur
-    print("Utilisez la souris pour sélectionner le rectangle de recadrage. Appuyez sur la touche 'c' pour terminer le recadrage.")
+    print("Utilisez la souris pour sélectionner le rectangle de recadrage. Appuyez sur la touche 'c' puis 'q' pour terminer le recadrage.")
 
     # Boucle principale
     while True:
