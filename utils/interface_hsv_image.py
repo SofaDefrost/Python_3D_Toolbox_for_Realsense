@@ -67,3 +67,4 @@ def interface_hsv_image(image_path):
         cv2.destroyAllWindows()
         print('Masque exporté ! ')
         return lower_hsv, upper_hsv
+
