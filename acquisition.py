@@ -331,6 +331,7 @@ def run_acquisition(point_cloud, image):
     # Stop streaming
     pipeline.stop()
 
+
 def points_and_colors_realsense(image_name="image.png"):
     # Crée une liste qui représente le nuage de point ainsi que les couleurs associées vu par la caméra Realsense et la met dans un format lisible pour l'intégration sofa
     try:
@@ -349,7 +350,7 @@ def points_and_colors_realsense(image_name="image.png"):
         frames = pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
-        
+
         # Get the 3D and 2D coordinates
         pc = rs.pointcloud()
         pc.map_to(depth_frame)
@@ -358,12 +359,12 @@ def points_and_colors_realsense(image_name="image.png"):
         # Convert the coordinates to NumPy arrays
         vertices = np.array(points.get_vertices()) # Les vertices correpondent à nos coordonnées 3D
         color_image = np.array(color_frame.get_data())
-        color_image_rgb = np.array([[[point[2], point[1], point[0]] for point in ligne] for ligne in color_image])
+        color_image_rgb = color_image[:, :, [2, 1, 0]]
         cv2.imwrite(image_name, color_image_rgb)
+
     except Exception as e:
         print(e)
         pass
-
     return vertices, color_image
 
 # ### Pour faire des acquisitions en masse
