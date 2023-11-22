@@ -11,6 +11,7 @@ import numpy as np
 
 def crop_points_cloud(image_path,points_cloud,couleurs,h):
 # Fonction permttant de couper un nuage de point à partir de sa projection 2D (image). h correspond à la longueur de l'image.
+# les tableaux doivent être en ligne
     # Variables globales pour stocker les coordonnées des clics souris
     start_x, start_y = -1, -1
     end_x, end_y = -1, -1
