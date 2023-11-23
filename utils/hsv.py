@@ -37,8 +37,10 @@ def rgbtohsv(colors):
         colorshsv[i][2]=v*255
     return colorshsv  
 
-def mask(nuagespoints, colorspoints, maskhsv):
+def mask(nuagespoints, colorspoints, maskhsv,tableau_indice=[]):
     # Permet de filtrer les points du nuages en fonction du masque hsv, les points et les couleurs doivent être sous fome de ligne
+    # tableau_indice est le tableau qui correspond aux indices du nuage de point initial
+
     points = nuagespoints
     colors = colorspoints
     # Convertir l'image "color" RVB en image "color" HSV 
@@ -51,7 +53,12 @@ def mask(nuagespoints, colorspoints, maskhsv):
             if((colorshsv[i][1] > maskhsv[0][1]) and (colorshsv[i][1] < maskhsv[1][1])): # Composante s
                 if((colorshsv[i][2] > maskhsv[0][2]) and (colorshsv[i][2] < maskhsv[1][2])): # Composante v
                     mask[i]=True
-    # Filtrage des points et des couleurs
+    # Filtrage des points, des couleurs et des indices (si nécessaire)
     points = points[mask]
     colors = colors[mask]
+
+    if len(tableau_indice)>0:
+        tableau_indice=tableau_indice[mask]
+        return np.array(points), np.array(colors),np.array(tableau_indice)
+    
     return np.array(points), np.array(colors)

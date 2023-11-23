@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-# Permets de détecter un point rouge dans une image 
+# Permets de détecter un point rouge dans une image
 
 def laser_in_picture(image_array):
 

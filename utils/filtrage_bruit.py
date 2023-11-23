@@ -14,22 +14,26 @@ def affichage_matplotlib(ax, points):
     ax.set_zlabel('Axe Z')
     ax.set_title('Nuage de points 3D')
 
-def filtrage_barycentre(points,colors, rayon):
+def filtrage_barycentre(points,colors, rayon,tableau_indice):
     barycentre = np.mean(points, axis=0)
     rayon_filtrage = rayon
     filtered_points = []
     filtered_colors = []
+    filtered_indice=[]
     for i in range(len(points)):
         point=points[i]
         distance = np.linalg.norm(point - barycentre)
         if distance <= rayon_filtrage:
             filtered_points.append(point)
             filtered_colors.append(colors[i])
-    return np.array(filtered_points), np.array(filtered_colors)
+            if len(tableau_indice)>0:
+                filtered_indice.append(tableau_indice[i])
 
-def update_filter(event, ax, canvas, points, colors, rayon_slider):
+    return np.array(filtered_points), np.array(filtered_colors),np.array(filtered_indice)
+
+def update_filter(event, ax, canvas, points, colors, rayon_slider,tableau_indice):
     rayon = rayon_slider.get()
-    filtered_points , filtered_colors = filtrage_barycentre(points,colors, rayon)
+    filtered_points , filtered_colors,filtered_tableau_indice = filtrage_barycentre(points,colors, rayon,tableau_indice)
     affichage_matplotlib(ax, filtered_points)
     canvas.draw()
 
@@ -42,7 +46,7 @@ def export_filtered_data(filtered_data, root):
         print(f"Les points filtrés ont été exportés dans {filename}")
     root.quit()  # Stop the Tkinter event loop
 
-def interface_de_filtrage_de_points(points,colors):
+def interface_de_filtrage_de_points(points,colors,tableau_indice=[]):
     root = tk.Tk()
     root.title("Filtrage de nuage de points")
 
@@ -53,13 +57,14 @@ def interface_de_filtrage_de_points(points,colors):
 
     rayon_label = ttk.Label(root, text="Rayon de filtrage")
     rayon_label.pack()
-    rayon_slider = Scale(root, from_=0, to=1, resolution=0.01, orient="horizontal", command=lambda event: update_filter(event, ax, canvas, points, colors, rayon_slider))
+    rayon_slider = Scale(root, from_=0, to=1, resolution=0.01, orient="horizontal", command=lambda event: update_filter(event, ax, canvas, points, colors, rayon_slider,tableau_indice))
     rayon_slider.pack()
 
     affichage_matplotlib(ax, points)
 
     filtered_data_points = []
     filtered_data_colors = []
+    filtered_data_indices = []
 
     export_button = Button(root, text="Exporter les points filtrés", command=lambda: export_filtered_data(filtered_data_points, root))
     export_button.pack()
@@ -67,11 +72,15 @@ def interface_de_filtrage_de_points(points,colors):
     root.mainloop()
     
     rayon = rayon_slider.get()
-    filtered_points, filtered_colors = filtrage_barycentre(points,colors, rayon)
+    filtered_points, filtered_colors,filtered_indices = filtrage_barycentre(points,colors, rayon,tableau_indice)
     filtered_data_points.extend(filtered_points)
     filtered_data_colors.extend(filtered_colors)
-
-    return np.array(filtered_data_points), np.array(filtered_data_colors)
+    
+    if len(filtered_indices)>0:
+        filtered_data_indices.extend(filtered_indices)
+        return np.array(filtered_data_points), np.array(filtered_data_colors),np.array(filtered_data_indices)
+    else:
+        return np.array(filtered_data_points), np.array(filtered_data_colors)
 
 # # Exemple de nuage de points avec ses couleurs
 # points = np.random.rand(100, 3)
