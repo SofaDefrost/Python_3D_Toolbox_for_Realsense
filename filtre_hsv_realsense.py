@@ -34,8 +34,16 @@ class AppState:
     def pivot(self):
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
-def determinemaskhsv(nameimageexportee='image.png'):
-    # Permet de déterminer le masque hsv d'une image avec une interface graphique
+def determine_mask_hsv(nameimageexportee='image.png'):
+     """
+    Permet de déterminer le masque hsv d'une image avec une interface graphique.
+
+    Parameters:
+    - nameimageexportee (str): Le nom du fichier image pour enregistrer le résultat. Par défaut, 'image.png'.
+
+    Returns:
+    - Tuple: Un tuple contenant les plages HSV inférieures et supérieures déterminées lors de l'ajustement dans l'interface graphique.
+    """
     state = AppState()
 
     # Configure depth and color streams

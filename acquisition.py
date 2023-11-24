@@ -4,6 +4,7 @@ import cv2
 import pyrealsense2 as rs
 import numpy as np
 
+
 class AppState:
 
     def __init__(self, *args, **kwargs):
@@ -32,7 +33,18 @@ class AppState:
     def pivot(self):
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
+
 def run_acquisition(point_cloud, image):
+    """
+    Acquiert des données à partir de la caméra RealSense.
+
+    Parameters:
+    - point_cloud (str): Le chemin du fichier PLY pour enregistrer le nuage de points.
+    - image (str): Le chemin du fichier image pour enregistrer la capture couleur.
+
+    Returns:
+    None
+    """
     state = AppState()
 
 # Configure depth and color streams
@@ -48,19 +60,19 @@ def run_acquisition(point_cloud, image):
         if s.get_info(rs.camera_info.name) == 'RGB Camera':
             found_rgb = True
             break
-    if not found_rgb: 
-        print("The demo requires Depth camera with Color sensor") 
-        
+    if not found_rgb:
+        print("The demo requires Depth camera with Color sensor")
 
-    config.enable_stream(rs.stream.depth,640,480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color,640,480, rs.format.bgr8, 30)
+    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
 # Start streaming
     pipeline.start(config)
 
 # Get stream profile and camera intrinsics
     profile = pipeline.get_active_profile()
-    depth_profile = rs.video_stream_profile(profile.get_stream(rs.stream.depth))
+    depth_profile = rs.video_stream_profile(
+        profile.get_stream(rs.stream.depth))
     depth_intrinsics = depth_profile.get_intrinsics()
     w, h = depth_intrinsics.width, depth_intrinsics.height
 
@@ -70,25 +82,24 @@ def run_acquisition(point_cloud, image):
     decimate.set_option(rs.option.filter_magnitude, 2 ** state.decimate)
     colorizer = rs.colorizer()
 
-
     def mouse_cb(event, x, y, flags, param):
-       if event == cv2.EVENT_LBUTTONDOWN: 
-            state.mouse_btns[0] = True 
-       if event == cv2.EVENT_LBUTTONUP: 
+        if event == cv2.EVENT_LBUTTONDOWN:
+            state.mouse_btns[0] = True
+        if event == cv2.EVENT_LBUTTONUP:
             state.mouse_btns[0] = False
 
-       if event == cv2.EVENT_RBUTTONDOWN:
-           state.mouse_btns[1] = True
+        if event == cv2.EVENT_RBUTTONDOWN:
+            state.mouse_btns[1] = True
 
-       if event == cv2.EVENT_RBUTTONUP: 
+        if event == cv2.EVENT_RBUTTONUP:
             state.mouse_btns[1] = False
 
-       if event == cv2.EVENT_MBUTTONDOWN: 
-            state.mouse_btns[2] = True 
-       if event == cv2.EVENT_MBUTTONUP: 
+        if event == cv2.EVENT_MBUTTONDOWN:
+            state.mouse_btns[2] = True
+        if event == cv2.EVENT_MBUTTONUP:
             state.mouse_btns[2] = False
 
-       if event == cv2.EVENT_MOUSEMOVE: 
+        if event == cv2.EVENT_MOUSEMOVE:
             h, w = out.shape[:2]
             dx, dy = x - state.prev_mouse[0], y - state.prev_mouse[1]
 
@@ -97,60 +108,55 @@ def run_acquisition(point_cloud, image):
                 state.pitch -= float(dy) / h * 2
 
             elif state.mouse_btns[1]:
-              dp = np.array((dx / w, dy / h, 0), dtype=np.float32)
-              state.translation -= np.dot(state.rotation, dp)
+                dp = np.array((dx / w, dy / h, 0), dtype=np.float32)
+                state.translation -= np.dot(state.rotation, dp)
 
             elif state.mouse_btns[2]:
-             dz = math.sqrt(dx**2 + dy**2) * math.copysign(0.01, -dy)
-             state.translation[2] += dz
-             state.distance -= dz
+                dz = math.sqrt(dx**2 + dy**2) * math.copysign(0.01, -dy)
+                state.translation[2] += dz
+                state.distance -= dz
 
-       if event == cv2.EVENT_MOUSEWHEEL:
-          dz = math.copysign(0.1, flags)
-          state.translation[2] += dz
-          state.distance -= dz
+        if event == cv2.EVENT_MOUSEWHEEL:
+            dz = math.copysign(0.1, flags)
+            state.translation[2] += dz
+            state.distance -= dz
 
-       state.prev_mouse = (x, y)
-
+        state.prev_mouse = (x, y)
 
     cv2.namedWindow(state.WIN_NAME, cv2.WINDOW_AUTOSIZE)
     cv2.resizeWindow(state.WIN_NAME, w, h)
     cv2.setMouseCallback(state.WIN_NAME, mouse_cb)
 
-
-    def project(v): 
+    def project(v):
         h, w = out.shape[:2]
         view_aspect = float(h)/w
 
     # ignore divide by zero for invalid depth
-        with np.errstate(divide='ignore', invalid='ignore'): 
+        with np.errstate(divide='ignore', invalid='ignore'):
             proj = v[:, :-1] / v[:, -1, np.newaxis] * \
-               (w*view_aspect, h) + (w/2.0, h/2.0)
+                (w*view_aspect, h) + (w/2.0, h/2.0)
 
     # near clipping
         znear = 0.03
         proj[v[:, 2] < znear] = np.nan
         return proj
 
-
     def view(v):
-      return np.dot(v - state.pivot, state.rotation) + state.pivot - state.translation
+        return np.dot(v - state.pivot, state.rotation) + state.pivot - state.translation
 
+    def line3d(out, pt1, pt2, color=(0x80, 0x80, 0x80), thickness=1):
+        p0 = project(pt1.reshape(-1, 3))[0]
+        p1 = project(pt2.reshape(-1, 3))[0]
+        if np.isnan(p0).any() or np.isnan(p1).any():
+            return
+        p0 = tuple(p0.astype(int))
+        p1 = tuple(p1.astype(int))
+        rect = (0, 0, out.shape[1], out.shape[0])
+        inside, p0, p1 = cv2.clipLine(rect, p0, p1)
+        if inside:
+            cv2.line(out, p0, p1, color, thickness, cv2.LINE_AA)
 
-    def line3d(out, pt1, pt2, color=(0x80, 0x80, 0x80), thickness=1): 
-      p0 = project(pt1.reshape(-1, 3))[0]
-      p1 = project(pt2.reshape(-1, 3))[0]
-      if np.isnan(p0).any() or np.isnan(p1).any():
-        return
-      p0 = tuple(p0.astype(int))
-      p1 = tuple(p1.astype(int))
-      rect = (0, 0, out.shape[1], out.shape[0])
-      inside, p0, p1 = cv2.clipLine(rect, p0, p1)
-      if inside:
-        cv2.line(out, p0, p1, color, thickness, cv2.LINE_AA)
-
-
-    def grid(out, pos, rotation=np.eye(3), size=1, n=10, color=(0x80, 0x80, 0x80)): 
+    def grid(out, pos, rotation=np.eye(3), size=1, n=10, color=(0x80, 0x80, 0x80)):
         pos = np.array(pos)
         s = size / float(n)
         s2 = 0.5 * size
@@ -163,40 +169,37 @@ def run_acquisition(point_cloud, image):
             line3d(out, view(pos + np.dot((-s2, 0, z), rotation)),
                    view(pos + np.dot((s2, 0, z), rotation)), color)
 
-
-    def axes(out, pos, rotation=np.eye(3), size=0.075, thickness=2): 
+    def axes(out, pos, rotation=np.eye(3), size=0.075, thickness=2):
         line3d(out, pos, pos +
-           np.dot((0, 0, size), rotation), (0xff, 0, 0), thickness)
+               np.dot((0, 0, size), rotation), (0xff, 0, 0), thickness)
         line3d(out, pos, pos +
-           np.dot((0, size, 0), rotation), (0, 0xff, 0), thickness)
+               np.dot((0, size, 0), rotation), (0, 0xff, 0), thickness)
         line3d(out, pos, pos +
-           np.dot((size, 0, 0), rotation), (0, 0, 0xff), thickness)
-
+               np.dot((size, 0, 0), rotation), (0, 0, 0xff), thickness)
 
     def frustum(out, intrinsics, color=(0x40, 0x40, 0x40)):
-   
-       orig = view([0, 0, 0])
-       w, h = intrinsics.width, intrinsics.height
 
-       for d in range(1, 6, 2): 
-           def get_point(x, y): 
-               p = rs.rs2_deproject_pixel_to_point(intrinsics, [x, y], d)
-               line3d(out, orig, view(p), color)
-               return p
+        orig = view([0, 0, 0])
+        w, h = intrinsics.width, intrinsics.height
 
-           top_left = get_point(0, 0)
-           top_right = get_point(w, 0)
-           bottom_right = get_point(w, h)
-           bottom_left = get_point(0, h)
+        for d in range(1, 6, 2):
+            def get_point(x, y):
+                p = rs.rs2_deproject_pixel_to_point(intrinsics, [x, y], d)
+                line3d(out, orig, view(p), color)
+                return p
 
-           line3d(out, view(top_left), view(top_right), color)
-           line3d(out, view(top_right), view(bottom_right), color)
-           line3d(out, view(bottom_right), view(bottom_left), color)
-           line3d(out, view(bottom_left), view(top_left), color)
+            top_left = get_point(0, 0)
+            top_right = get_point(w, 0)
+            bottom_right = get_point(w, h)
+            bottom_left = get_point(0, h)
 
+            line3d(out, view(top_left), view(top_right), color)
+            line3d(out, view(top_right), view(bottom_right), color)
+            line3d(out, view(bottom_right), view(bottom_left), color)
+            line3d(out, view(bottom_left), view(top_left), color)
 
-    def pointcloud(out, verts, texcoords, color, painter=True): 
-        if painter: 
+    def pointcloud(out, verts, texcoords, color, painter=True):
+        if painter:
             v = view(verts)
             s = v[:, 2].argsort()[::-1]
             proj = project(v[s])
@@ -204,11 +207,11 @@ def run_acquisition(point_cloud, image):
 
         # get reverse sorted indices by z (in view-space)
         # https://gist.github.com/stevenvo/e3dad127598842459b68
-       
-        else:
-          proj = project(view(verts))
 
-        if state.scale: 
+        else:
+            proj = project(view(verts))
+
+        if state.scale:
             proj *= 0.5**state.decimate
 
         h, w = out.shape[:2]
@@ -223,19 +226,18 @@ def run_acquisition(point_cloud, image):
 
         cw, ch = color.shape[:2][::-1]
         if painter:
-        # sort texcoord with same indices as above
-        # texcoords are [0..1] and relative to top-left pixel corner,
-        # multiply by size and add 0.5 to center
-          v, u = (texcoords[s] * (cw, ch) + 0.5).astype(np.uint32).T
+            # sort texcoord with same indices as above
+            # texcoords are [0..1] and relative to top-left pixel corner,
+            # multiply by size and add 0.5 to center
+            v, u = (texcoords[s] * (cw, ch) + 0.5).astype(np.uint32).T
         else:
-           v, u = (texcoords * (cw, ch) + 0.5).astype(np.uint32).T
+            v, u = (texcoords * (cw, ch) + 0.5).astype(np.uint32).T
     # clip texcoords to image
         np.clip(u, 0, ch-1, out=u)
         np.clip(v, 0, cw-1, out=v)
 
     # perform uv-mapping
         out[i[m], j[m]] = color[u[m], v[m]]
-
 
     out = np.empty((h, w, 3), dtype=np.uint8)
 
@@ -312,7 +314,8 @@ def run_acquisition(point_cloud, image):
 
         if key == ord("d"):
             state.decimate = (state.decimate + 1) % 3
-            decimate.set_option(rs.option.filter_magnitude, 2 ** state.decimate)
+            decimate.set_option(rs.option.filter_magnitude,
+                                2 ** state.decimate)
 
         if key == ord("z"):
             state.scale ^= True
@@ -323,7 +326,6 @@ def run_acquisition(point_cloud, image):
         if key == ord("s"):
             cv2.imwrite(image, color_image)
             points.export_to_ply(point_cloud, mapped_frame)
-        
 
         if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
             break
@@ -333,7 +335,17 @@ def run_acquisition(point_cloud, image):
 
 
 def points_and_colors_realsense(image_name="image.png"):
-    # Crée une liste qui représente le nuage de point ainsi que les couleurs associées vu par la caméra Realsense et la met dans un format lisible pour l'intégration sofa
+    """
+    Capturer les coordonnées 3D et les couleurs associées à partir de la caméra RealSense.
+
+    Parameters:
+    - image_name (str): Nom du fichier pour enregistrer l'image couleur.
+
+    Returns:
+    - vertices (np.array): Coordonnées 3D des points.
+    - color_image (np.array): Image couleur correspondante.
+    - depth_image (np.array): Image de profondeur associée.
+    """
     try:
         # Create a context object. This object owns the handles to all connected realsense devices
         pipeline = rs.pipeline()
@@ -357,7 +369,8 @@ def points_and_colors_realsense(image_name="image.png"):
         points = pc.calculate(depth_frame)
 
         # Convert the coordinates to NumPy arrays
-        vertices = np.array(points.get_vertices()) # Les vertices correpondent à nos coordonnées 3D
+        # Les vertices correpondent à nos coordonnées 3D
+        vertices = np.array(points.get_vertices())
         color_image = np.array(color_frame.get_data())
         color_image_rgb = color_image[:, :, [2, 1, 0]]
         cv2.imwrite(image_name, color_image_rgb)

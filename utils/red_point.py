@@ -1,10 +1,17 @@
 import cv2
 import numpy as np
 
-# Permets de détecter un point rouge dans une image
 
 def laser_in_picture(image_array):
+    """
+    Détecte le point laser le plus brillant dans une image.
 
+    Parameters:
+    - image_array (numpy.ndarray): Tableau représentant une image en format RGB.
+
+    Returns:
+    - tuple: Coordonnées (x, y) du point laser le plus brillant détecté.
+    """
     # Convertir le tableau en une image OpenCV
     image = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
 
@@ -29,7 +36,3 @@ def laser_in_picture(image_array):
     # cv2.destroyAllWindows()
 
     return x, y
-
-
-
-

@@ -1,11 +1,22 @@
 import cv2
 import numpy as np
 
-# Retourne la matrice d'hommogarphie entre deux images
+
 def feature_matching(image1_path, image2_path):
+    """
+    Trouve la matrice d'homographie entre deux images en utilisant la correspondance de caractéristiques.
+
+    Parameters:
+    - image1_path (str): Chemin de l'image de référence.
+    - image2_path (str): Chemin de l'image d'environnement.
+
+    Returns:
+    - numpy.ndarray: Matrice d'homographie.
+    """
     # Charger les images
     img1 = cv2.imread(image1_path, 0)  # Image de référence en niveaux de gris
-    img2 = cv2.imread(image2_path, 0)  # Image d'environnement en niveaux de gris
+    # Image d'environnement en niveaux de gris
+    img2 = cv2.imread(image2_path, 0)
 
     # Initialiser l'ORB detector
     orb = cv2.ORB_create()
@@ -25,11 +36,12 @@ def feature_matching(image1_path, image2_path):
     good_matches = matches[:50]
 
     # Obtenir les points correspondants dans les deux images
-    src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
-    dst_pts = np.float32([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+    src_pts = np.float32(
+        [kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+    dst_pts = np.float32(
+        [kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
     # Trouver la matrice d'homographie
     H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
 
     return H
-

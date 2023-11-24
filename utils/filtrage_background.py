@@ -1,9 +1,24 @@
-import open3d as o3d
 import numpy as np
+import open3d as o3d
 
-# Fonction qui permet de supprimer dans un nuage de points, les poins en dessous d'un seuil en z.
 
 def remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold):
+    """
+    Supprime les points d'un nuage de points dont la coordonnée Z est inférieure à un seuil donné.
+
+    Parameters:
+    - input_ply_file (str): Chemin du fichier PLY d'entrée.
+    - output_ply_file (str): Chemin du fichier PLY de sortie filtré.
+    - z_threshold (float): Valeur de seuil Z à partir de laquelle supprimer les points.
+    """
+    # Vérifier l'existence des fichiers d'entrée
+    try:
+        with open(input_ply_file):
+            pass
+    except FileNotFoundError:
+        print(f"Erreur: Le fichier d'entrée '{input_ply_file}' n'existe pas.")
+        return
+
     # Charger le fichier PLY
     point_cloud = o3d.io.read_point_cloud(input_ply_file)
 
@@ -13,16 +28,22 @@ def remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold):
     # Sélectionner les indices des points dont la coordonnée Z est supérieure ou égale à z_threshold
     indices = np.where(point_cloud_np[:, 2] >= z_threshold)
 
+    # Vérifier si le nuage de points filtré n'est pas vide
+    if len(indices[0]) == 0:
+        print("Aucun point ne satisfait la condition de seuil Z. Le nuage de points filtré est vide.")
+        return
+
     # Créer un nouveau nuage de points à partir des indices sélectionnés
     filtered_point_cloud = o3d.geometry.PointCloud()
     filtered_point_cloud.points = o3d.utility.Vector3dVector(point_cloud_np[indices])
 
     # Enregistrer le nuage de points filtré dans un nouveau fichier
     o3d.io.write_point_cloud(output_ply_file, filtered_point_cloud)
+    print(f"Le nuage de points filtré a été enregistré sous '{output_ply_file}'.")
 
 # Exemple d'utilisation de la fonction
-input_ply_file = "foie_de_boeuf_de_dos.ply"  # Remplacez par votre propre fichier PLY
-output_ply_file = "foie_de_boeuf_de_dos_sans_back.ply"  # Fichier de sortie filtré
-z_threshold = -0.1  # Valeur de seuil Z à partir de laquelle supprimer les points
+INPUT_PLY_FILE = "foie_de_boeuf_de_dos.ply"  # Remplacez par votre propre fichier PLY
+OUTPUT_PLY_FILE = "foie_de_boeuf_de_dos_sans_back.ply"  # Fichier de sortie filtré
+Z_THRESHOLD = -0.1  # Valeur de seuil Z à partir de laquelle supprimer les points
 
-remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold)
+remove_points_below_threshold(INPUT_PLY_FILE, OUTPUT_PLY_FILE, Z_THRESHOLD)

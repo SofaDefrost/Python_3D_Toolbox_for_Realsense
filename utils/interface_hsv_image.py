@@ -1,20 +1,26 @@
 import cv2
 import numpy as np
 
-# Fonction qui crée une terface pour la selection d'un masque hsv à partir d'une image. Elle retourne le couple du masque associé lower_hsv, upper_hsv
 
 def interface_hsv_image(image_path):
+    """
+    Permet à l'utilisateur de sélectionner un masque HSV à partir d'une image en utilisant des curseurs.
 
-    # Fonction pour mettre à jour le masque en fonction des curseurs HSV
+    Parameters:
+    - image_path (str): Chemin vers l'image source.
+
+    Returns:
+    - tuple: Couple du masque HSV sélectionné (lower_hsv, upper_hsv).
+    """
     def update_mask_hsv(x):
         global lower_hsv, upper_hsv, mask, result
         lower_hsv = np.array([cv2.getTrackbarPos('H_L', 'HSV Interface'),
-                            cv2.getTrackbarPos('S_L', 'HSV Interface'),
-                            cv2.getTrackbarPos('V_L', 'HSV Interface')])
-        
+                              cv2.getTrackbarPos('S_L', 'HSV Interface'),
+                              cv2.getTrackbarPos('V_L', 'HSV Interface')])
+
         upper_hsv = np.array([cv2.getTrackbarPos('H_U', 'HSV Interface'),
-                            cv2.getTrackbarPos('S_U', 'HSV Interface'),
-                            cv2.getTrackbarPos('V_U', 'HSV Interface')])
+                              cv2.getTrackbarPos('S_U', 'HSV Interface'),
+                              cv2.getTrackbarPos('V_U', 'HSV Interface')])
 
         mask = cv2.inRange(hsv_img, lower_hsv, upper_hsv)
         cv2.imshow('HSV Mask', mask)
@@ -49,7 +55,8 @@ def interface_hsv_image(image_path):
         # Initialiser les plages HSV
         lower_hsv = np.array([0, 0, 0])
         upper_hsv = np.array([179, 255, 255])
-        mask = np.zeros(image.shape[:2], dtype=np.uint8)  # Créez une image noire comme masque initial
+        # Créez une image noire comme masque initial
+        mask = np.zeros(image.shape[:2], dtype=np.uint8)
         result = image.copy()
 
         # Afficher l'image initiale
@@ -57,8 +64,8 @@ def interface_hsv_image(image_path):
 
         while True:
             # Mettre à jour le masque en fonction des curseurs
-            lower_hsv, upper_hsv= update_mask_hsv(0)
-            
+            lower_hsv, upper_hsv = update_mask_hsv(0)
+
             # Afficher les trois fenêtres
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -67,4 +74,5 @@ def interface_hsv_image(image_path):
         cv2.destroyAllWindows()
         print('Masque exporté ! ')
         return lower_hsv, upper_hsv
-interface_hsv_image("image_source.png")
+
+# interface_hsv_image("image_source.png")
