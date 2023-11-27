@@ -23,10 +23,11 @@ def remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold):
     point_cloud = o3d.io.read_point_cloud(input_ply_file)
 
     # Convertir le nuage de points Open3D en un tableau NumPy
-    point_cloud_np = np.asarray(point_cloud.points)
+    points_np = np.asarray(point_cloud.points)
+    colors_np = np.asarray(point_cloud.colors)
 
     # Sélectionner les indices des points dont la coordonnée Z est supérieure ou égale à z_threshold
-    indices = np.where(point_cloud_np[:, 2] >= z_threshold)
+    indices = np.where(points_np[:, 2] >= z_threshold)
 
     # Vérifier si le nuage de points filtré n'est pas vide
     if len(indices[0]) == 0:
@@ -35,7 +36,8 @@ def remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold):
 
     # Créer un nouveau nuage de points à partir des indices sélectionnés
     filtered_point_cloud = o3d.geometry.PointCloud()
-    filtered_point_cloud.points = o3d.utility.Vector3dVector(point_cloud_np[indices])
+    filtered_point_cloud.points = o3d.utility.Vector3dVector(points_np[indices])
+    filtered_point_cloud.colors = o3d.utility.Vector3dVector(colors_np[indices])
 
     # Enregistrer le nuage de points filtré dans un nouveau fichier
     o3d.io.write_point_cloud(output_ply_file, filtered_point_cloud)
