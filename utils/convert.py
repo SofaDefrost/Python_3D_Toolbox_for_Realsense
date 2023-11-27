@@ -55,7 +55,9 @@ def create_ply_file(points, colors, output_filename):
 
         # Écriture des données de points et couleurs
         for point, color in zip(points, colors):
-            x, y, z = point
+            x = point[0]
+            y = point[1]
+            z = point[2]
             r, g, b = color
             ply_file.write(f"{x} {y} {z} {r} {g} {b}\n")
 
