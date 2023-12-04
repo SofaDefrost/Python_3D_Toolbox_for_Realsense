@@ -4,11 +4,15 @@ import cv2
 import numpy as np
 import pyrealsense2 as rs
 
+from typing import Tuple
+
+
 def nothing(x):
     pass
 
+
 class AppState:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.WIN_NAME = 'RealSense'
         self.pitch, self.yaw = math.radians(-10), math.radians(-15)
         self.translation = np.array([0, 0, -1], dtype=np.float32)
@@ -20,21 +24,22 @@ class AppState:
         self.scale = True
         self.color = True
 
-    def reset(self):
+    def reset(self) -> None:
         self.pitch, self.yaw, self.distance = 0, 0, 2
         self.translation[:] = 0, 0, -1
 
     @property
-    def rotation(self):
+    def rotation(self) -> np.ndarray:
         Rx, _ = cv2.Rodrigues((self.pitch, 0, 0))
         Ry, _ = cv2.Rodrigues((0, self.yaw, 0))
         return np.dot(Ry, Rx).astype(np.float32)
 
     @property
-    def pivot(self):
+    def pivot(self) -> np.ndarray:
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
-def determine_mask_hsv(nameimageexportee='image.png'):
+
+def determine_mask_hsv(nameimageexportee: str = 'image.png') -> Tuple[Tuple[int]]:
     """
     Permet de déterminer le masque hsv d'une image avec une interface graphique.
 
@@ -44,7 +49,7 @@ def determine_mask_hsv(nameimageexportee='image.png'):
     Returns:
     - Tuple: Un tuple contenant les plages HSV inférieures et supérieures déterminées lors de l'ajustement dans l'interface graphique.
     """
-    
+
     state = AppState()
 
     # Configure depth and color streams
@@ -58,7 +63,8 @@ def determine_mask_hsv(nameimageexportee='image.png'):
 
     # Get stream profile and camera intrinsics
     profile = pipeline.get_active_profile()
-    depth_profile = rs.video_stream_profile(profile.get_stream(rs.stream.depth))
+    depth_profile = rs.video_stream_profile(
+        profile.get_stream(rs.stream.depth))
     depth_intrinsics = depth_profile.get_intrinsics()
     w, h = depth_intrinsics.width, depth_intrinsics.height
 
@@ -72,14 +78,14 @@ def determine_mask_hsv(nameimageexportee='image.png'):
     cv2.resizeWindow(state.WIN_NAME, w, h)
 
     cv2.namedWindow("Trackbars")
-    cv2.createTrackbar("L-H","Trackbars",0,179,nothing)
-    cv2.createTrackbar("L-S","Trackbars",0,255,nothing)
-    cv2.createTrackbar("L-V","Trackbars",0,255,nothing)
-    cv2.createTrackbar("U-H","Trackbars",179,179,nothing)
-    cv2.createTrackbar("U-S","Trackbars",255,255,nothing)
-    cv2.createTrackbar("U-V","Trackbars",255,255,nothing)
+    cv2.createTrackbar("L-H", "Trackbars", 0, 179, nothing)
+    cv2.createTrackbar("L-S", "Trackbars", 0, 255, nothing)
+    cv2.createTrackbar("L-V", "Trackbars", 0, 255, nothing)
+    cv2.createTrackbar("U-H", "Trackbars", 179, 179, nothing)
+    cv2.createTrackbar("U-S", "Trackbars", 255, 255, nothing)
+    cv2.createTrackbar("U-V", "Trackbars", 255, 255, nothing)
 
-    def project(v):
+    def project(v: np.ndarray) -> np.ndarray:
         """project 3d vector array to 2d"""
         h, w = out.shape[:2]
         view_aspect = float(h) / w
@@ -94,11 +100,11 @@ def determine_mask_hsv(nameimageexportee='image.png'):
         proj[v[:, 2] < znear] = np.nan
         return proj
 
-    def view(v):
+    def view(v: np.ndarray) -> np.ndarray:
         """apply view transformation on vector array"""
         return np.dot(v - state.pivot, state.rotation) + state.pivot - state.translation
 
-    def pointcloud(out, verts, texcoords, color, painter=True):
+    def pointcloud(out: np.ndarray, verts: np.ndarray, texcoords: np.ndarray, color: np.ndarray, painter: bool = True) -> None:
         """draw point cloud with optional painter's algorithm"""
         if painter:
             # Painter's algo, sort points from back to front
@@ -153,11 +159,11 @@ def determine_mask_hsv(nameimageexportee='image.png'):
             u_h = cv2.getTrackbarPos("U-H", "Trackbars")
             u_s = cv2.getTrackbarPos("U-S", "Trackbars")
             u_v = cv2.getTrackbarPos("U-V", "Trackbars")
-        
+
             lower_blue = np.array([l_h, l_s, l_v])
             upper_blue = np.array([u_h, u_s, u_v])
 
-            mask = cv2.inRange(hsv,lower_blue,upper_blue)
+            mask = cv2.inRange(hsv, lower_blue, upper_blue)
             result_BGR = cv2.bitwise_and(frame, frame, mask=mask)
             result = cv2.cvtColor(result_BGR, cv2.COLOR_BGR2RGB)
 
@@ -178,8 +184,6 @@ def determine_mask_hsv(nameimageexportee='image.png'):
             depth_frame = frames.get_depth_frame()
             color_frame = frames.get_color_frame()
 
-            
-            
             depth_frame = decimate.process(depth_frame)
 
             depth_intrinsics = rs.video_stream_profile(
@@ -206,7 +210,6 @@ def determine_mask_hsv(nameimageexportee='image.png'):
 
         out.fill(0)
 
-
         if not state.scale or out.shape[:2] == (h, w):
             pointcloud(out, verts, texcoords, color_source)
         else:
@@ -221,11 +224,9 @@ def determine_mask_hsv(nameimageexportee='image.png'):
         cv2.setWindowTitle(
             state.WIN_NAME, "RealSense (%dx%d) %dFPS (%.2fms) %s" %
                             (w, h, 1.0 / dt, dt * 1000, "PAUSED" if state.paused else ""))
-        
 
         cv2.imshow(state.WIN_NAME, out)
 
-        
         key = cv2.waitKey(1)
 
         if key == ord("p"):
@@ -234,11 +235,11 @@ def determine_mask_hsv(nameimageexportee='image.png'):
         if key == ord('s'):
             cv2.imwrite(nameimageexportee, result)
             break
-        
+
         if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
             break
 
     print("Masque exporté")
     pipeline.stop()
     cv2.destroyAllWindows()
-    return lower_blue,upper_blue
+    return lower_blue, upper_blue

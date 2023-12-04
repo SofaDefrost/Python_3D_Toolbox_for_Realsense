@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def feature_matching(image1_path, image2_path):
+def feature_matching(image1_path: str, image2_path: str) -> np.ndarray:
     """
     Trouve la matrice d'homographie entre deux images en utilisant la correspondance de caractéristiques.
 

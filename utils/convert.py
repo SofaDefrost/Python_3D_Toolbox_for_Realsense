@@ -2,9 +2,10 @@ import numpy as np
 import open3d as o3d
 
 from PIL import Image
+from typing import List, Tuple
 
 
-def ply_to_points_and_colors(file_path):
+def ply_to_points_and_colors(file_path: str) -> Tuple[np.ndarray, np.ndarray]:
     """
     Convertit un fichier .ply en nuage de points et en couleur au format RGB entre 0 et 255.
 
@@ -24,7 +25,7 @@ def ply_to_points_and_colors(file_path):
     return points, colors
 
 
-def create_ply_file(points, colors, output_filename):
+def create_ply_file(points: np.ndarray, colors: np.ndarray, output_filename: str) -> None:
     """
     Crée un fichier PLY à partir de points et de couleurs, avec un en-tête spécifique.
 
@@ -64,7 +65,7 @@ def create_ply_file(points, colors, output_filename):
         print(f"Le fichier '{output_filename}' a été créé.")
 
 
-def create_ply_file_without_colors(points, output_filename):
+def create_ply_file_without_colors(points: np.ndarray, output_filename: str) -> None:
     """
     Crée un fichier PLY à partir de points sans couleurs, avec un en-tête spécifique.
 
@@ -90,7 +91,7 @@ def create_ply_file_without_colors(points, output_filename):
     print(f"Le fichier '{output_filename}' a été créé.")
 
 
-def creer_image_a_partir_de_liste(liste_pixels, largeur, hauteur, nom_fichier_sortie):
+def creer_image_a_partir_de_liste(liste_pixels: List[int], largeur: int, hauteur: int, nom_fichier_sortie: str) -> None:
     """
     Crée une image à partir d'une liste de pixels et la sauvegarde dans un fichier.
 
@@ -114,7 +115,7 @@ def creer_image_a_partir_de_liste(liste_pixels, largeur, hauteur, nom_fichier_so
     print(f"L'image a été créée et sauvegardée sous '{nom_fichier_sortie}'.")
 
 
-def image_en_liste(chemin_image):
+def image_en_liste(chemin_image: str) -> List[Tuple[int, int, int]]:
     """
     Convertit une image en une liste de pixels (composantes RVB).
 
@@ -143,7 +144,7 @@ def image_en_liste(chemin_image):
     return liste_pixels_rgb
 
 
-def convert_map_to_ply(map_file, ply_file):
+def convert_map_to_ply(map_file: str, ply_file: str) -> None:
     """
     Convertit un fichier .map en un fichier .ply contenant un nuage de points.
 

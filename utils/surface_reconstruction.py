@@ -2,7 +2,7 @@ import numpy as np
 import pyvista as pv
 
 
-def surface_reconstruction(points):
+def surface_reconstruction(points: np.ndarray) -> np.ndarray:
     """
     Calcule et reconstruit une surface à partir d'un nuage de points.
 

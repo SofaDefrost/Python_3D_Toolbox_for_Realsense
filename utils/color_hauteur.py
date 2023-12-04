@@ -2,8 +2,10 @@ import numpy as np
 
 import convert as cv
 
+from typing import List, Optional, Tuple
 
-def statistiques_hauteur(liste_hauteurs):
+
+def statistiques_hauteur(liste_hauteurs: List[float]) -> Optional[Tuple[float, float, float]]:
     """
     Calcule la hauteur maximale, minimale et moyenne à partir d'une liste de hauteurs.
 
@@ -24,7 +26,7 @@ def statistiques_hauteur(liste_hauteurs):
     return hauteur_min, hauteur_moyenne, hauteur_max
 
 
-def hauteur_vers_rgb(hauteur, plage_basse, plage_moyenne, plage_elevee):
+def hauteur_vers_rgb(hauteur: float, plage_basse: float, plage_moyenne: float, plage_elevee: float) -> Tuple[int, int, int]:
     """
     Convertit une hauteur en valeurs RGB en fonction des plages spécifiées.
 

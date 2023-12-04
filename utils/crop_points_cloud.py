@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
 
+from typing import List, Optional, Tuple
 
-def crop_points_cloud(image_path, points_cloud, couleurs, h, tableau_indice=[]):
+
+def crop_points_cloud(image_path: str, points_cloud: np.ndarray, couleurs: np.ndarray, h: int, tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
     """
     Coupe un nuage de points en fonction de la projection 2D d'une image.
 
@@ -78,7 +80,7 @@ def crop_points_cloud(image_path, points_cloud, couleurs, h, tableau_indice=[]):
     bottom_left_corner = (y_min-1)*h + x_min
     top_left_corner = (y_max-1)*h + x_min
     bottom_right_corner = (y_min-1)*h + x_max
-    
+
     i = 0
     points_cloud_crop = []
     couleurs_crop = []

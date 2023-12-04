@@ -1,7 +1,8 @@
 import cv2
+import numpy as np
 
 
-def detect_point_rouge_hsv(path_image, lower_red, upper_red, Affichage=False):
+def detect_point_rouge_hsv(path_image: str, lower_red: np.ndarray, upper_red: np.ndarray, Affichage: bool = False):
     """
     Retourne les coordonnées en pixel d'un point rouge présent dans une image à partir d'un masque HSV.
 

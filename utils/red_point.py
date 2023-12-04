@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
 
+from typing import Tuple
 
-def laser_in_picture(image_array):
+
+def laser_in_picture(image_array: np.ndarray) -> Tuple[int]:
     """
     Détecte le point laser le plus brillant dans une image.
 

@@ -2,7 +2,7 @@ import numpy as np
 import open3d as o3d
 
 
-def remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold):
+def remove_points_below_threshold(input_ply_file: str, output_ply_file: str, z_threshold: float) -> None:
     """
     Supprime les points d'un nuage de points dont la coordonnée Z est inférieure à un seuil donné.
 
@@ -36,15 +36,20 @@ def remove_points_below_threshold(input_ply_file, output_ply_file, z_threshold):
 
     # Créer un nouveau nuage de points à partir des indices sélectionnés
     filtered_point_cloud = o3d.geometry.PointCloud()
-    filtered_point_cloud.points = o3d.utility.Vector3dVector(points_np[indices])
-    filtered_point_cloud.colors = o3d.utility.Vector3dVector(colors_np[indices])
+    filtered_point_cloud.points = o3d.utility.Vector3dVector(
+        points_np[indices])
+    filtered_point_cloud.colors = o3d.utility.Vector3dVector(
+        colors_np[indices])
 
     # Enregistrer le nuage de points filtré dans un nouveau fichier
     o3d.io.write_point_cloud(output_ply_file, filtered_point_cloud)
-    print(f"Le nuage de points filtré a été enregistré sous '{output_ply_file}'.")
+    print(
+        f"Le nuage de points filtré a été enregistré sous '{output_ply_file}'.")
+
 
 # Exemple d'utilisation de la fonction
-INPUT_PLY_FILE = "foie_de_boeuf_de_dos.ply"  # Remplacez par votre propre fichier PLY
+# Remplacez par votre propre fichier PLY
+INPUT_PLY_FILE = "foie_de_boeuf_de_dos.ply"
 OUTPUT_PLY_FILE = "foie_de_boeuf_de_dos_sans_back.ply"  # Fichier de sortie filtré
 Z_THRESHOLD = -0.1  # Valeur de seuil Z à partir de laquelle supprimer les points
 

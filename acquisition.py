@@ -4,10 +4,12 @@ import cv2
 import pyrealsense2 as rs
 import numpy as np
 
+from typing import Tuple
+
 
 class AppState:
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,*args, **kwargs) -> None:
         self.WIN_NAME = 'RealSense'
         self.pitch, self.yaw = math.radians(-10), math.radians(-15)
         self.translation = np.array([0, 0, -1], dtype=np.float32)
@@ -19,22 +21,22 @@ class AppState:
         self.scale = True
         self.color = True
 
-    def reset(self):
+    def reset(self) -> None:
         self.pitch, self.yaw, self.distance = 0, 0, 2
         self.translation[:] = 0, 0, -1
 
     @property
-    def rotation(self):
+    def rotation(self) -> np.ndarray:
         Rx, _ = cv2.Rodrigues((self.pitch, 0, 0))
         Ry, _ = cv2.Rodrigues((0, self.yaw, 0))
         return np.dot(Ry, Rx).astype(np.float32)
 
     @property
-    def pivot(self):
+    def pivot(self) -> np.ndarray:
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
 
-def run_acquisition(point_cloud, image):
+def run_acquisition(point_cloud: str, image: str) -> None:
     """
     Acquiert des données à partir de la caméra RealSense.
 
@@ -82,7 +84,7 @@ def run_acquisition(point_cloud, image):
     decimate.set_option(rs.option.filter_magnitude, 2 ** state.decimate)
     colorizer = rs.colorizer()
 
-    def mouse_cb(event, x, y, flags, param):
+    def mouse_cb(event: int, x: int, y: int, flags: int, param: dict) -> None:
         if event == cv2.EVENT_LBUTTONDOWN:
             state.mouse_btns[0] = True
         if event == cv2.EVENT_LBUTTONUP:
@@ -127,24 +129,24 @@ def run_acquisition(point_cloud, image):
     cv2.resizeWindow(state.WIN_NAME, w, h)
     cv2.setMouseCallback(state.WIN_NAME, mouse_cb)
 
-    def project(v):
+    def project(v: np.ndarray) -> np.ndarray:
         h, w = out.shape[:2]
         view_aspect = float(h)/w
 
-    # ignore divide by zero for invalid depth
+        # ignore divide by zero for invalid depth
         with np.errstate(divide='ignore', invalid='ignore'):
             proj = v[:, :-1] / v[:, -1, np.newaxis] * \
                 (w*view_aspect, h) + (w/2.0, h/2.0)
 
-    # near clipping
+        # near clipping
         znear = 0.03
         proj[v[:, 2] < znear] = np.nan
         return proj
 
-    def view(v):
+    def view(v: np.ndarray) -> np.ndarray:
         return np.dot(v - state.pivot, state.rotation) + state.pivot - state.translation
 
-    def line3d(out, pt1, pt2, color=(0x80, 0x80, 0x80), thickness=1):
+    def line3d(out: np.ndarray, pt1: np.ndarray, pt2: np.ndarray, color: np.ndarray = (0x80, 0x80, 0x80), thickness: int = 1) -> int:
         p0 = project(pt1.reshape(-1, 3))[0]
         p1 = project(pt2.reshape(-1, 3))[0]
         if np.isnan(p0).any() or np.isnan(p1).any():
@@ -156,7 +158,7 @@ def run_acquisition(point_cloud, image):
         if inside:
             cv2.line(out, p0, p1, color, thickness, cv2.LINE_AA)
 
-    def grid(out, pos, rotation=np.eye(3), size=1, n=10, color=(0x80, 0x80, 0x80)):
+    def grid(out: np.ndarray, pos: np.ndarray, rotation: np.ndarray = np.eye(3), size: float = 1, n: np.ndarray = 10, color: np.ndarray = (0x80, 0x80, 0x80)) -> None:
         pos = np.array(pos)
         s = size / float(n)
         s2 = 0.5 * size
@@ -169,7 +171,7 @@ def run_acquisition(point_cloud, image):
             line3d(out, view(pos + np.dot((-s2, 0, z), rotation)),
                    view(pos + np.dot((s2, 0, z), rotation)), color)
 
-    def axes(out, pos, rotation=np.eye(3), size=0.075, thickness=2):
+    def axes(out: np.ndarray, pos: np.ndarray, rotation: np.ndarray = np.eye(3), size: float = 0.075, thickness: int = 2) -> None:
         line3d(out, pos, pos +
                np.dot((0, 0, size), rotation), (0xff, 0, 0), thickness)
         line3d(out, pos, pos +
@@ -177,7 +179,7 @@ def run_acquisition(point_cloud, image):
         line3d(out, pos, pos +
                np.dot((size, 0, 0), rotation), (0, 0, 0xff), thickness)
 
-    def frustum(out, intrinsics, color=(0x40, 0x40, 0x40)):
+    def frustum(out: np.ndarray, intrinsics, color: np.ndarray = (0x40, 0x40, 0x40)) -> None:
 
         orig = view([0, 0, 0])
         w, h = intrinsics.width, intrinsics.height
@@ -198,7 +200,7 @@ def run_acquisition(point_cloud, image):
             line3d(out, view(bottom_right), view(bottom_left), color)
             line3d(out, view(bottom_left), view(top_left), color)
 
-    def pointcloud(out, verts, texcoords, color, painter=True):
+    def pointcloud(out: np.ndarray, verts: np.ndarray, texcoords: np.ndarray, color: np.ndarray, painter: bool = True) -> None:
         if painter:
             v = view(verts)
             s = v[:, 2].argsort()[::-1]
@@ -334,7 +336,7 @@ def run_acquisition(point_cloud, image):
     pipeline.stop()
 
 
-def points_and_colors_realsense(image_name="image.png"):
+def points_and_colors_realsense(image_name: str = "image.png") -> Tuple[np.ndarray]:
     """
     Capturer les coordonnées 3D et les couleurs associées à partir de la caméra RealSense.
 

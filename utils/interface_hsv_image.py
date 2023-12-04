@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
 
+from typing import Tuple
 
-def interface_hsv_image(image_path):
+
+def interface_hsv_image(image_path: str) -> Tuple[Tuple[int]]:
     """
     Permet à l'utilisateur de sélectionner un masque HSV à partir d'une image en utilisant des curseurs.
 

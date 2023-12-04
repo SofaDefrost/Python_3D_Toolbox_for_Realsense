@@ -2,7 +2,7 @@ import numpy as np
 import open3d as o3d
 
 
-def reduction_densite_pc(input_file, output_file, densite):
+def reduction_densite_pc(input_file: str, output_file: str, densite: float) -> None:
     """
     Réduit le nombre de points d'un nuage de points au format PLY selon une certaine densité.
 

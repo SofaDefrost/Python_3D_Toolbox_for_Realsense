@@ -1,7 +1,9 @@
 import numpy as np
 
+from typing import List, Optional, Tuple
 
-def rgb_to_hsv(colors):
+
+def rgb_to_hsv(colors: List[List[int]]) -> np.ndarray:
     """
     Convertit une liste de couleurs RGB en couleurs HSV.
 
@@ -46,7 +48,7 @@ def rgb_to_hsv(colors):
     return colorshsv
 
 
-def mask(nuagespoints, colorspoints, maskhsv, tableau_indice=[]):
+def mask(nuagespoints: np.ndarray, colorspoints: np.ndarray, maskhsv: List[List[int]], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
     """
     Filtrer les points d'un nuage en fonction d'un masque HSV.
 

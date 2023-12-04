@@ -1,14 +1,17 @@
 import numpy as np
 import tkinter as tk
+import matplotlib.axes._axes
 import matplotlib.pyplot as plt
 import csv
 
 from tkinter import ttk
 from tkinter import Scale, Button
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from typing import List, Optional, Tuple, Any
 
 
-def affichage_matplotlib(ax, points):
+def affichage_matplotlib(ax: matplotlib.axes._axes.Axes, points: np.ndarray) -> None:
     """
     Affiche un nuage de points en 3D à l'aide de Matplotlib.
 
@@ -26,7 +29,7 @@ def affichage_matplotlib(ax, points):
     ax.set_zlabel('Axe Z')
 
 
-def filtrage_barycentre(points, colors, rayon, tableau_indice=[]):
+def filtrage_barycentre(points: np.ndarray, colors: np.ndarray, rayon: float, tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Filtre les points en fonction du barycentre et du rayon spécifiés.
 
@@ -56,7 +59,7 @@ def filtrage_barycentre(points, colors, rayon, tableau_indice=[]):
     return np.array(filtered_points), np.array(filtered_colors), np.array(filtered_indice)
 
 
-def update_filter(event, ax, canvas, points, colors, rayon_slider, tableau_indice):
+def update_filter(event: Any, ax: Axes3D, canvas: Any, points: np.ndarray, colors: np.ndarray, rayon_slider: Any, tableau_indice: list) -> None:
     """
     Met à jour l'affichage en fonction de la valeur du slider de rayon.
 
@@ -79,7 +82,7 @@ def update_filter(event, ax, canvas, points, colors, rayon_slider, tableau_indic
     canvas.draw()
 
 
-def export_filtered_data(filtered_data, root):
+def export_filtered_data(filtered_data: List[List[str]], root: tk.Tk) -> None:
     """
     Exporte les données filtrées vers un fichier CSV.
 
@@ -99,7 +102,7 @@ def export_filtered_data(filtered_data, root):
     root.quit()  # Stop the Tkinter event loop
 
 
-def interface_de_filtrage_de_points(points, colors, tableau_indice=[]):
+def interface_de_filtrage_de_points(points: np.ndarray, colors: np.ndarray, tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
     """
     Interface graphique pour filtrer un nuage de points en fonction d'un rayon.
 
