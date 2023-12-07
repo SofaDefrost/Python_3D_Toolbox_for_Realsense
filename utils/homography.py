@@ -63,8 +63,8 @@ def feature_matching(image1_path: str, image2_path: str) -> np.ndarray:
     
     return H
 
-# # Exemple d'utilisation
-# image1_path = 'images/image_ref.png'
-# image2_path = 'chemin/vers/image_source.jpg'
-# homography_matrix = feature_matching(image1_path, image2_path)
+# Exemple d'utilisation
+image1_path = 'images/image_ref.png'
+image2_path = 'images/image.png'
+homography_matrix = feature_matching(image1_path, image2_path)
 
