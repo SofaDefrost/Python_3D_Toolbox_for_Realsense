@@ -44,4 +44,27 @@ def feature_matching(image1_path: str, image2_path: str) -> np.ndarray:
     # Trouver la matrice d'homographie
     H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
 
+    # Charger les images en couleur
+    img1_color = cv2.imread(image1_path)
+    img2_color = cv2.imread(image2_path)
+
+    # Appliquer la matrice d'homographie pour transformer les coins de l'image de référence
+    h, w = img1_color.shape[:2]
+    pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+    transformed_pts = cv2.perspectiveTransform(pts, H)
+
+    # Dessiner les contours de l'image de référence dans l'image source
+    img2_with_reference = cv2.polylines(img2_color, [np.int32(transformed_pts)], True, (0, 255, 0), 2)
+
+    # Afficher l'image résultante
+    cv2.imshow('Image avec image de référence', img2_with_reference)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    
     return H
+
+# # Exemple d'utilisation
+# image1_path = 'images/image_ref.png'
+# image2_path = 'chemin/vers/image_source.jpg'
+# homography_matrix = feature_matching(image1_path, image2_path)
+

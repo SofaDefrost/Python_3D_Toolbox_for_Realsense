@@ -9,8 +9,7 @@ try:
     import realsense.utils.homography as h
 except:
     import utils.homography as h
-import realsense.utils.convert as cv
-import realsense.utils.realsense_pc as rpc
+
 from PIL import Image
 
 from typing import Tuple
@@ -55,6 +54,6 @@ def pc_centered_on_centre_objet_ref(image1_path: str, image2_path: str, longueur
     nuage_point_centred = [(x[0] - origine_nuage[0], x[1] -
                             origine_nuage[1], x[2] - origine_nuage[2]) for x in vertices]
 
-    cv.create_ply_file(nuage_point_centred,
-                       rpc.colors_relasense_sofa(color_image), "test.ply")
+    # cv.create_ply_file(nuage_point_centred,
+    #                    rpc.colors_relasense_sofa(color_image), "test.ply")
     return nuage_point_centred, color_image
