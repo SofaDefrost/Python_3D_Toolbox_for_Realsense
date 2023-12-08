@@ -1,44 +1,74 @@
-README WIP
-==========
-
 # RealSense
 
 Ce dépôt fourni tout un ensemble de fonctions utiles pour les caméras Intel Realsense (acquisition, filtrage...) ainsi qu'un répertoire *Utils* qui regroupe un ensemble de script python utiles en computer vison mais dont l'usage n'est pas reservé aux travaux sur les caméra RealSense. 
 
-## Organisation du code
-*(voir la partie ci-après pour des explications sur le fonctionnement des fonctions)*
+## Organisation du dépôt
 
-Le fichier *acquisition.py* contient les fonctions *run_acquisition* et *points_and_colors_realsense*.
+### Dossier *realsense*
 
-Le fichier *filtre_hsv_realsense.py* contient la fonction *determinemaskhsv*.
+Le fichier *acquisition.py* contient les fonctions qui permettent de faire des acquiistions.
 
-Le fichier *main.py* effectue une démonstration de ces fonctions.
+Le fichier *filtre_hsv_realsense.py*  contient les fonctions permettant de déterminer un masque hsv avec une interface adaptée pour la realsense.
 
-Le fichier *filtrage hsv et bruits + export ply.py* est un fichier d'exemple qui permet à partir d'une caméra RealSense de faire une acquisition, d'effectuer un filtrage hsv et anti bruit et d'exporter le tout au format *.ply*.
+Le fichier *get_pc_centered_on.py*  contient les fonctions permettant faire une acquisition et recentrer le nuage de points acquis par rapport au centre de l'objet de référence.
 
-## Mode d'emploi et explications
+Le fichier *exemple.py* est un fichier d'exemple qui permet à partir d'une caméra RealSense de faire une acquisition, d'effectuer un filtrage hsv et anti bruit et d'exporter le tout au format *.ply*.
+
+### Dossier *realsense/utils*
+
+Le fichier *affichage_ply.py* contient les fonctions permettant de d'afficher un nuage de point dans une interface matplotlib.
+
+Le fichier *color_hauteur.py* contient les fonctions permettant de colorer un fichier *.ply* en fonction de la hauteur de ses points.
+
+Le fichier *convert.py* contient plusieurs fonctions permettant d'effectuer des convertions (exemples: *.ply* -> np.darray, np.darray -> *.ply*...)
+
+Le fichier *crop_points_cloud.py* contient les fonctions permettant de couper un nuage de points à l'aide de la projection 2D d'une image et de points définis à la souris par l'utilisateur.
+
+Le fichier *filtrage_background.py* contient les fonctions permettant de supprimer les points d'un nuage de points dont la coordonnée Z est inférieure à un seuil donné.
+
+Le fichier *filtrage_bruit.py* contient des fonctions permettant de créer une interface de filtrage d'un nuage de point par rapport à son centre de masse.
+
+Le fichier *homography.py* contient des fonctions permettant de trouver la matrice d'homographie entre deux images en utilisant la correspondance de caractéristiques.
+
+Le fichier *hsv.py* contient des fonctions permettant d'appliquer un masque à un nuage de points.
+
+Le fichier *interface_hsv_image.py* contient des fonctions permettant de déterminer un masque hsv à partir d'une image.
+
+Le fichier *realsense_pc.py* contient un ensemble de fonctions permettant de convertir les données d'une realsense dans un format lisible .(notamment) par Sofa.
+
+Le fichier *red_point.py* contient les fonctions qui permettent de détecter un point rouge dans une image.
+
+Le fichier *reduction_densite_pc.py*
+
+Le fichier *repose.py* contient les fonctions qui permettent de recentrer un nuage de points par rapport à son centre de masse.
+
+Le fichier *surface_reconstruction.py* contient les fonctions qui permettent de calculer et de reconstruitre une surface à partir d'un nuage de points.
+
+## Mode d'emploi
 
 Pour tester le code, il faut exécuter le code python *main.py* :
 
 ```console
-python3 main.py
+python3 exemple.py
 ```
-
-Trois démonstrations vont alors s'effectuer :
-
-La première (qui illustre la fonction *run_acquisition*) permet de faire une acquisition de la caméra Realsense D405 et de l'exporter au format *.ply*. A l'exécution de la fonction, un retour de ce que voit la caméra apparaît. L'utilisateur devra ensuite cliquer sur la touche 's' pour enregistrer le nuage de points (au format *.ply*) ainsi que l'image optique (comprenez une image 2D de ce que voit la caméra à l'instant de la capture), et sur la touche 'q' pour arrêter l'acquisition. Notez que l'utilisateur devra fournir en argument de cette fonction un nom de fichier pour le fichier *.ply* ainsi que pour l'image optique (ces noms sont des variables modifiables dans le fichier *main.py*). Une fois l'acquisition terminée, les fichiers *.ply* et l'image optique seront enregistrés dans le même dossier.
-
-La seconde (qui illustre la fonction *points_and_colors_realsense*) permet de faire également une acquisition de la caméra Realsense D405 mais avec quelques différences par rapport à la version précédente. Premièrement, aucune interface visuelle n'apparaît à l'écran de l'utilisateur : l'acquisition se déroule sans. Deuxièmement, l'utilisateur n'a plus besoin d'appuyer sur un bouton pour effectuer la capture, elle se fait de manière automatique et unique. Enfin, aucun fichier (*.ply* ou *.png*) n'est exporté à la fin d'exécution de la fonction : les résultats sont renvoyés sous la forme de deux tableaux, l'un représentant les points dans l'espace (liste de taille [307200 ,3]) et l'autre représentant les couleurs associées à ces points (liste de taille [480,640, 3])  
-
-La dernière (qui illustre la fonction *determinemaskhsv*) permet de déterminer un masque hsv grâce à la caméra Realsense D405. A l'exécution de cette fonction une interface s'ouvre avec plusieurs fenêtres et notamment une qui permet à l'utilisateur de paramétrer le masque à l'aide de curseurs. Au fur et à mesure de sa configuration, l'utilisateur voit le retour de l'application de son masque sur une autre fenêtre. Une fois que ce dernier est satisfait par son choix, il peut l'exporter en appuyant sur la touche 'q'. Notez bien qu'aucun filtrage n'est appliqué, la fonction permet juste de déterminer et d'exporter un masque hsv.
 
 ## Prérequis :
-Librairies python nécessaires : pyrealsense2 et cv2
+Librairies python nécessaires pour l'ensemble du dépôt : numpy, matplotlib, cv2, typing, time, trimesh, pyvista, pyrealsense2, scipy, open3d, tkinter, pil
 ```console
-pip3 install pyrealsense2
+pip3 install numpy
+pip3 install matplotlib
 pip3 install opencv-python
+pip3 install scipy
+pip3 install typing
+pip3 install time
+pip3 install trimesh
+pip3 install pyrealsense2
+pip3 install pyvista
+pip3 install open3d
+pip3 install tkinter
+pip3 install pil
 ```
 
-To get more information and exemple about the RealSense with python : https://dev.intelrealsense.com/docs/python2
+Pour avoir d'autres informations concernant la realsense avec Python : https://dev.intelrealsense.com/docs/python2
 
 Auteurs : Thibaud, Tinhinane

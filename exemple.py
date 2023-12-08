@@ -51,7 +51,7 @@ def colors_relasense_sofa(colors):
 
 
 # On détermine le masque à appliquer
-MASK = filtre.determinemaskhsv()
+MASK = filtre.determine_mask_hsv()
 # On récupère les points et les couleurs de la caméra
 VERTICES, COLORS = get.points_and_colors_realsense()
 # On converit les couleurs dans un bon format (ie on met l'image en ligne)
