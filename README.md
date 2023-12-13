@@ -47,7 +47,7 @@ Le fichier *surface_reconstruction.py* contient les fonctions qui permettent de 
 ## Mode d'emploi
 
 Pour tester le code, il faut exécuter le code python *main.py* :
-
+exemple
 ```console
 python3 exemple.py
 ```

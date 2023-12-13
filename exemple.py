@@ -53,7 +53,7 @@ def colors_relasense_sofa(colors):
 # On détermine le masque à appliquer
 MASK = filtre.determine_mask_hsv()
 # On récupère les points et les couleurs de la caméra
-VERTICES, COLORS = get.points_and_colors_realsense()
+VERTICES, COLORS = realsense.get_points_and_colors()
 # On converit les couleurs dans un bon format (ie on met l'image en ligne)
 COLORS_SOFA = colors_relasense_sofa(COLORS)
 # On applique le masque

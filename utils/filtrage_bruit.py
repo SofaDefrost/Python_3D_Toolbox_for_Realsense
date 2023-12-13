@@ -134,8 +134,12 @@ def interface_de_filtrage_de_points(points: np.ndarray, colors: np.ndarray, tabl
     filtered_data_colors = []
     filtered_data_indices = []
 
+    def export_and_quit():
+        export_filtered_data()
+        root.quit()
+
     export_button = Button(root, text="Exporter les points filtrés",
-                           command=lambda: export_filtered_data(filtered_data_points, root))
+                           command=export_and_quit)
     export_button.pack()
 
     root.mainloop()

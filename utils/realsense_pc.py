@@ -21,7 +21,7 @@ def points_realsense_sofa(vertices: np.ndarray) -> np.ndarray:
     return np.array(points)
 
 
-def colors_relasense_sofa(colors: np.ndarray) -> np.ndarray:
+def colors_realsense_sofa(colors: np.ndarray) -> np.ndarray:
     """
     Convertit les couleurs de la caméra RealSense en un format lisible par Sofa.
 
