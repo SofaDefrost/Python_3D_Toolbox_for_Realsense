@@ -52,6 +52,12 @@ def save_ply_file(output_filename: str, points: np.ndarray, colors: Optional[np.
     Raises:
     - ValueError: Si le nombre de points ne correspond pas au nombre de couleurs.
     """
+    if len(output_filename)<5:
+        raise ValueError(f"Incorrect filename {output_filename}")
+    if output_filename[-4:] != ".ply":
+        raise ValueError(f"Incorrect filename {output_filename} must end with '.ply'")
+    if len(points)==0:
+        raise ValueError("No points to create the file")
     with_color=False
     if len(colors)>0:
         with_color=True
@@ -116,9 +122,22 @@ def color_ply_depending_on_axis(name_ply:str,new_name:str,axis:str):
     colors=pa.color_3D_array_depending_on_axis(points,axis)
     save_ply_file(new_name,points,colors)
 
+def remove_points_of_ply_below_threshold(z_threshold: float,input_ply_file: str, output_ply_file: str):
+    points,colors=get_points_and_colors_of_ply(input_ply_file)
+    index=pa.give_index_points_below_threshold(z_threshold,points)
+    if len(colors)>0:
+        new_points=points[index]
+        new_colors=colors[index]
+    else:
+        new_points=points[index]
+        new_colors=colors
+        
+    save_ply_file(output_ply_file,new_points,new_colors)
+
 if __name__ == '__main__':
     color_ply_depending_on_axis("test.ply","test_colore.ply","z")
-    # points,colors=get_points_and_colors_of_ply('test.ply')
-    # save_ply_file("with_colors.ply",points,colors)
-    # save_ply_file("without_colors.ply",points)
-    # save_ply_from_map("test.map","ply_from_map.ply")
+    remove_points_of_ply_below_threshold(10,"test_colore.ply","test2.ply")
+    points,colors=get_points_and_colors_of_ply('test.ply')
+    save_ply_file("with_colors.ply",points,colors)
+    save_ply_file("without_colors.ply",points)
+    save_ply_from_map("test.map","ply_from_map.ply")

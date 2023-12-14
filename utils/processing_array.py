@@ -1,3 +1,4 @@
+import processing_ply as pp
 import numpy as np
 
 from matplotlib import pyplot as plt
@@ -64,19 +65,19 @@ def give_min_mean_max_of_list(list: List[float]) -> Optional[Tuple[float, float,
 
 
 def color_3D_array_depending_on_axis(points: np.ndarray, axis: str) -> np.ndarray:
-    
+
     if axis != "x" and axis != "y" and axis != "z":
         raise ValueError(f"Unknown axis: {axis}. Must be x, y or z")
-    
+
     colors = np.array([[0, 0, 0] for i in range(len(points))])
-    
+
     if axis == "x":
-        axis_int=0
+        axis_int = 0
     if axis == "y":
-        axis_int=1
+        axis_int = 1
     if axis == "z":
-        axis_int=2
-    
+        axis_int = 2
+
     axis_coordinates = [coord[axis_int] for coord in points]
     min_coord, mean_coord, max_coord = give_min_mean_max_of_list(
         axis_coordinates)
@@ -87,5 +88,41 @@ def color_3D_array_depending_on_axis(points: np.ndarray, axis: str) -> np.ndarra
     return np.array(colors)
 
 
+def give_index_points_below_threshold(z_threshold: float, points: np.ndarray):
+
+    # Sélectionner les indices des points dont la coordonnée Z est supérieure ou égale à z_threshold
+    indices = np.where(points[:, 2] >= z_threshold)
+
+    # Vérifier si le nuage de points filtré n'est pas vide
+    if len(indices[0]) == 0:
+        raise ValueError("Every points have been removed")
+
+    return indices
+
+
+def add_list_at_each_rows_of_array(array: np.ndarray, list: List) -> np.ndarray:
+    new_array = []
+    array = array.tolist()
+    for i in range(len(array)):
+        new_array.append(array[i]+list)
+    return np.array(new_array)
+
+def array_to_line(array: np.ndarray) -> np.ndarray:
+    # Suppose que le tableau est uniforme
+    l = len(array)*len(array[0])
+    sub_array=[0 for i in range(len(array[0]))]
+    new_array = np.asarray([sub_array for i in range(l)])
+    indice = 0
+    for i in range(len(array)):
+        for j in range(len(array[0])):
+            new_array[indice] = array[i][j]
+            indice += 1
+    return np.array(new_array)
+
+
 if __name__ == '__main__':
     print(give_min_mean_max_of_list([1.0, 2.0, 3.0]))
+    points, colors = pp.get_points_and_colors_of_ply("test_colore.ply")
+    print(add_list_at_each_rows_of_array(points, [0., 0., 0., 1.])[0])
+    print(np.shape(colors))
+    print(array_to_line(colors))
