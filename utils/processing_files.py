@@ -1,5 +1,6 @@
 import os
 
+
 def open_file_and_give_content(file_path):
     # Unknwon file
     if not os.path.exists(file_path):
