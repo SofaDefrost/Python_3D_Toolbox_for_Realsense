@@ -1,0 +1,67 @@
+import numpy as np
+import tkinter as tk
+import matplotlib.axes._axes
+import matplotlib.pyplot as plt
+
+from tkinter import ttk
+from tkinter import Scale, Button
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from typing import List, Optional, Tuple, Any
+
+import processing_array as pa
+import processing_ply as pl
+
+def plot_3Darray_Tkinter(ax: matplotlib.axes._axes.Axes, points: np.ndarray) -> None:
+    """
+    Affiche un nuage de points en 3D à l'aide de Matplotlib.
+
+    Parameters:
+    - ax (matplotlib.axes._axes.Axes): Instance d'Axes3D de Matplotlib.
+    - points (numpy.ndarray): Nuage de points en 3D.
+    """
+    ax.cla()
+    ax.scatter(points[:, 0], points[:, 1], points[:, 2], c='b', marker='o')
+
+    # Définir le titre et les étiquettes des axes
+    ax.set_title('3D Array')
+    ax.set_xlabel('Axe X')
+    ax.set_ylabel('Axe Y')
+    ax.set_zlabel('Axe Z')
+
+def update_display_Tkinter(event: Any, ax: Axes3D, canvas: Any, points: np.ndarray, colors: np.ndarray,fonction, rayon_slider: Any) -> None:
+    rayon = rayon_slider.get()
+    results = fonction(
+        points, colors, rayon)
+    plot_3Darray_Tkinter(ax,results[0])
+    canvas.draw()
+
+def get_parameter_function_on_array_Tkinter(points: np.ndarray, colors: np.ndarray,fonction,start_slider=0,end_slider=1,resolution=0.01) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+
+    root = tk.Tk()
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    canvas = FigureCanvasTkAgg(fig, master=root)
+    canvas.get_tk_widget().pack()
+
+    slider_label = ttk.Label(root, text=f"Parameter of {fonction.__name__}")
+    slider_label.pack()
+    slider = Scale(root, from_=start_slider, to=end_slider, resolution=resolution, orient="horizontal", command=lambda event: update_display_Tkinter(
+        event, ax, canvas, points, colors,fonction, slider))
+    slider.pack()
+
+    plot_3Darray_Tkinter(ax,points)
+
+    export_button = Button(root, text="Return the value of the slider",
+                           command=root.quit)
+    export_button.pack()
+
+    root.mainloop()
+    
+    return slider.get()
+
+if __name__ == '__main__':
+    points,colors=pl.get_points_and_colors_of_ply("test_cropped.ply")
+    print(get_parameter_function_on_array_Tkinter(points,colors,pa.reduce_density_of_array))
+    print(get_parameter_function_on_array_Tkinter(points,colors,pa.filter_array_with_sphere_on_barycentre))

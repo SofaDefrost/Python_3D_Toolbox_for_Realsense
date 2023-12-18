@@ -4,7 +4,7 @@ import logging
 
 from typing import List, Tuple, Optional
 
-import processing_files as pf
+import processing_general as pg
 import processing_array as pa
 
 def get_points_and_colors_of_ply(file_path: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -38,7 +38,7 @@ def plot_ply(path_name: str) -> None:
     """
     points,colors = get_points_and_colors_of_ply(path_name)
     vertices = [point + color for point, color in zip(points, colors)]
-    pa.plot_ply_from_array(np.array(vertices))
+    pa.plot_3D_array(np.array(vertices))
     
 def save_ply_file(output_filename: str, points: np.ndarray, colors: Optional[np.ndarray] = []) -> None:
     """
@@ -52,6 +52,8 @@ def save_ply_file(output_filename: str, points: np.ndarray, colors: Optional[np.
     Raises:
     - ValueError: Si le nombre de points ne correspond pas au nombre de couleurs.
     """
+    pg.is_good_type(output_filename,str)
+    pg.is_good_type(points,np.ndarray)
     if len(output_filename)<5:
         raise ValueError(f"Incorrect filename {output_filename}")
     if output_filename[-4:] != ".ply":
@@ -122,9 +124,9 @@ def color_ply_depending_on_axis(name_ply:str,new_name:str,axis:str):
     colors=pa.color_3D_array_depending_on_axis(points,axis)
     save_ply_file(new_name,points,colors)
 
-def remove_points_of_ply_below_threshold(z_threshold: float,input_ply_file: str, output_ply_file: str):
+def remove_points_of_ply_below_threshold(axis:str,threshold: float,input_ply_file: str, output_ply_file: str):
     points,colors=get_points_and_colors_of_ply(input_ply_file)
-    index=pa.give_index_points_below_threshold(z_threshold,points)
+    index=pa.give_index_points_below_threshold_on_axis(axis,threshold,points)
     if len(colors)>0:
         new_points=points[index]
         new_colors=colors[index]
@@ -134,10 +136,43 @@ def remove_points_of_ply_below_threshold(z_threshold: float,input_ply_file: str,
         
     save_ply_file(output_ply_file,new_points,new_colors)
 
+def centering_ply_on_mean_points(input_filename:str, output_filename:str):
+    points,colors=get_points_and_colors_of_ply(input_filename)
+    new_points=pa.centering_3Darray_on_mean_points(points)
+    save_ply_file(output_filename,new_points,colors)
+
+def reduce_density_of_ply(input_filename:str, output_filename:str,density:float):
+    pg.is_good_type(density,float)
+    points,colors=get_points_and_colors_of_ply(input_filename)
+    new_points,new_colors=pa.reduce_density_of_array(points,colors,density)
+    save_ply_file(output_filename,new_points,new_colors)
+
+def crop_ply_from_pixels_selection(input_filename:str, output_filename:str,shape:(int,int)):
+    pg.is_good_type(shape[0],int)
+    pg.is_good_type(shape[1],int)
+    if np.shape(shape)!=(2,):
+        raise ValueError(f"Incorrect shape {shape} for the display")
+    points,colors=get_points_and_colors_of_ply(input_filename)
+    if len(colors)==0:
+        raise ValueError(f"No image to display in the ply {input_filename} : the list of colors is empty")
+    results=pa.crop_array_from_pixels_selection(points,colors,shape[0],shape[1])
+    save_ply_file(output_filename,results[0],results[1])
+    
+def filter_array_with_sphere_on_barycentre(input_filename:str, output_filename:str,radius:float):
+    pg.is_good_type(radius,float)
+    points,colors=get_points_and_colors_of_ply(input_filename)
+    new_points,new_colors=pa.filter_array_with_sphere_on_barycentre(points,colors,radius)
+    save_ply_file(output_filename,new_points,new_colors)
+    
 if __name__ == '__main__':
-    color_ply_depending_on_axis("test.ply","test_colore.ply","z")
-    remove_points_of_ply_below_threshold(10,"test_colore.ply","test2.ply")
-    points,colors=get_points_and_colors_of_ply('test.ply')
-    save_ply_file("with_colors.ply",points,colors)
-    save_ply_file("without_colors.ply",points)
-    save_ply_from_map("test.map","ply_from_map.ply")
+    filter_array_with_sphere_on_barycentre("test.ply","test_barycentre.ply",0.06)
+    # crop_ply_from_pixels_selection("test.ply","test_cropped.ply",(640,480))
+    # points,colors=get_points_and_colors_of_ply('test.ply')
+    # reduce_density_of_ply("test_colore.ply","test_reduce.ply",0.5)
+    # centering_ply_on_mean_points("test.ply","test_centered.ply")
+    # color_ply_depending_on_axis("test.ply","test_colore.ply","z")
+    # remove_points_of_ply_below_threshold(10,"test_colore.ply","test2.ply")
+    # points,colors=get_points_and_colors_of_ply('test.ply')
+    # save_ply_file("with_colors.ply",points,colors)
+    # save_ply_file("without_colors.ply",points)
+    # save_ply_from_map("test.map","ply_from_map.ply")

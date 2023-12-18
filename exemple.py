@@ -2,7 +2,7 @@ import numpy as np
 import acquisition as get
 import filtre_hsv_realsense as filtre
 from utils import hsv as apply_hsv
-from utils import filtrage_bruit as bruit
+from realsense.utils import display_function_Tkinter as bruit
 from utils import convert as cv
 
 # Fichier d'exemple qui montre comment utilser les différentes fonctions.

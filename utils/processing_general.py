@@ -13,7 +13,11 @@ def open_file_and_give_content(file_path):
         lines = file.readlines()
     return lines
 
-
+def is_good_type(value,intended_type):
+    if type(value)!=intended_type:
+        raise ValueError(f"Incorrect type for {value} : expected {intended_type} and given {type(value)}")
+    
 if __name__ == '__main__':
-    print(open_file_and_give_content("realsense/utils/file_manager.py"))
-    open_file_and_give_content("Unknownfile")
+    is_good_type(7,int)
+    # print(open_file_and_give_content("realsense/utils/file_manager.py"))
+    # open_file_and_give_content("Unknownfile")
