@@ -7,25 +7,6 @@ from typing import List, Tuple, Optional
 import processing_general as pg
 import processing_array as pa
 
-def get_points_and_colors_of_ply(file_path: str) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Convertit un fichier .ply en nuage de points et en couleur au format RGB entre 0 et 255.
-
-    Parameters:
-    - file_path (str): Chemin du fichier .ply.
-
-    Returns:
-    - tuple: Un tuple contenant un tableau numpy des points et un tableau numpy des couleurs.
-    """
-    # Charge les données du fichier .ply
-    ply_data = o3d.io.read_point_cloud(file_path)
-
-    # Récupère les points et les couleurs
-    points = np.array(ply_data.points)
-    colors = np.array(ply_data.colors) * 255
-
-    return points, colors
-
 def plot_ply(path_name: str) -> None:
     """
     Plot 3D points and triangles from PLY file vertices.
@@ -52,8 +33,6 @@ def save_ply_file(output_filename: str, points: np.ndarray, colors: Optional[np.
     Raises:
     - ValueError: Si le nombre de points ne correspond pas au nombre de couleurs.
     """
-    pg.is_good_type(output_filename,str)
-    pg.is_good_type(points,np.ndarray)
     if len(output_filename)<5:
         raise ValueError(f"Incorrect filename {output_filename}")
     if output_filename[-4:] != ".ply":
@@ -109,7 +88,7 @@ def save_ply_from_map(map_file: str, ply_file: str) -> None:
     - map_file (str): Chemin du fichier .map d'entrée.
     - ply_file (str): Chemin du fichier .ply de sortie.
     """
-    lines = pf.open_file_and_give_content(map_file)
+    lines = pg.open_file_and_give_content(map_file)
 
     # Extraire les coordonnées XYZ
     points = [list(map(float, line.strip().split())) for line in lines]
@@ -119,53 +98,70 @@ def save_ply_from_map(map_file: str, ply_file: str) -> None:
 
     save_ply_file(ply_file,points_np)
 
-def color_ply_depending_on_axis(name_ply:str,new_name:str,axis:str):
-    points,_=get_points_and_colors_of_ply(name_ply)
-    colors=pa.color_3D_array_depending_on_axis(points,axis)
-    save_ply_file(new_name,points,colors)
+def get_points_and_colors_of_ply(file_path: str) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Convertit un fichier .ply en nuage de points et en couleur au format RGB entre 0 et 255.
 
-def remove_points_of_ply_below_threshold(axis:str,threshold: float,input_ply_file: str, output_ply_file: str):
-    points,colors=get_points_and_colors_of_ply(input_ply_file)
-    index=pa.give_index_points_below_threshold_on_axis(axis,threshold,points)
-    if len(colors)>0:
-        new_points=points[index]
-        new_colors=colors[index]
-    else:
-        new_points=points[index]
-        new_colors=colors
-        
-    save_ply_file(output_ply_file,new_points,new_colors)
+    Parameters:
+    - file_path (str): Chemin du fichier .ply.
+
+    Returns:
+    - tuple: Un tuple contenant un tableau numpy des points et un tableau numpy des couleurs.
+    """
+    # Charge les données du fichier .ply
+    ply_data = o3d.io.read_point_cloud(file_path)
+
+    # Récupère les points et les couleurs
+    points = np.array(ply_data.points)
+    colors = np.array(ply_data.colors) * 255
+
+    return points, colors
 
 def centering_ply_on_mean_points(input_filename:str, output_filename:str):
     points,colors=get_points_and_colors_of_ply(input_filename)
     new_points=pa.centering_3Darray_on_mean_points(points)
     save_ply_file(output_filename,new_points,colors)
 
+def color_ply_depending_on_axis(name_ply:str,new_name:str,axis:str):
+    points,_=get_points_and_colors_of_ply(name_ply)
+    colors=pa.color_3D_array_depending_on_axis(points,axis)
+    save_ply_file(new_name,points,colors)
+
+def remove_points_of_ply_below_threshold(input_ply_file: str, output_ply_file: str,threshold: float,axis:str):
+    points,colors=get_points_and_colors_of_ply(input_ply_file)
+    new_points,new_colors=pa.remove_points_of_array_below_threshold(points,threshold,colors,axis)   
+    save_ply_file(output_ply_file,new_points,new_colors)
+
 def reduce_density_of_ply(input_filename:str, output_filename:str,density:float):
-    pg.is_good_type(density,float)
     points,colors=get_points_and_colors_of_ply(input_filename)
-    new_points,new_colors=pa.reduce_density_of_array(points,colors,density)
+    new_points,new_colors=pa.reduce_density_of_array(points,density,colors)
     save_ply_file(output_filename,new_points,new_colors)
 
 def crop_ply_from_pixels_selection(input_filename:str, output_filename:str,shape:(int,int)):
-    pg.is_good_type(shape[0],int)
-    pg.is_good_type(shape[1],int)
-    if np.shape(shape)!=(2,):
-        raise ValueError(f"Incorrect shape {shape} for the display")
     points,colors=get_points_and_colors_of_ply(input_filename)
     if len(colors)==0:
         raise ValueError(f"No image to display in the ply {input_filename} : the list of colors is empty")
-    results=pa.crop_array_from_pixels_selection(points,colors,shape[0],shape[1])
+    results=pa.crop_pc_from_zone_selection(points,colors,shape)
     save_ply_file(output_filename,results[0],results[1])
     
 def filter_array_with_sphere_on_barycentre(input_filename:str, output_filename:str,radius:float):
-    pg.is_good_type(radius,float)
     points,colors=get_points_and_colors_of_ply(input_filename)
-    new_points,new_colors=pa.filter_array_with_sphere_on_barycentre(points,colors,radius)
+    new_points,new_colors=pa.filter_array_with_sphere_on_barycentre(points,radius,colors)
     save_ply_file(output_filename,new_points,new_colors)
     
+def apply_hsv_mask_to_ply(input_filename:str, output_filename:str,maskhsv: List[List[int]]):
+    points,colors=get_points_and_colors_of_ply(input_filename)
+    new_points,new_colors=pa.apply_hsv_mask_to_arrays(points,colors,maskhsv)
+    save_ply_file(output_filename,new_points,new_colors)
+
+def center_ply_on_image(input_filename:str, output_filename:str,image_target_path:str,shape:Tuple[int,int]=[]):
+    points,colors=get_points_and_colors_of_ply(input_filename)
+    new_points,new_colors=pa.center_pc_on_image(points,colors,image_target_path,shape)
+    save_ply_file(output_filename,new_points,new_colors)
+
 if __name__ == '__main__':
-    filter_array_with_sphere_on_barycentre("test.ply","test_barycentre.ply",0.06)
+    # filter_array_with_sphere_on_barycentre("test.ply","test_barycentre.ply",0.06)
+    center_ply_on_image("test.ply","test_centered.ply","image_ref.png",(640,480))
     # crop_ply_from_pixels_selection("test.ply","test_cropped.ply",(640,480))
     # points,colors=get_points_and_colors_of_ply('test.ply')
     # reduce_density_of_ply("test_colore.ply","test_reduce.ply",0.5)

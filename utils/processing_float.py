@@ -16,6 +16,9 @@ def convert_float_in_range_to_rgb(float: float, plage_basse: float, plage_moyenn
     Returns:
         tuple: Un tuple représentant les valeurs RGB de la couleur correspondant à la hauteur.
     """
+    if not (plage_basse <= plage_moyenne and plage_moyenne <= plage_elevee):
+        raise ValueError("Incorrect values given for the range")
+    
     couleur_basse = (0, 0, 255)  # Bleu pour les chiffres bas dans la plage
     couleur_moyenne = (0, 255, 0)  # Vert pour les chiffres moyen dans la plage
     couleur_elevee = (255, 0, 0)  # Rouge pour les chiffres haut dans la plage
@@ -42,3 +45,5 @@ def convert_float_in_range_to_rgb(float: float, plage_basse: float, plage_moyenn
     else:
         return couleur_elevee
 
+if __name__ == '__main__':
+    print(convert_float_in_range_to_rgb(1.5,1,2,3))

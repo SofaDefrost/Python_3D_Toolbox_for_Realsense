@@ -29,14 +29,14 @@ def plot_3Darray_Tkinter(ax: matplotlib.axes._axes.Axes, points: np.ndarray) -> 
     ax.set_ylabel('Axe Y')
     ax.set_zlabel('Axe Z')
 
-def update_display_Tkinter(event: Any, ax: Axes3D, canvas: Any, points: np.ndarray, colors: np.ndarray,fonction, rayon_slider: Any) -> None:
+def update_display_Tkinter(event: Any, ax: Axes3D, canvas: Any, points: np.ndarray,fonction, rayon_slider: Any) -> None:
     rayon = rayon_slider.get()
-    results = fonction(
-        points, colors, rayon)
-    plot_3Darray_Tkinter(ax,results[0])
+    new_points = fonction(
+        points, rayon)
+    plot_3Darray_Tkinter(ax,new_points)
     canvas.draw()
 
-def get_parameter_function_on_array_Tkinter(points: np.ndarray, colors: np.ndarray,fonction,start_slider=0,end_slider=1,resolution=0.01) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+def get_parameter_function_on_array_Tkinter(points: np.ndarray, fonction,start_slider=0,end_slider=1,resolution=0.01) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
 
     root = tk.Tk()
 
@@ -45,15 +45,15 @@ def get_parameter_function_on_array_Tkinter(points: np.ndarray, colors: np.ndarr
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.get_tk_widget().pack()
 
-    slider_label = ttk.Label(root, text=f"Parameter of {fonction.__name__}")
+    slider_label = ttk.Label(root, text=f"{fonction.__code__.co_varnames[:fonction.__code__.co_argcount][1]}")
     slider_label.pack()
     slider = Scale(root, from_=start_slider, to=end_slider, resolution=resolution, orient="horizontal", command=lambda event: update_display_Tkinter(
-        event, ax, canvas, points, colors,fonction, slider))
+        event, ax, canvas, points,fonction, slider))
     slider.pack()
 
     plot_3Darray_Tkinter(ax,points)
 
-    export_button = Button(root, text="Return the value of the slider",
+    export_button = Button(root, text=f"Export value of the {fonction.__code__.co_varnames[:fonction.__code__.co_argcount][2]}",
                            command=root.quit)
     export_button.pack()
 
@@ -61,7 +61,14 @@ def get_parameter_function_on_array_Tkinter(points: np.ndarray, colors: np.ndarr
     
     return slider.get()
 
+def template_function_for_Tkinter_display(points: np.ndarray,parameter_that_you_want,Optional_other_arguments=[]):
+    # DO STUFF (below is an example) 
+    new_points=points # Example
+    # Return 3D np.array
+    return np.array(new_points)
+
 if __name__ == '__main__':
     points,colors=pl.get_points_and_colors_of_ply("test_cropped.ply")
-    print(get_parameter_function_on_array_Tkinter(points,colors,pa.reduce_density_of_array))
-    print(get_parameter_function_on_array_Tkinter(points,colors,pa.filter_array_with_sphere_on_barycentre))
+    print(get_parameter_function_on_array_Tkinter(points,pa.reduce_density_of_array))
+    print(get_parameter_function_on_array_Tkinter(points,pa.filter_array_with_sphere_on_barycentre))
+    print(get_parameter_function_on_array_Tkinter(points,pa.remove_points_of_array_below_threshold))
