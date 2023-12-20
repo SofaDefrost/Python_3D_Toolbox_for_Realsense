@@ -7,10 +7,10 @@ from matplotlib import pyplot as plt
 from scipy.spatial import Delaunay
 from typing import List, Optional, Tuple
 
-import processing_float as pfl
-import processing_ply as pp
-import processing_img as pi
-import processing_general as pg
+import processing_float as pf
+from . import processing_ply as pp
+from . import processing_img as pi
+from . import processing_general as pg
 
 # Arrays
 
@@ -347,8 +347,8 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray,shape:Tup
     if shape!=[]:
         if np.shape(shape)!=(2,):
             raise ValueError(f"Incorrect shape {shape} for the display")
-        colors_image=line_to_3Darray(colors,(height,length)).astype(np.uint8)
         length,height=shape
+        colors_image=line_to_3Darray(colors,(height,length)).astype(np.uint8)
     else:
         if len(np.shape(colors))!=3:
             raise ValueError(f"Incorrect shape for the display got {np.shape(colors)} and expected (x,y,z)")
@@ -470,7 +470,7 @@ def center_pc_on_image(points: np.ndarray,colors:np.ndarray,image_target: str, s
 if __name__ == '__main__':
     l=np.array([1,2,3])
     points, colors = pp.get_points_and_colors_of_ply("test.ply")
-    crop_pc_from_zone_selection(points,colors,640,480)
+    crop_pc_from_zone_selection(points,colors,(640,480))
     # new_colors=line_to_3Darray(colors,(480,640))
     # pi.save_PIL_image_from_array(new_colors,"oui.png")
     # plot_3D_array(points)

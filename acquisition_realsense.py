@@ -3,9 +3,11 @@ import time
 import cv2
 import pyrealsense2 as rs
 import numpy as np
+import logging
 
 from typing import Tuple
 
+from .utils import processing_array as pa
 
 class AppState:
 
@@ -36,17 +38,17 @@ class AppState:
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
 
-def run_acquisition(point_cloud: str, image: str) -> None:
-    """
-    Acquiert des données à partir de la caméra RealSense.
-
-    Parameters:
-    - point_cloud (str): Le chemin du fichier PLY pour enregistrer le nuage de points.
-    - image (str): Le chemin du fichier image pour enregistrer la capture couleur.
-
-    Returns:
-    None
-    """
+def save_ply_from_realsense(path_name_ply: str, image_name: str="") -> None:
+# Version déprécié => enregistre le ply au format bgr
+    if len(path_name_ply)<5:
+        raise ValueError(f"Incorrect filename {path_name_ply}")
+    if path_name_ply[-4:] != ".ply":
+        raise ValueError(f"Incorrect filename {path_name_ply} must end with '.ply'")
+    if len(image_name)>0:
+        if len(image_name)<5:
+            raise ValueError(f"Incorrect filename {image_name}")
+        if image_name[-4:] != ".png" and image_name[-4:] != ".jpg":
+            raise ValueError(f"Incorrect filename {image_name} must end with '.jpg' or '.png'")
     state = AppState()
 
 # Configure depth and color streams
@@ -63,7 +65,7 @@ def run_acquisition(point_cloud: str, image: str) -> None:
             found_rgb = True
             break
     if not found_rgb:
-        print("The demo requires Depth camera with Color sensor")
+        logging.info("The demo requires Depth camera with Color sensor")
 
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
     config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
@@ -326,8 +328,9 @@ def run_acquisition(point_cloud: str, image: str) -> None:
             state.color ^= True
 
         if key == ord("s"):
-            cv2.imwrite(image, color_image)
-            points.export_to_ply(point_cloud, mapped_frame)
+            if len(image_name)>0:
+                cv2.imwrite(image_name, color_image)
+            points.export_to_ply(path_name_ply, mapped_frame)
 
         if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
             break
@@ -335,19 +338,12 @@ def run_acquisition(point_cloud: str, image: str) -> None:
     # Stop streaming
     pipeline.stop()
 
-
-def points_and_colors_realsense(image_name: str = "image.png") -> Tuple[np.ndarray]:
-    """
-    Capturer les coordonnées 3D et les couleurs associées à partir de la caméra RealSense.
-
-    Parameters:
-    - image_name (str): Nom du fichier pour enregistrer l'image couleur.
-
-    Returns:
-    - vertices (np.array): Coordonnées 3D des points.
-    - color_image (np.array): Image couleur correspondante.
-    - depth_image (np.array): Image de profondeur associée.
-    """
+def get_points_and_colors_from_realsense(image_name: str = "") -> Tuple[np.ndarray]:
+    if len(image_name)>0:
+        if len(image_name)<5:
+            raise ValueError(f"Incorrect filename {image_name}")
+        if image_name[-4:] != ".png" and image_name[-4:] != ".jpg":
+            raise ValueError(f"Incorrect filename {image_name} must end with '.jpg' or '.png'")
     try:
         # Create a context object. This object owns the handles to all connected realsense devices
         pipeline = rs.pipeline()
@@ -374,8 +370,9 @@ def points_and_colors_realsense(image_name: str = "image.png") -> Tuple[np.ndarr
         # Les vertices correpondent à nos coordonnées 3D
         vertices = np.array(points.get_vertices())
         color_image = np.array(color_frame.get_data())
-        color_image_rgb = color_image[:, :, [2, 1, 0]]
-        cv2.imwrite(image_name, color_image_rgb)
+        if len(image_name)>0:
+            color_image_rgb = color_image[:, :, [2, 1, 0]]
+            cv2.imwrite(image_name, color_image_rgb)
 
     except Exception as e:
         print(e)
@@ -383,15 +380,5 @@ def points_and_colors_realsense(image_name: str = "image.png") -> Tuple[np.ndarr
     return vertices, color_image
 
 if __name__ == '__main__':
-    # ### Pour faire des acquisitions en masse
-    name_object="_test_"
-    # name_folder="labo_biologie/acquisition_en_masse/"
-    # name_acquisition_thibaud=name_folder+name_object+"_Thibaud"
-    # name_acquisition_tinhinane=name_folder+name_object+"_Tinhinane"
-    # i=0
-    # while True:
-    #     run_acquisition(name_acquisition_tinhinane+str(i)+".ply",name_acquisition_tinhinane+str(i)+".png")
-    #     points,couleurs=points_and_colors_realsense(name_acquisition_thibaud+str(i)+".png")
-    #     couleurs=colors_relasense_sofa(couleurs)
-    #     cv.create_ply_file(points, couleurs, name_acquisition_thibaud+str(i)+".ply")
-    #     i+=1
+    save_ply_from_realsense("toto.ply","oui.png")
+    get_points_and_colors_from_realsense()

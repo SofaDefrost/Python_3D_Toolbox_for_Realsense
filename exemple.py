@@ -1,5 +1,5 @@
 import numpy as np
-import acquisition as get
+import realsense.acquisition_realsense as get
 import filtre_hsv_realsense as filtre
 from utils import hsv as apply_hsv
 from realsense.utils import display_function_Tkinter as bruit
