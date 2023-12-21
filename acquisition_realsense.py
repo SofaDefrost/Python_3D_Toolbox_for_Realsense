@@ -7,7 +7,7 @@ import logging
 
 from typing import Tuple
 
-from .utils import processing_array as pa
+from utils import processing_array as pa
 
 class AppState:
 

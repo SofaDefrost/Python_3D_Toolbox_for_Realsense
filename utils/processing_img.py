@@ -1,13 +1,30 @@
 import numpy as np
 import logging
 import cv2
+import sys
 
 from PIL import Image
 from typing import List, Tuple
 
-import processing_array as pa
 
-def is_readable_image(image_path):
+mod_name = vars(sys.modules[__name__])['__package__']
+if mod_name:
+    # Code executed as a module
+    from . import processing_array as pa
+else:
+    # Code executed as a script
+    import processing_array as pa
+    
+def is_readable_image(image_path:str)->None:
+    """
+    Check if an image is readable using OpenCV.
+
+    Parameters:
+    - image_path (str): The path to the image file.
+
+    Raises:
+    - ValueError: If the image is empty or cannot be read. Check if the path is correct.
+    """
     image = cv2.imread(image_path)
     if image is None:
         raise ValueError(f"The image is empty. Please check if the path {image_path} is correct ")
@@ -154,7 +171,7 @@ def get_hsv_mask_with_sliders(image_path: str) -> Tuple[Tuple[int]]:
         # Appliquer le masque sur l'image originale
         result = cv2.bitwise_and(image, image, mask=mask)
         cv2.imshow('Result', result)
-        return lower_hsv, upper_hsv
+        return np.array(lower_hsv), np.array(upper_hsv)
 
     # Charger votre image
     image = cv2.imread(image_path)
