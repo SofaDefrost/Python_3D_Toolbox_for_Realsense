@@ -69,5 +69,5 @@ def is_good_type(value, intended_type):
 
 if __name__ == '__main__':
     is_good_type(7, int)
-    # print(open_file_and_give_content("realsense/utils/file_manager.py"))
-    # open_file_and_give_content("Unknownfile")
+    print(open_file_and_give_content("realsense/utils/processing_general.py"))
+    open_file_and_give_content("?")

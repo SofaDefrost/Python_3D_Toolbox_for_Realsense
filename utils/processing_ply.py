@@ -129,6 +129,9 @@ def get_points_and_colors_of_ply(file_path: str) -> Tuple[np.ndarray, np.ndarray
     Returns:
     - tuple: A tuple containing a NumPy array of points and a NumPy array of colors.
     """
+    # Guaranteed that the file exists
+    pg.open_file_and_give_content(file_path)
+    
     # Load data from the .ply file
     ply_data = o3d.io.read_point_cloud(file_path)
 
@@ -289,15 +292,14 @@ def center_ply_on_image(input_filename: str, output_filename: str, image_target_
 
 if __name__ == '__main__':
     # filter_array_with_sphere_on_barycentre("test.ply","test_barycentre.ply",0.06)
-    center_ply_on_image("test.ply", "test_centered.ply",
-                        "image_ref.png", (640, 480))
+    # center_ply_on_image("test.ply", "test_centered.ply",
+    #                     "image_ref.png", (640, 480))
     # crop_ply_from_pixels_selection("test.ply","test_cropped.ply",(640,480))
-    # points,colors=get_points_and_colors_of_ply('test.ply')
-    # reduce_density_of_ply("test_colore.ply","test_reduce.ply",0.5)
+    # reduce_density_of_ply("test.ply","test_reduce.ply",0.5)
     # centering_ply_on_mean_points("test.ply","test_centered.ply")
-    # color_ply_depending_on_axis("test.ply","test_colore.ply","z")
-    # remove_points_of_ply_below_threshold(10,"test_colore.ply","test2.ply")
-    # points,colors=get_points_and_colors_of_ply('test.ply')
-    # save_ply_file("with_colors.ply",points,colors)
-    # save_ply_file("without_colors.ply",points)
+    # color_ply_depending_on_axis("test.ply","test_colore.ply","x")
+    # remove_points_of_ply_below_threshold("test_colore.ply","test_below_threshold.ply",0.1,"z")
+    points,colors=get_points_and_colors_of_ply('test.ply')
+    save_ply_file("test_with_colors.ply",points,colors)
+    save_ply_file("test_without_colors.ply",points)
     # save_ply_from_map("test.map","ply_from_map.ply")

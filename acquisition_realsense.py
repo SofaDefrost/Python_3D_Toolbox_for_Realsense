@@ -8,6 +8,7 @@ import logging
 from typing import Tuple
 
 from utils import processing_array as pa
+from utils import processing_ply as pp
 
 class AppState:
 
@@ -38,7 +39,7 @@ class AppState:
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
 
-def save_ply_from_realsense(path_name_ply: str, image_name: str="") -> None:
+def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="") -> None:
 # Version déprécié => enregistre le ply au format bgr
     if len(path_name_ply)<5:
         raise ValueError(f"Incorrect filename {path_name_ply}")
@@ -379,6 +380,9 @@ def get_points_and_colors_from_realsense(image_name: str = "") -> Tuple[np.ndarr
         pass
     return vertices, color_image
 
+def save_ply_from_realsense(output_filename: str,image_name:str=""):
+    points,colors=get_points_and_colors_from_realsense(image_name)
+    pp.save_ply_file(output_filename,points,colors)
+
 if __name__ == '__main__':
     save_ply_from_realsense("toto.ply","oui.png")
-    get_points_and_colors_from_realsense()

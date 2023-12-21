@@ -56,7 +56,7 @@ def save_image_from_array(pixels,nom_fichier_sortie: str, shape:Tuple[int,int]=[
     image.save(nom_fichier_sortie)
     logging.info(f"Image saved under the name '{nom_fichier_sortie}'.")
 
-def give_array_from_image(image_name: str) -> List[Tuple[int, int, int]]:
+def give_array_from_image(image_name: str):
     """
     Convertit une image en une liste de pixels (composantes RVB).
 
@@ -79,7 +79,7 @@ def give_array_from_image(image_name: str) -> List[Tuple[int, int, int]]:
     liste_pixels_rgb = [tuple(pixel)
                         for ligne in tableau_image for pixel in ligne]
 
-    return liste_pixels_rgb
+    return np.array(liste_pixels_rgb)
 
 def get_homography_between_imgs(image1_path: str, image2_path: str,display=False) -> np.ndarray:
     """
@@ -304,8 +304,8 @@ def get_shining_point_with_hsv_mask(image_path: str,hsv_mask:np.ndarray, display
     return pixel_x, pixel_y
 
 if __name__ == '__main__':
-    print(get_shining_point_image("image_source.png"))
-    # array=give_array_from_image_name("test.png")
-    # save_image_from_array(array,640,480,"test2.png")
-    # H=get_homography_between_imgs("image_ref.png","image_source.png")
-    # display_homography_between_imgs("image_ref.png","image_source.png",H)
+    # print(get_shining_point_image("image_source.png"))
+    # array=give_array_from_image("image_source.png")
+    # save_image_from_array(array,"image_source_rebuilt.png",(640,480))
+    H=get_homography_between_imgs("image_ref.png","image_source.png",True)
+    print(H)

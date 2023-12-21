@@ -14,9 +14,11 @@ if mod_name:
     from . import processing_img as pi
     from . import processing_general as pg
     from . import processing_ply as pp
+    from . import processing_float as pf
 else:
     # Code executed as a script
     import processing_ply as pp
+    import processing_float as pf
     import processing_img as pi
     import processing_general as pg
 
@@ -212,7 +214,7 @@ def get_color_3D_array_depending_on_axis(points: np.ndarray, axis: str) -> np.nd
         axis_coordinates)
 
     for i in range(len(colors)):
-        colors[i] = pfl.convert_float_in_range_to_rgb(
+        colors[i] = pf.convert_float_in_range_to_rgb(
             points[i][axis_int], min_coord, mean_coord, max_coord)
     return np.array(colors)
 
@@ -284,12 +286,12 @@ def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float,
         return np.array(new_points)
 
 
-def reduce_density_of_array(points: np.ndarray, densite: float, colors: np.ndarray = []):
+def reduce_density_of_array(points: np.ndarray, density: float, colors: np.ndarray = []):
 
     colors_reduits = []
 
     # Calculer le nombre de points à conserver
-    nombre_points = int(len(points) * densite)
+    nombre_points = int(len(points) * density)
 
     # Sélectionner aléatoirement les indices des points à conserver
     indices_a_conserver = np.random.choice(
@@ -297,7 +299,7 @@ def reduce_density_of_array(points: np.ndarray, densite: float, colors: np.ndarr
 
     # Extraire les points sélectionnés
     points_reduits = points[indices_a_conserver, :]
-    if len(colors) != 0:
+    if len(colors) > 0:
         colors_reduits = colors[indices_a_conserver, :]
         return np.array(points_reduits), np.array(colors_reduits)
 
