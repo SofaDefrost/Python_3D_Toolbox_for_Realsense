@@ -385,4 +385,4 @@ def save_ply_from_realsense(output_filename: str,image_name:str=""):
     pp.save_ply_file(output_filename,points,colors)
 
 if __name__ == '__main__':
-    save_ply_from_realsense("toto.ply","oui.png")
+    save_ply_from_realsense("realsense.ply","realsense.png")

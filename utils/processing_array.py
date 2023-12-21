@@ -119,6 +119,8 @@ def add_list_at_each_rows_of_array(array: np.ndarray, list: List) -> np.ndarray:
 
 
 def array_to_line(array: np.ndarray) -> np.ndarray:
+    if len(np.shape(array))==2:
+        return array
     is_homogenous_array_of_dim(array)
     return array.reshape((np.shape(array)[0]*np.shape(array)[1], 3))
 
@@ -499,14 +501,13 @@ def center_pc_on_image(points: np.ndarray, colors: np.ndarray, image_target: str
 
 
 if __name__ == '__main__':
-    l = np.array([1, 2, 3])
+    # l = np.array([1, 2, 3])
     points, colors = pp.get_points_and_colors_of_ply("test.ply")
-    crop_pc_from_zone_selection(points, colors, (640, 480))
-    # new_colors=line_to_3Darray(colors,(480,640))
-    # pi.save_PIL_image_from_array(new_colors,"oui.png")
+    # crop_pc_from_zone_selection(points, colors, (640, 480))
+    new_colors=line_to_3Darray(colors,(480,640))
+    # pi.save_image_from_array(new_colors,"oui.png")
     # plot_3D_array(points)
     # print(add_list_at_each_rows_of_array(points, [0., 0., 0., 1.])[0])
-    # print(np.shape(colors))
-    # print(array_to_line(colors))
+    print(array_to_line(colors))
     # test=[[0,0,0],[1,0,0],[0,1,0],[1,1,0]]
     # liste_triangles=build_mesh_from_3Darray(test)
