@@ -4,7 +4,7 @@ import cv2
 import sys
 
 from PIL import Image
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 mod_name = vars(sys.modules[__name__])['__package__']
@@ -14,8 +14,9 @@ if mod_name:
 else:
     # Code executed as a script
     import processing_array as pa
-    
-def is_readable_image(image_path:str)->None:
+
+
+def is_readable_image(image_path: str) -> None:
     """
     Check if an image is readable using OpenCV.
 
@@ -27,134 +28,174 @@ def is_readable_image(image_path:str)->None:
     """
     image = cv2.imread(image_path)
     if image is None:
-        raise ValueError(f"The image is empty. Please check if the path {image_path} is correct ")
+        raise ValueError(
+            f"The image is empty. Please check if the path {image_path} is correct ")
 
-def get_size_of_image(image_path):
+
+def get_size_of_image(image_path: str) -> Tuple[int, int]:
+    """
+    Get the size (width, height) of an image using the PIL library.
+
+    Parameters:
+    - image_path (str): The path to the image file.
+
+    Returns:
+    - Tuple[int, int]: The width and height of the image.
+    """
     img_ref = Image.open(image_path)
     return img_ref.size
-   
-def save_image_from_array(pixels,nom_fichier_sortie: str, shape:Tuple[int,int]=[]) -> None:
-    
-    if shape==[]:
-        if len(np.shape(pixels))!=3:
-            raise ValueError(f"Incorrect shape got {np.shape(pixels)} and expected (x,y,z)")
-        if np.shape(pixels)[2]!=3:
-            raise ValueError(f"Incorrect dimension for the array, expected 3 and given {np.shape(pixels)[2]}")
+
+
+def save_image_from_array(pixels: np.ndarray, nom_fichier_sortie: str, shape: Tuple[int, int] = []) -> None:
+    """
+    Save an image from a pixel array to a file using the PIL library.
+
+    Parameters:
+    - pixels: The pixel array (2D or 3D).
+    - nom_fichier_sortie (str): The output file name.
+    - shape (Tuple[int, int], optional): The shape of the image for 2D arrays.
+
+    Raises:
+    - ValueError: If the shape is incorrect for display or if the array dimension is not supported.
+
+    Returns:
+    - None: The function does not return anything, but it saves an image file.
+    """
+    if shape == []:
+        if len(np.shape(pixels)) != 3:
+            raise ValueError(
+                f"Incorrect shape got {np.shape(pixels)} and expected (x,y,z)")
+        if np.shape(pixels)[2] != 3:
+            raise ValueError(
+                f"Incorrect dimension for the array, expected 3 and given {np.shape(pixels)[2]}")
         image = Image.fromarray(pixels.astype(np.uint8))
     else:
-        if np.shape(shape)!=(2,):
+        if np.shape(shape) != (2,):
             raise ValueError(f"Incorrect shape {shape} for the display")
-        pa.line_to_3Darray(pixels,(shape[0],shape[1]))
-        image = Image.new("RGB", (shape[0],shape[1]))
+        pa.line_to_3Darray(pixels, (shape[0], shape[1]))
+        # Create an image with the specified shape
+        image = Image.new("RGB", (shape[0], shape[1]))
 
-        # Remplissage de l'image avec les pixels de la liste
-        # Convertit les listes en tuples
-        pixel_data = [tuple((int(pixel[0]),int(pixel[1]),int(pixel[2]))) for pixel in pixels]
+        # Fill the image with pixels from the list
+        # Convert lists to tuples
+        pixel_data = [tuple((int(pixel[0]), int(pixel[1]), int(pixel[2])))
+                      for pixel in pixels]
         image.putdata(pixel_data)
-    
-    # Sauvegarde de l'image
+
+    # Save the image
     image.save(nom_fichier_sortie)
     logging.info(f"Image saved under the name '{nom_fichier_sortie}'.")
 
-def give_array_from_image(image_name: str):
+
+def give_array_from_image(image_name: str) -> np.ndarray:
     """
-    Convertit une image en une liste de pixels (composantes RVB).
+    Extract an array of RGB values from an image using the PIL library.
 
     Parameters:
-    - image_name (str): Chemin vers le fichier image.
+    - image_name (str): The path to the image file.
 
     Returns:
-    - liste_pixels (list): Liste de pixels (composantes RVB).
+    - np.ndarray: An array of RGB values representing the pixels in the image.
     """
     image = Image.open(image_name)
     tableau_image = np.array(image)
-    
-    # Obtenir les dimensions de l'image
+
+    # Get the dimensions of the image
     largeur, hauteur, _ = tableau_image.shape
 
-    # Reshape le tableau pour correspondre aux dimensions de l'image
+    # Reshape the array to match the dimensions of the image
     tableau_image = tableau_image.reshape((hauteur, largeur, -1))
-    
-    # Extraire les composantes RGB
+
+    # Extract the RGB components
     liste_pixels_rgb = [tuple(pixel)
                         for ligne in tableau_image for pixel in ligne]
 
     return np.array(liste_pixels_rgb)
 
-def get_homography_between_imgs(image1_path: str, image2_path: str,display=False) -> np.ndarray:
+
+def get_homography_between_imgs(image1_path: str, image2_path: str, display: Optional[bool] = False) -> np.ndarray:
     """
-    Trouve la matrice d'homographie entre deux images en utilisant la correspondance de caractéristiques.
+    Compute the homography matrix between two images using the ORB feature detector.
 
     Parameters:
-    - image1_path (str): Chemin de l'image de référence.
-    - image2_path (str): Chemin de l'image d'environnement.
+    - image1_path (str): The path to the reference image.
+    - image2_path (str): The path to the target image.
+    - display (bool, optional): Whether to display the images with matched points (default is False).
 
     Returns:
-    - numpy.ndarray: Matrice d'homographie.
+    - np.ndarray: The homography matrix.
+
+    Raises:
+    - ValueError: If either image cannot be read.
     """
     is_readable_image(image1_path)
     is_readable_image(image2_path)
-    # Charger les images
-    img1 = cv2.imread(image1_path, 0)  # Image de référence en niveaux de gris
-    # Image d'environnement en niveaux de gris
-    img2 = cv2.imread(image2_path, 0)
+    # Load the images in grayscale
+    img1 = cv2.imread(image1_path, 0)  # Reference image in grayscale
+    img2 = cv2.imread(image2_path, 0)  # Target image in grayscale
 
-    # Initialiser l'ORB detector
+    # Initialize the ORB detector
     orb = cv2.ORB_create()
 
-    # Trouver les points clés et les descripteurs avec ORB
+    # Find keypoints and descriptors with ORB
     kp1, des1 = orb.detectAndCompute(img1, None)
     kp2, des2 = orb.detectAndCompute(img2, None)
 
-    # Utiliser le BFMatcher pour trouver les meilleures correspondances
+    # Use the BFMatcher to find the best matches
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
     matches = bf.match(des1, des2)
 
-    # Trier les correspondances en fonction de leur similarité
+    # Sort matches based on their similarity
     matches = sorted(matches, key=lambda x: x.distance)
 
-    # Sélectionner les meilleures correspondances (peut ajuster le ratio en conséquence)
+    # Select the best matches (can adjust the ratio accordingly)
     good_matches = matches[:50]
 
-    # Obtenir les points correspondants dans les deux images
+    # Get corresponding points in both images
     src_pts = np.float32(
         [kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
     dst_pts = np.float32(
         [kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
-    # Trouver la matrice d'homographie
+    # Find the homography matrix
     H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
     if display:
-        # Charger les images en couleur
+        # Load the images in color
         img1_color = cv2.imread(image1_path)
         img2_color = cv2.imread(image2_path)
 
-        # Appliquer la matrice d'homographie pour transformer les coins de l'image de référence
+        # Apply the homography matrix to transform the corners of the reference image
         h, w = img1_color.shape[:2]
-        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1],
+                         [w - 1, 0]]).reshape(-1, 1, 2)
         transformed_pts = cv2.perspectiveTransform(pts, H)
 
-        # Dessiner les contours de l'image de référence dans l'image source
-        img2_with_reference = cv2.polylines(img2_color, [np.int32(transformed_pts)], True, (0, 255, 0), 2)
+        # Draw the contours of the reference image on the source image
+        img2_with_reference = cv2.polylines(
+            img2_color, [np.int32(transformed_pts)], True, (0, 255, 0), 2)
 
-        # Afficher l'image résultante
+        # Display the resulting image
         cv2.imshow(f'{image1_path} in {image2_path}', img2_with_reference)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     return H
 
-def get_hsv_mask_with_sliders(image_path: str) -> Tuple[Tuple[int]]:
+
+def get_hsv_mask_with_sliders(image_path: str) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Permet à l'utilisateur de sélectionner un masque HSV à partir d'une image en utilisant des curseurs.
+    Create an HSV mask using sliders to define the lower and upper HSV values interactively.
 
     Parameters:
-    - image_path (str): Chemin vers l'image source.
+    - image_path (str): The path to the image file.
 
     Returns:
-    - tuple: Couple du masque HSV sélectionné (lower_hsv, upper_hsv).
+    - Tuple[np.ndarray,np.ndarray]: The lower and upper HSV values.
+
+    Raises:
+    - ValueError: If the image cannot be read.
     """
     is_readable_image(image_path)
-    
+
     def update_mask_hsv(x):
         global lower_hsv, upper_hsv, mask, result
         lower_hsv = np.array([cv2.getTrackbarPos('H_L', 'HSV Interface'),
@@ -168,24 +209,23 @@ def get_hsv_mask_with_sliders(image_path: str) -> Tuple[Tuple[int]]:
         mask = cv2.inRange(hsv_img, lower_hsv, upper_hsv)
         cv2.imshow('HSV Mask', mask)
 
-        # Appliquer le masque sur l'image originale
+        # Apply the mask to the original image
         result = cv2.bitwise_and(image, image, mask=mask)
         cv2.imshow('Result', result)
         return np.array(lower_hsv), np.array(upper_hsv)
 
-    # Charger votre image
+    # Load your image
     image = cv2.imread(image_path)
 
-    
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Créer les fenêtres
+    # Create windows
     cv2.namedWindow('Original Image')
     cv2.namedWindow('HSV Interface')
     cv2.namedWindow('HSV Mask')
     cv2.namedWindow('Result')
 
-    # Créer les curseurs pour les composantes HSV
+    # Create sliders for HSV components
     cv2.createTrackbar('H_L', 'HSV Interface', 0, 179, update_mask_hsv)
     cv2.createTrackbar('S_L', 'HSV Interface', 0, 255, update_mask_hsv)
     cv2.createTrackbar('V_L', 'HSV Interface', 0, 255, update_mask_hsv)
@@ -193,97 +233,115 @@ def get_hsv_mask_with_sliders(image_path: str) -> Tuple[Tuple[int]]:
     cv2.createTrackbar('S_U', 'HSV Interface', 255, 255, update_mask_hsv)
     cv2.createTrackbar('V_U', 'HSV Interface', 255, 255, update_mask_hsv)
 
-    # Initialiser les plages HSV
+    # Initialize HSV ranges
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 255])
-    # Créez une image noire comme masque initial
+
+    # Create an initial black image as the initial mask
     mask = np.zeros(image.shape[:2], dtype=np.uint8)
     result = image.copy()
 
-    # Afficher l'image initiale
+    # Display the original image
     cv2.imshow('Original Image', image)
 
     while True:
-        # Mettre à jour le masque en fonction des curseurs
+        # Update the mask based on the sliders
         lower_hsv, upper_hsv = update_mask_hsv(0)
 
-        # Afficher les trois fenêtres
+        # Display the three windows
         if cv2.waitKey(1) & 0xFF == ord('q'):
-           break
+            break
 
-    # Une fois que l'utilisateur appuie sur 'q', renvoyer le masque
+    # Once the user presses 'q', return the mask
     cv2.destroyAllWindows()
     logging.info(f"Mask hsv [{lower_hsv},{upper_hsv}] exported !")
     return np.array(lower_hsv), np.array(upper_hsv)
 
-def get_shining_point_image(image_path: np.ndarray,display=False) -> Tuple[int]:
 
+def get_shining_point_image(image_path: np.ndarray, display: Optional[bool] = False) -> Tuple[int, int]:
+    """
+    Detect the brightest point in an image using the cornerHarris algorithm.
+
+    Parameters:
+    - image_path (str): The path to the image file.
+    - display (bool, optional): Whether to display the image with the detected shining point (default is False).
+
+    Returns:
+    - Tuple[int, int]: The coordinates (x, y) of the brightest point.
+
+    Raises:
+    - ValueError: If the image cannot be read.
+    """
     is_readable_image(image_path)
-    # Charger votre image
+    # Load your image
     image_array = cv2.imread(image_path)
-    
-    # Convertir le tableau en une image OpenCV
+
+    # Convert the array to an OpenCV image
     image = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
 
-    # Convertir l'image en niveaux de gris
+    # Convert the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Utiliser la fonction cornerHarris pour détecter le coin le plus brillant
+    # Use the cornerHarris function to detect the brightest corner
     dst = cv2.cornerHarris(gray, 2, 3, 0.04)
 
-    # Normaliser la réponse pour faciliter la détection du point le plus brillant
+    # Normalize the response to make it easier to detect the brightest point
     cv2.normalize(dst, dst, 0, 255, cv2.NORM_MINMAX)
 
-    # Trouver les coordonnées du point brillant
+    # Find the coordinates of the shining point
     y, x = np.unravel_index(dst.argmax(), dst.shape)
     if display:
-        # Visualisation
-        cv2.circle(image, (x, y), 5, (0, 0, 255), -1)  # Dessine un cercle rouge
+        # Visualization
+        # Dessine un cercle rouge
+        cv2.circle(image, (x, y), 5, (0, 0, 255), -1)
 
-        # # Afficher l'image avec le point brillant détecté
+        # Show the image with the detected shining point
         cv2.imshow('Shining point', image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
     return x, y
 
-def get_shining_point_with_hsv_mask(image_path: str,hsv_mask:np.ndarray, display: bool = False):
+
+def get_shining_point_with_hsv_mask(image_path: str, hsv_mask: np.ndarray, display: Optional[bool] = False) -> Tuple[int, int]:
     """
-    Retourne les coordonnées en pixel d'un point rouge présent dans une image à partir d'un masque HSV.
+    Detect the shining point in an image using an HSV color mask.
 
     Parameters:
-    - path_image (str): Chemin vers l'image à analyser.
-    - lower_red (numpy.ndarray): Plage inférieure de la couleur rouge dans l'espace HSV.
-    - upper_red (numpy.ndarray): Plage supérieure de la couleur rouge dans l'espace HSV.
-    - Affichage (bool): Indique si l'image avec les contours du point laser doit être affichée.
+    - image_path (str): The path to the image file.
+    - hsv_mask (Tuple[Tuple[int], Tuple[int]]): The HSV color mask range.
+    - display (bool, optional): Whether to display the image with the detected shining point (default is False).
 
     Returns:
-    - tuple: Coordonnées (pixel_x, pixel_y) du point rouge détecté.
+    - Tuple[int, int]: The coordinates (x, y) of the detected shining point.
+
+    Raises:
+    - ValueError: If the image cannot be read.
     """
     is_readable_image(image_path)
-    
-    lower_red=hsv_mask[0]
-    upper_red=hsv_mask[1]
 
-    # Charger l'image
+    lower_red = hsv_mask[0]
+    upper_red = hsv_mask[1]
+
+    # Load the image
     image = cv2.imread(image_path)
 
-    # Convertir l'image en espace de couleur HSV
+    # Convert the image to HSV color space
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Créer un masque en utilisant la plage de couleurs définie
+    # Create a mask using the defined color range
     mask = cv2.inRange(hsv, lower_red, upper_red)
 
-    # Trouver les contours dans le masque
+    # Find contours in the mask
     contours, _ = cv2.findContours(
         mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     x_sum = 0
     y_sum = 0
     sum = 0
-    # Parcourir tous les contours détectés
+    # Iterate over all detected contours
     for contour in contours:
-        # Récupérer les coordonnées des pixels dans le contour
+        # Get the coordinates of pixels in the contour
         for point in contour:
             x, y = point[0]
             x_sum += x
@@ -293,19 +351,20 @@ def get_shining_point_with_hsv_mask(image_path: str,hsv_mask:np.ndarray, display
     pixel_y = int(y_sum/sum)
 
     if display:
-        # Dessiner les contours sur l'image originale
+        # Draw contours on the original image
         cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
 
-        # Afficher l'image avec les contours
-        cv2.imshow('Image avec contours du point laser', image)
+        # Show the image with contours
+        cv2.imshow('Image with laser point contours', image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
     return pixel_x, pixel_y
 
+
 if __name__ == '__main__':
     # print(get_shining_point_image("image_source.png"))
     # array=give_array_from_image("image_source.png")
     # save_image_from_array(array,"image_source_rebuilt.png",(640,480))
-    H=get_homography_between_imgs("image_ref.png","image_source.png",True)
+    H = get_homography_between_imgs("image_ref.png", "image_source.png", True)
     print(H)
