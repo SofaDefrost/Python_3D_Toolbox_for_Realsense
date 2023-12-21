@@ -9,6 +9,7 @@ from typing import Tuple
 
 from utils import processing_array as pa
 from utils import processing_ply as pp
+from utils import processing_img as pi
 
 class AppState:
 
@@ -40,16 +41,7 @@ class AppState:
 
 
 def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="") -> None:
-# Version déprécié => enregistre le ply au format bgr
-    if len(path_name_ply)<5:
-        raise ValueError(f"Incorrect filename {path_name_ply}")
-    if path_name_ply[-4:] != ".ply":
-        raise ValueError(f"Incorrect filename {path_name_ply} must end with '.ply'")
-    if len(image_name)>0:
-        if len(image_name)<5:
-            raise ValueError(f"Incorrect filename {image_name}")
-        if image_name[-4:] != ".png" and image_name[-4:] != ".jpg":
-            raise ValueError(f"Incorrect filename {image_name} must end with '.jpg' or '.png'")
+
     state = AppState()
 
 # Configure depth and color streams
@@ -330,7 +322,7 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="
 
         if key == ord("s"):
             if len(image_name)>0:
-                cv2.imwrite(image_name, color_image)
+                pi.save_image_from_array(color_image[:, :, [2, 1, 0]],image_name)
             points.export_to_ply(path_name_ply, mapped_frame)
 
         if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
@@ -340,11 +332,6 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="
     pipeline.stop()
 
 def get_points_and_colors_from_realsense(image_name: str = "") -> Tuple[np.ndarray]:
-    if len(image_name)>0:
-        if len(image_name)<5:
-            raise ValueError(f"Incorrect filename {image_name}")
-        if image_name[-4:] != ".png" and image_name[-4:] != ".jpg":
-            raise ValueError(f"Incorrect filename {image_name} must end with '.jpg' or '.png'")
     try:
         # Create a context object. This object owns the handles to all connected realsense devices
         pipeline = rs.pipeline()
@@ -372,8 +359,7 @@ def get_points_and_colors_from_realsense(image_name: str = "") -> Tuple[np.ndarr
         vertices = np.array(points.get_vertices())
         color_image = np.array(color_frame.get_data())
         if len(image_name)>0:
-            color_image_rgb = color_image[:, :, [2, 1, 0]]
-            cv2.imwrite(image_name, color_image_rgb)
+            pi.save_image_from_array(color_image,image_name)
 
     except Exception as e:
         print(e)
@@ -382,7 +368,8 @@ def get_points_and_colors_from_realsense(image_name: str = "") -> Tuple[np.ndarr
 
 def save_ply_from_realsense(output_filename: str,image_name:str=""):
     points,colors=get_points_and_colors_from_realsense(image_name)
-    pp.save_ply_file(output_filename,points,colors)
+    new_colors=pa.array_to_line(colors)
+    pp.save_ply_file(output_filename,points,new_colors)
 
 if __name__ == '__main__':
-    save_ply_from_realsense("realsense.ply","realsense.png")
+    save_ply_from_realsense("realsense.ply","realsense2.png")
