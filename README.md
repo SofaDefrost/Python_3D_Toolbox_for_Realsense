@@ -9,7 +9,7 @@ exemple
 ```console
 python3 example.py
 ```
-
+All outcomes will be stored in the 'example' folder.
 ## Prerequisites
 Python libraries required for the entire repository:
 
