@@ -237,7 +237,9 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="
         out[i[m], j[m]] = color[u[m], v[m]]
 
     out = np.empty((h, w, 3), dtype=np.uint8)
-
+    
+    print("Press the 'q' key to save and finish the acquisition.")
+    
     while True:
         # Grab camera data
         if not state.paused:
@@ -299,8 +301,10 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="
         cv2.setWindowTitle(
             state.WIN_NAME, "RealSense (%dx%d) %dFPS (%.2fms) %s" %
             (w, h, 1.0/dt, dt*1000, "PAUSED" if state.paused else ""))
+        
         cv2.imshow("Color Image", color_image)
         cv2.imshow(state.WIN_NAME, out)
+    
         key = cv2.waitKey(1)
 
         if key == ord("r"):
@@ -319,13 +323,9 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="
 
         if key == ord("c"):
             state.color ^= True
-
-        if key == ord("s"):
-            if len(image_name)>0:
-                pi.save_image_from_array(color_image[:, :, [2, 1, 0]],image_name)
-            points.export_to_ply(path_name_ply, mapped_frame)
-
+            
         if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
+            save_ply_from_realsense(path_name_ply,image_name)
             break
 
     # Stop streaming

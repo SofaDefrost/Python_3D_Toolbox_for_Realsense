@@ -15,7 +15,7 @@ else:
     import processing_general as pg
     import processing_array as pa
 
-def plot_ply(path_name: str) -> None:
+def plot_ply(input_filename: str) -> None:
     """
     Plot 3D points from PLY file.
 
@@ -25,7 +25,7 @@ def plot_ply(path_name: str) -> None:
     Returns:
     - None
     """
-    points, colors = get_points_and_colors_of_ply(path_name)
+    points, colors = get_points_and_colors_of_ply(input_filename)
     vertices = [point + color for point, color in zip(points, colors)]
     pa.plot_3D_array(np.array(vertices))
 
@@ -158,7 +158,7 @@ def centering_ply_on_mean_points(input_filename: str, output_filename: str) -> N
     save_ply_file(output_filename, new_points, colors)
 
 
-def color_ply_depending_on_axis(name_ply: str, new_name: str, axis: str) -> None:
+def color_ply_depending_on_axis(input_filename: str, output_filename: str, axis: str) -> None:
     """
     Color a PLY file based on the specified axis and save the result to a new file.
 
@@ -170,9 +170,9 @@ def color_ply_depending_on_axis(name_ply: str, new_name: str, axis: str) -> None
     Returns:
     - None: The function does not return anything, but it creates a colored PLY file.
     """
-    points, _ = get_points_and_colors_of_ply(name_ply)
+    points, _ = get_points_and_colors_of_ply(input_filename)
     colors = pa.get_color_3D_array_depending_on_axis(points, axis)
-    save_ply_file(new_name, points, colors)
+    save_ply_file(output_filename, points, colors)
 
 
 def remove_points_of_ply_below_threshold(input_ply_file: str, output_ply_file: str, threshold: float, axis: str) -> None:
