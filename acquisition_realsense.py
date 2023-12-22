@@ -325,11 +325,10 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="
             state.color ^= True
             
         if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
+            # Stop streaming
+            pipeline.stop()
             save_ply_from_realsense(path_name_ply,image_name)
             break
-
-    # Stop streaming
-    pipeline.stop()
 
 def get_points_and_colors_from_realsense(image_name: str = "") -> Tuple[np.ndarray]:
     try:
