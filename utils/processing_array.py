@@ -24,7 +24,18 @@ else:
 
 # Arrays
 
-def is_homogenous_array_of_dim(array, dimension=-1) -> None:
+
+def is_homogenous_array_of_dim(array: np.ndarray, dimension: Optional[int] = -1) -> None:
+    """
+    Check if the input array is homogeneous and has the specified dimension.
+
+    Parameters:
+    - array (List[Union[int, float, str]]): The input array to be checked.
+    - dimension (Optional[int]): The expected dimension of the array. If not specified, any dimension is allowed.
+
+    Raises:
+    - ValueError: If the array is empty, contains different types, or has an incorrect dimension.
+    """
     if len(array) == 0:
         raise ValueError(f"Empty array {array}")
     if not all(isinstance(element, type(array[0])) for element in array):
@@ -39,14 +50,13 @@ def is_homogenous_array_of_dim(array, dimension=-1) -> None:
 
 def plot_3D_array(vertices: np.ndarray) -> None:
     """
-    Plot 3D points and triangles from PLY file vertices.
+    Plot a 3D array of vertices with optional color information.
 
     Parameters:
-    - vertices (np.ndarray): An array containing vertices with X, Y, Z coordinates.
-      If the array has 6 columns, it is assumed to include color information (RGB).
+    - vertices (np.ndarray): The input array of vertices with shape (N, 3) or (N, 6) where the last three columns represent RGB color values.
 
-    Returns:
-    - None
+    Raises:
+    - ValueError: If the input array is not of the correct shape.
     """
     is_homogenous_array_of_dim(vertices, 3)
     # Extract color information if available
@@ -75,13 +85,16 @@ def plot_3D_array(vertices: np.ndarray) -> None:
 
 def build_mesh_from_3Darray(points: np.ndarray) -> np.ndarray:
     """
-    Calcule et reconstruit une surface à partir d'un nuage de points.
+    Build a mesh from a 3D array of points using Delaunay triangulation.
 
     Parameters:
-    - points (np.array): Nuage de points sous forme d'un tableau NumPy.
+    - points (np.ndarray): The input array of points with shape (N, 3).
 
     Returns:
-    - triangles (np.array): Liste des triangles de la surface reconstruite.
+    - np.ndarray: The list of triangles forming the mesh.
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape.
     """
     is_homogenous_array_of_dim(points, 3)
     cloud = pv.PolyData(points)
@@ -110,6 +123,19 @@ def build_mesh_from_3Darray(points: np.ndarray) -> np.ndarray:
 
 
 def add_list_at_each_rows_of_array(array: np.ndarray, list: List) -> np.ndarray:
+    """
+    Add a list at each row of a 2D array.
+
+    Parameters:
+    - array (np.ndarray): The input 2D array.
+    - lst (List): The list to be added to each row.
+
+    Returns:
+    - np.ndarray: The new array after adding the list to each row.
+
+    Raises:
+    - ValueError: If the input array is not a 2D array.
+    """
     is_homogenous_array_of_dim(array)
     new_array = []
     array = array.tolist()
@@ -119,27 +145,54 @@ def add_list_at_each_rows_of_array(array: np.ndarray, list: List) -> np.ndarray:
 
 
 def array_to_line(array: np.ndarray) -> np.ndarray:
-    if len(np.shape(array))==2:
+    """
+    Convert a 2D or 3D array to a 2D array.
+
+    Parameters:
+    - array (np.ndarray): The input array.
+
+    Returns:
+    - np.ndarray: The converted 2D array.
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape.
+    """
+    if len(np.shape(array)) == 2:
         return array
     is_homogenous_array_of_dim(array)
     return array.reshape((np.shape(array)[0]*np.shape(array)[1], 3))
 
 
 def line_to_3Darray(line: np.ndarray, shape: Tuple[int, int]) -> np.ndarray:
+    """
+    Convert a 1D array to a 3D array with the specified shape.
+
+    Parameters:
+    - line (np.ndarray): The input 1D array.
+    - shape (Tuple[int, int]): The desired shape of the output 3D array.
+
+    Returns:
+    - np.ndarray: The converted 3D array.
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape.
+    """
     is_homogenous_array_of_dim(line)
     return line.reshape((shape[0], shape[1], 3))
 
 
 def give_min_mean_max_of_array(array: np.ndarray) -> Tuple[float, float, float]:
     """
-    Calcule la valeur maximale, minimale et moyenne à partir d'une liste.
+    Calculate the minimum, mean, and maximum values of a 1D array.
 
-    Args:
-        list (list): Liste des valeurs à analyser.
+    Parameters:
+    - array (np.ndarray): The input 1D array.
 
     Returns:
-        tuple or None: Un tuple contenant la valeur minimale, moyenne et maximale, 
-                      ou None si la liste est vide.
+    - Tuple[float, float, float]: The minimum, mean, and maximum values of the array.
+
+    Raises:
+    - ValueError: If the input array is not a 1D array.
     """
     is_homogenous_array_of_dim(array, 1)
 
@@ -151,13 +204,16 @@ def give_min_mean_max_of_array(array: np.ndarray) -> Tuple[float, float, float]:
 
 def convert_rgb_array_to_hsv_array(colors: np.ndarray) -> np.ndarray:
     """
-    Convertit une liste de couleurs RGB en couleurs HSV.
+    Convert an array of RGB colors to an array of HSV colors.
 
     Parameters:
-    - colors (list): Liste de couleurs RGB sous la forme [[r, g, b], ...] avec r, g, et b entre 0 et 255.
+    - colors (np.ndarray): The input array of RGB colors with shape (N, 3).
 
     Returns:
-    - numpy.ndarray: Tableau des couleurs HSV.
+    - np.ndarray: The converted array of HSV colors.
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape.
     """
     is_homogenous_array_of_dim(colors, 3)
     colorshsv = np.asarray([[i, i, i] for i in range(len(colors))])
@@ -196,7 +252,19 @@ def convert_rgb_array_to_hsv_array(colors: np.ndarray) -> np.ndarray:
 
 
 def get_color_3D_array_depending_on_axis(points: np.ndarray, axis: str) -> np.ndarray:
+    """
+    Get colors for a 3D array based on the values along a specific axis.
 
+    Parameters:
+    - points (np.ndarray): The input array of 3D points.
+    - axis (str): The axis along which to determine colors ('x', 'y', or 'z').
+
+    Returns:
+    - np.ndarray: The array of RGB colors corresponding to the values along the specified axis.
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape or if the axis is unknown.
+    """
     is_homogenous_array_of_dim(points, 3)
 
     if axis != "x" and axis != "y" and axis != "z":
@@ -221,20 +289,19 @@ def get_color_3D_array_depending_on_axis(points: np.ndarray, axis: str) -> np.nd
     return np.array(colors)
 
 
-def centering_3Darray_on_mean_points(array):
+def centering_3Darray_on_mean_points(array: np.ndarray) -> np.ndarray:
     """
-    Repose the point cloud mesh by centering it around its mean point.
+    Center a 3D array of points around their mean.
 
-    Parameters
-    ----------
-    pc_resized : list
-        The  point cloud mesh.
+    Parameters:
+    - array (np.ndarray): The input array of 3D points.
 
-    Returns
-    -------
-    pc_respoed : list
-        The list reposed.
-"""
+    Returns:
+    - np.ndarray: The array of 3D points centered around their mean.
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape.
+    """
     is_homogenous_array_of_dim(array, 3)
     tab_x = []
     tab_y = []
@@ -253,13 +320,27 @@ def centering_3Darray_on_mean_points(array):
 
     new_vertices = [point - pt_milieu for point in array]
 
-    return new_vertices
+    return np.array(new_vertices)
 
 # Arrays and points clouds
 
 
-def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float, colors: np.ndarray = [], axis: str = "z"):
+def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float, colors: np.ndarray = [], axis: str = "z") -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    """
+    Remove points from a 3D array based on a threshold along a specific axis.
 
+    Parameters:
+    - points (np.ndarray): The input array of 3D points.
+    - threshold (float): The threshold value for removing points.
+    - colors (np.ndarray, optional): The array of colors associated with the points.
+    - axis (str, optional): The axis along which to apply the threshold ('x', 'y', or 'z').
+
+    Returns:
+    - np.ndarray: The filtered array of 3D points (and colors if provided).
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape or if the axis is unknown.
+    """
     is_homogenous_array_of_dim(points, 3)
 
     if axis != "x" and axis != "y" and axis != "z":
@@ -272,10 +353,10 @@ def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float,
     if axis == "z":
         axis_int = 2
 
-    # Sélectionner les indices des points dont la coordonnée Z est supérieure ou égale à z_threshold
+    # Select indices of points whose coordinate along the specified axis is greater than or equal to the threshold
     index = np.where(points[:, axis_int] >= threshold)
 
-    # Vérifier si le nuage de points filtré n'est pas vide
+    # Check if the filtered point cloud is not empty
     if len(index[0]) == 0:
         raise ValueError("Every points have been removed")
 
@@ -288,18 +369,36 @@ def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float,
         return np.array(new_points)
 
 
-def reduce_density_of_array(points: np.ndarray, density: float, colors: np.ndarray = []):
+def reduce_density_of_array(points: np.ndarray, density: float, colors: np.ndarray = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    """
+    Reduce the density of a 3D point cloud by randomly selecting a fraction of the points.
+
+    Parameters:
+    - points (np.ndarray): The input array of 3D points.
+    - density (float): The fraction of points to keep in the range (0, 1).
+    - colors (np.ndarray, optional): The array of colors associated with the points.
+
+    Returns:
+    - np.ndarray: The reduced array of 3D points (and colors if provided).
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape or if the density is outside the valid range.
+    """
+    is_homogenous_array_of_dim(points, 3)
+
+    if not (0 < density <= 1):
+        raise ValueError("Density must be in the range (0, 1]")
 
     colors_reduits = []
 
-    # Calculer le nombre de points à conserver
+    # Calculate the number of points to keep
     nombre_points = int(len(points) * density)
 
-    # Sélectionner aléatoirement les indices des points à conserver
+    # Randomly select indices of points to keep
     indices_a_conserver = np.random.choice(
         len(points), nombre_points, replace=False)
 
-    # Extraire les points sélectionnés
+    # Extract the selected points
     points_reduits = points[indices_a_conserver, :]
     if len(colors) > 0:
         colors_reduits = colors[indices_a_conserver, :]
@@ -308,21 +407,28 @@ def reduce_density_of_array(points: np.ndarray, density: float, colors: np.ndarr
     return np.array(points_reduits)
 
 
-def filter_array_with_sphere_on_barycentre(points: np.ndarray, rayon: float, colors: np.ndarray = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def filter_array_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: np.ndarray = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     """
-    Filtre les points en fonction du barycentre et du rayon spécifiés.
+    Filter a 3D point cloud by keeping only the points within a sphere centered at the barycentre.
 
     Parameters:
-    - points (numpy.ndarray): Tableau des coordonnées des points.
-    - colors (numpy.ndarray): Tableau des couleurs associées aux points.
-    - rayon (float): Rayon de filtrage autour du barycentre.
-    - tableau_indice (list): Tableau des indices des points (optionnel).
+    - points (np.ndarray): The input array of 3D points.
+    - radius (float): The radius of the sphere.
+    - colors (np.ndarray, optional): The array of colors associated with the points.
+    - indices (List[int], optional): The array of indices associated with the points.
 
     Returns:
-    - tuple: Tuple contenant les points filtrés, les couleurs filtrées, et les indices filtrés (si fournis).
+    - np.ndarray: The filtered array of 3D points (and colors and indices if provided).
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape or if the radius is negative.
     """
+    is_homogenous_array_of_dim(points, 3)
+    if radius < 0:
+        raise ValueError("Radius must be non-negative")
+
     barycentre = np.mean(points, axis=0)
-    rayon_filtrage = rayon
+    rayon_filtrage = radius
     filtered_points = []
     filtered_colors = []
     filtered_indice = []
@@ -345,27 +451,41 @@ def filter_array_with_sphere_on_barycentre(points: np.ndarray, rayon: float, col
 
 
 def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tuple[int, int] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+    """
+    Crop a 3D point cloud based on user-defined rectangle selection.
 
-    # Variables globales pour stocker les coordonnées des clics souris
+    Parameters:
+    - points (np.ndarray): The input array of 3D points.
+    - colors (np.ndarray): The array of colors associated with the points.
+    - shape (Tuple[int, int], optional): The shape of the display window. Default is an empty tuple.
+    - indices (List[int], optional): The array of indices associated with the points.
+
+    Returns:
+    - Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]: The cropped array of 3D points, colors, and indices.
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape.
+    """
+    # Globa variables to store information of mouseclick
     start_x, start_y = -1, -1
     end_x, end_y = -1, -1
     cropping = False
 
     def mouse_click(event, x, y, flags, param):
-        # Référence aux variables globales
+
         nonlocal start_x, start_y, end_x, end_y, cropping
 
         if event == cv2.EVENT_LBUTTONDOWN:
-            # Début du cropping
+            # Start cropping
             start_x, start_y = x, y
             end_x, end_y = x, y
             cropping = True
 
         elif event == cv2.EVENT_LBUTTONUP:
-            # Fin du cropping
+            # End cropping
             end_x, end_y = x, y
             cropping = False
-            # Dessine le rectangle de cropping
+            # Draw selection
             cv2.rectangle(colors_image, (start_x, start_y),
                           (end_x, end_y), (0, 255, 0), 2)
             cv2.imshow("Cropping", colors_image)
@@ -387,31 +507,30 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
         colors = array_to_line(colors)
         height, length = np.shape(colors_image)[0], np.shape(colors_image)[1]
 
-    # Créer une fenêtre pour l'image
+    # Create a window for the display
     cv2.namedWindow("Cropping")
     cv2.setMouseCallback("Cropping", mouse_click)
 
-    # Instructions pour l'utilisateur
-    print("Utilisez la souris pour sélectionner le rectangle de recadrage. Appuyez sur la touche 'c' puis 'q' pour terminer le recadrage.")
+    # User's instructions
+    print("Use the mouse to select the cropping rectangle. Press the 'c' key, then 'q' to finish cropping.")
 
-    # Boucle principale
     while True:
         cv2.imshow("Cropping", colors_image[:, :, ::-1])
         key = cv2.waitKey(1) & 0xFF
 
-        # Quitter la boucle si la touche "c" est pressée
+        # Leave the programm if key 'c'
         if key == ord("c"):
             break
 
-    # Vérifier si le rectangle de recadrage a une taille valide
+    # Check if the selection has a valid shape
     if start_x == end_x or start_y == end_y:
         raise ValueError("Incorrect values for cropping selected")
 
-    # Récupérer les coordonnées de cropping
+    # Get the data for the cropping
     x_min, y_min = min(start_x, end_x), min(start_y, end_y)
     x_max, y_max = max(start_x, end_x), max(start_y, end_y)
 
-    # Filtrage du nuage de points
+    # Filtering of the points
     bottom_left_corner = (y_min-1)*length + x_min
     top_left_corner = (y_max-1)*length + x_min
     bottom_right_corner = (y_min-1)*length + x_max
@@ -439,22 +558,36 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
         return np.array(points_cloud_crop), np.array(couleurs_crop)
 
 
-def apply_hsv_mask_to_pc(points: np.ndarray, colors: np.ndarray, maskhsv: List[List[int]], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+def apply_hsv_mask_to_pc(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.ndarray, np.ndarray], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+    """
+    Apply an HSV mask to a 3D point cloud.
 
-    # Convertir l'image "color" RVB en image "color" HSV
+    Parameters:
+    - points (np.ndarray): The input array of 3D points.
+    - colors (np.ndarray): The array of colors associated with the points.
+    - mask_hsv Tuple[np.ndarray,np.ndarray]: The HSV mask to apply.
+    - indices (List[int], optional): The array of indices associated with the points.
+
+    Returns:
+    - Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]: The filtered array of 3D points, colors, and indices (if provided).
+
+    Raises:
+    - ValueError: If the input arrays are not of the correct shape.
+    """
+    # Convert RGB colors to HSV
     colorshsv = convert_rgb_array_to_hsv_array(colors)
-    # Construction du masque
+    # Construct the mask
     msk = [False for i in range(0, len(colors))]
     for i in range(0, len(colors)):
-        # condition : les trois composantes hsv de l'image doivent être incluse entre les deux valeurs de seuil du masque hsv
+        # Condition : the three hsv values of the colors must be in maskhsv
         if ((colorshsv[i][0] > maskhsv[0][0]) and (colorshsv[i][0] < maskhsv[1][0])):  # Composante h
-            # Composante s
+            # s
             if ((colorshsv[i][1] > maskhsv[0][1]) and (colorshsv[i][1] < maskhsv[1][1])):
-                # Composante v
+                # v
                 if ((colorshsv[i][2] > maskhsv[0][2]) and (colorshsv[i][2] < maskhsv[1][2])):
                     msk[i] = True
 
-    # Filtrage des points, des couleurs et des indices (si nécessaire)
+    # Apply the mask to filter points, colors, and indices (if provided)
     points = points[msk]
     colors = colors[msk]
 
@@ -466,34 +599,46 @@ def apply_hsv_mask_to_pc(points: np.ndarray, colors: np.ndarray, maskhsv: List[L
 
 
 def center_pc_on_image(points: np.ndarray, colors: np.ndarray, image_target: str, shape: Tuple[int, int] = []) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Center a point cloud on the target image.
+
+    Parameters:
+    - points (np.ndarray): The array of 3D points.
+    - colors (np.ndarray): The array of colors associated with the points.
+    - image_target (str): The path to the target image.
+    - shape (Tuple[int, int], optional): The shape of the image.
+
+    Returns:
+    - Tuple[np.ndarray, np.ndarray]: The centered array of 3D points and colors.
+    """
+    # Get the size of the target image
 
     largeur, hauteur = pi.get_size_of_image(image_target)
 
+    # Calculate the center of the image in pixel coordinates
     centre_image_ref = np.array(
         [int(largeur/2), int(hauteur/2), 1])  # En pixel
 
     image_source = "center_pc_on_image.png"
 
+    # Save the colors as an image for homography calculation
     pi.save_image_from_array(colors, image_source, shape)
 
+    # Get the size of the source image
     longueur, _ = pi.get_size_of_image(image_source)
 
-    # On calcule les coordonnées (toujours en pixel) de ce centre dans l'image source
-    # Pour cela on calcule la matrice d'homographie
+    # Calculate the coordinates of the center in the source image (in pixel coordinates)
     homography_matrix = pi.get_homography_between_imgs(
         image_target, image_source)
     pg.delete_file(image_source)
 
     projected_center = np.dot(homography_matrix, centre_image_ref)  # en pixel
 
-    # On repasse en coordonnées en profondeur
-
+    # Convert to depth coordinates
     origine_nuage = points[(int(projected_center[1])-1)
                            * longueur + int(projected_center[0])]
 
-    # On repose ensuite le nuage de point pour que ce dernier soit centré autour du point origine_nuage
-    # (qui correpont au centre de l'objet de l'image de reference)
-
+    # Reposition the point cloud to be centered around the origin point
     nuage_point_centred = [(x[0] - origine_nuage[0], x[1] -
                             origine_nuage[1], x[2] - origine_nuage[2]) for x in points]
 
@@ -504,7 +649,7 @@ if __name__ == '__main__':
     # l = np.array([1, 2, 3])
     points, colors = pp.get_points_and_colors_of_ply("test.ply")
     # crop_pc_from_zone_selection(points, colors, (640, 480))
-    new_colors=line_to_3Darray(colors,(480,640))
+    new_colors = line_to_3Darray(colors, (480, 640))
     # pi.save_image_from_array(new_colors,"oui.png")
     # plot_3D_array(points)
     # print(add_list_at_each_rows_of_array(points, [0., 0., 0., 1.])[0])
