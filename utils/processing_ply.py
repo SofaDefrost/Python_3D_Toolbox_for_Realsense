@@ -10,10 +10,13 @@ if mod_name:
     # Code executed as a module
     from . import processing_general as pg
     from . import processing_array as pa
+    from . import display_function_Tkinter as tk
 else:
     # Code executed as a script
     import processing_general as pg
     import processing_array as pa
+    import display_function_Tkinter as tk
+
 
 def plot_ply(input_filename: str) -> None:
     """
@@ -131,7 +134,7 @@ def get_points_and_colors_of_ply(file_path: str) -> Tuple[np.ndarray, np.ndarray
     """
     # Guaranteed that the file exists
     pg.open_file_and_give_content(file_path)
-    
+
     # Load data from the .ply file
     ply_data = o3d.io.read_point_cloud(file_path)
 
@@ -175,23 +178,42 @@ def color_ply_depending_on_axis(input_filename: str, output_filename: str, axis:
     save_ply_file(output_filename, points, colors)
 
 
-def remove_points_of_ply_below_threshold(input_ply_file: str, output_ply_file: str, threshold: float, axis: str) -> None:
+def remove_points_of_ply_below_threshold(input_filename: str, output_filename: str, threshold: float, axis: str) -> None:
     """
     Remove points from a PLY file below a specified threshold along a given axis and save the result to a new file.
 
     Parameters:
-    - input_ply_file (str): The path to the input PLY file.
-    - output_ply_file (str): The name of the output PLY file after removing points.
+    - input_filename (str): The path to the input PLY file.
+    - output_filename (str): The name of the output PLY file after removing points.
     - threshold (float): The threshold value below which points will be removed.
     - axis (str): The axis along which to apply the threshold ('x', 'y', or 'z').
 
     Returns:
     - None: The function does not return anything, but it creates a PLY file with points removed below the threshold.
     """
-    points, colors = get_points_and_colors_of_ply(input_ply_file)
+    points, colors = get_points_and_colors_of_ply(input_filename)
     new_points, new_colors = pa.remove_points_of_array_below_threshold(
         points, threshold, colors, axis)
-    save_ply_file(output_ply_file, new_points, new_colors)
+    save_ply_file(output_filename, new_points, new_colors)
+
+
+def remove_points_of_ply_below_threshold_with_interface(input_filename: str, output_filename: str) -> None:
+    """
+    Remove points from a PLY file that are below a certain threshold using a Tkinter interface.
+
+    Parameters:
+    - input_filename (str): Path to the input PLY file.
+    - output_filename (str): Path to save the output PLY file.
+
+    Returns:
+    None
+    """
+    points, colors = get_points_and_colors_of_ply(input_filename)
+    threshold = tk.get_parameter_function_on_array_Tkinter(
+        points, pa.remove_points_of_array_below_threshold)
+    new_points, new_colors = pa.remove_points_of_array_below_threshold(
+        points, threshold, colors)
+    save_ply_file(output_filename, new_points, new_colors)
 
 
 def reduce_density_of_ply(input_filename: str, output_filename: str, density: float) -> None:
@@ -209,6 +231,62 @@ def reduce_density_of_ply(input_filename: str, output_filename: str, density: fl
     points, colors = get_points_and_colors_of_ply(input_filename)
     new_points, new_colors = pa.reduce_density_of_array(
         points, density, colors)
+    save_ply_file(output_filename, new_points, new_colors)
+
+
+def reduce_density_of_ply_with_interface(input_filename: str, output_filename: str) -> None:
+    """
+    Reduce the density of a PLY file using a Tkinter interface.
+
+    Parameters:
+    - input_filename (str): Path to the input PLY file.
+    - output_filename (str): Path to save the output PLY file.
+
+    Returns:
+    None
+    """
+    points, colors = get_points_and_colors_of_ply(input_filename)
+    density = tk.get_parameter_function_on_array_Tkinter(
+        points, pa.reduce_density_of_array)
+    new_points, new_colors = pa.reduce_density_of_array(
+        points, density, colors)
+    save_ply_file(output_filename, new_points, new_colors)
+
+
+def filter_array_with_sphere_on_barycentre(input_filename: str, output_filename: str, radius: float) -> None:
+    """
+    Filter points in a PLY file based on a sphere centered at the barycenter and save the result to a new file.
+
+    Parameters:
+    - input_filename (str): The path to the input PLY file.
+    - output_filename (str): The name of the output PLY file after filtering.
+    - radius (float): The radius of the sphere used for filtering.
+
+    Returns:
+    - None: The function does not return anything, but it creates a PLY file with points filtered by a sphere.
+    """
+    points, colors = get_points_and_colors_of_ply(input_filename)
+    new_points, new_colors = pa.filter_array_with_sphere_on_barycentre(
+        points, radius, colors)
+    save_ply_file(output_filename, new_points, new_colors)
+
+
+def filter_array_with_sphere_on_barycentre_with_interface(input_filename: str, output_filename: str) -> None:
+    """
+    Filter points from a PLY file using a sphere centered on the barycenter with a Tkinter interface.
+
+    Parameters:
+    - input_filename (str): Path to the input PLY file.
+    - output_filename (str): Path to save the output PLY file.
+
+    Returns:
+    None
+    """
+    points, colors = get_points_and_colors_of_ply(input_filename)
+    radius = tk.get_parameter_function_on_array_Tkinter(
+        points, pa.filter_array_with_sphere_on_barycentre)
+    new_points, new_colors = pa.filter_array_with_sphere_on_barycentre(
+        points, radius, colors)
     save_ply_file(output_filename, new_points, new_colors)
 
 
@@ -235,24 +313,6 @@ def crop_ply_from_pixels_selection(input_filename: str, output_filename: str, sh
     save_ply_file(output_filename, results[0], results[1])
 
 
-def filter_array_with_sphere_on_barycentre(input_filename: str, output_filename: str, radius: float) -> None:
-    """
-    Filter points in a PLY file based on a sphere centered at the barycenter and save the result to a new file.
-
-    Parameters:
-    - input_filename (str): The path to the input PLY file.
-    - output_filename (str): The name of the output PLY file after filtering.
-    - radius (float): The radius of the sphere used for filtering.
-
-    Returns:
-    - None: The function does not return anything, but it creates a PLY file with points filtered by a sphere.
-    """
-    points, colors = get_points_and_colors_of_ply(input_filename)
-    new_points, new_colors = pa.filter_array_with_sphere_on_barycentre(
-        points, radius, colors)
-    save_ply_file(output_filename, new_points, new_colors)
-
-
 def apply_hsv_mask_to_ply(input_filename: str, output_filename: str, maskhsv: Tuple[np.ndarray, np.ndarray]) -> None:
     """
     Apply an HSV mask to the colors of a PLY file and save the result to a new file.
@@ -266,7 +326,7 @@ def apply_hsv_mask_to_ply(input_filename: str, output_filename: str, maskhsv: Tu
     - None: The function does not return anything, but it creates a PLY file with colors filtered by the HSV mask.
     """
     points, colors = get_points_and_colors_of_ply(input_filename)
-    new_points, new_colors = pa.apply_hsv_mask_to_arrays(
+    new_points, new_colors = pa.apply_hsv_mask_to_pc(
         points, colors, maskhsv)
     save_ply_file(output_filename, new_points, new_colors)
 
@@ -291,15 +351,15 @@ def center_ply_on_image(input_filename: str, output_filename: str, image_target_
 
 
 if __name__ == '__main__':
-    # filter_array_with_sphere_on_barycentre("test.ply","test_barycentre.ply",0.06)
-    # center_ply_on_image("test.ply", "test_centered.ply",
-    #                     "image_ref.png", (640, 480))
-    # crop_ply_from_pixels_selection("test.ply","test_cropped.ply",(640,480))
-    # reduce_density_of_ply("test.ply","test_reduce.ply",0.5)
-    # centering_ply_on_mean_points("test.ply","test_centered.ply")
-    # color_ply_depending_on_axis("test.ply","test_colore.ply","x")
+    # filter_array_with_sphere_on_barycentre("./example/test.ply","./example/test_barycentre.ply",0.06)
+    # crop_ply_from_pixels_selection("./example/test.ply","./example/test_cropped.ply",(640,480))
+    # reduce_density_of_ply("./example/test.ply","./example/test_reduce.ply",0.5)
+    # centering_ply_on_mean_points("./example/test.ply","./example/test_centered.ply")
+    # color_ply_depending_on_axis("./example/test.ply","./example/test_colored_y.ply","y")
     # remove_points_of_ply_below_threshold("test_colore.ply","test_below_threshold.ply",0.1,"z")
-    points,colors=get_points_and_colors_of_ply('test.ply')
-    save_ply_file("test_with_colors.ply",points,colors)
-    save_ply_file("test_without_colors.ply",points)
+    # points, colors = get_points_and_colors_of_ply('./example/test.ply')
+    # save_ply_file("./example/test_with_colors.ply", points, colors)
+    # save_ply_file("./example/test_without_colors.ply", points)
     # save_ply_from_map("test.map","ply_from_map.ply")
+    center_ply_on_image("./example/capture_with_image_ref.ply", "./example/capture_with_image_ref_centred.ply",
+                        "./example/image_ref.png", (640, 480))

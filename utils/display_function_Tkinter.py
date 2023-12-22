@@ -8,7 +8,7 @@ from tkinter import ttk
 from tkinter import Scale, Button
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from mpl_toolkits.mplot3d.axes3d import Axes3D
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 
 mod_name = vars(sys.modules[__name__])['__package__']
@@ -59,7 +59,7 @@ def update_display_Tkinter(event: Any, ax: Axes3D, canvas: Any, points: np.ndarr
     canvas.draw()
 
 
-def get_parameter_function_on_array_Tkinter(points: np.ndarray, fonction: Callable[[np.ndarray, float]], start_slider: int = 0, end_slider: int = 1, resolution: float = 0.01) -> float:
+def get_parameter_function_on_array_Tkinter(points: np.ndarray, fonction, start_slider: int = 0.01, end_slider: int = 1, resolution: float = 0.01) -> float:
     """
     Get a parameter value interactively using Tkinter GUI.
 
@@ -117,7 +117,7 @@ def template_function_for_Tkinter_display(points: np.ndarray, parameter_that_you
 
 
 if __name__ == '__main__':
-    points, colors = pl.get_points_and_colors_of_ply("test.ply")
+    points, colors = pl.get_points_and_colors_of_ply("./example/test.ply")
     print(get_parameter_function_on_array_Tkinter(
         points, pa.reduce_density_of_array))
     print(get_parameter_function_on_array_Tkinter(

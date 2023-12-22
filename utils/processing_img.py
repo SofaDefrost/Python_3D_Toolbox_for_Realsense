@@ -244,6 +244,9 @@ def get_hsv_mask_with_sliders(image_path: str) -> Tuple[np.ndarray, np.ndarray]:
     # Display the original image
     cv2.imshow('Original Image', image)
 
+    print("Press the 'q' key to export the mask.")
+
+    
     while True:
         # Update the mask based on the sliders
         lower_hsv, upper_hsv = update_mask_hsv(0)
@@ -363,8 +366,8 @@ def get_shining_point_with_hsv_mask(image_path: str, hsv_mask: np.ndarray, displ
 
 
 if __name__ == '__main__':
-    # print(get_shining_point_image("image_source.png"))
-    # array=give_array_from_image("image_source.png")
-    # save_image_from_array(array,"image_source_rebuilt.png",(640,480))
-    H = get_homography_between_imgs("image_ref.png", "image_source.png", True)
+    # print(get_shining_point_image("./example/image_source.png"))
+    # array=give_array_from_image("./example/image_source.png")
+    # save_image_from_array(array,"./example/image_source_rebuilt.png",(640,480))
+    H = get_homography_between_imgs("./example/image_ref.png", "./example/image_source.png", True)
     print(H)

@@ -512,16 +512,16 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
     cv2.setMouseCallback("Cropping", mouse_click)
 
     # User's instructions
-    print("Use the mouse to select the cropping rectangle. Press the 'c' key, then 'q' to finish cropping.")
+    print("Use the mouse to select the cropping rectangle. Press the 'q' to finish cropping.")
 
     while True:
         cv2.imshow("Cropping", colors_image[:, :, ::-1])
         key = cv2.waitKey(1) & 0xFF
 
         # Leave the programm if key 'c'
-        if key == ord("c"):
+        if key == ord("q"):
             break
-
+    
     # Check if the selection has a valid shape
     if start_x == end_x or start_y == end_y:
         raise ValueError("Incorrect values for cropping selected")
@@ -550,8 +550,8 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
         bottom_right_corner = (y_min+i-1)*length + x_max
         i += 1
 
-    cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
     if len(tableau_indice_crop) > 0:
         return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop)
     else:
@@ -647,7 +647,7 @@ def center_pc_on_image(points: np.ndarray, colors: np.ndarray, image_target: str
 
 if __name__ == '__main__':
     # l = np.array([1, 2, 3])
-    points, colors = pp.get_points_and_colors_of_ply("test.ply")
+    points, colors = pp.get_points_and_colors_of_ply("./example/test.ply")
     # crop_pc_from_zone_selection(points, colors, (640, 480))
     new_colors = line_to_3Darray(colors, (480, 640))
     # pi.save_image_from_array(new_colors,"oui.png")
