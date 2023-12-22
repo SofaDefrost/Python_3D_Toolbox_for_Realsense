@@ -25,7 +25,9 @@ pip3 install tkinter
 
 For additional information about Realsense with Python, visit: https://dev.intelrealsense.com/docs/python2
 
-Authors: Thibaud, Tinhinane
+Authors: Thibaud Piccinali, Tinhinane Smail
+Supervision: Paul Chaillou
+Revision: Damien Marchal
 
 
 
