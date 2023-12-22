@@ -5,7 +5,6 @@ This repository provides a set of Python scripts useful for 3D file processing, 
 ## Usage
 
 To test the code, execute the Python script example.py:
-exemple
 ```console
 python3 example.py
 ```
