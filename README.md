@@ -20,7 +20,6 @@ pip3 install opencv-python
 pip3 install pyrealsense2
 pip3 install pyvista
 pip3 install open3d
-pip3 install tkinter
 ```
 
 For additional information about Realsense with Python, visit: https://dev.intelrealsense.com/docs/python2
