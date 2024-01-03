@@ -565,7 +565,9 @@ def apply_hsv_mask_to_pc(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[
     Parameters:
     - points (np.ndarray): The input array of 3D points.
     - colors (np.ndarray): The array of colors associated with the points.
-    - mask_hsv Tuple[np.ndarray,np.ndarray]: The HSV mask to apply.
+    - mask_hsv (Tuple[np.ndarray,np.ndarray]): The HSV mask to apply. The mask must be in the following from : [[H_L,S_L,V_L],[H_U,S_U,V_U]] with 
+    H_L,S_L,V_L the lower values of Hue, Saturation and Value, and H_L,S_L,V_L the upper values. 
+    You can generate such mask using the function "get_hsv_mask_with_sliders" in "processing_img.py".
     - indices (List[int], optional): The array of indices associated with the points.
 
     Returns:

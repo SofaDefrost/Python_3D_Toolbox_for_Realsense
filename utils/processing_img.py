@@ -198,13 +198,13 @@ def get_hsv_mask_with_sliders(image_path: str) -> Tuple[np.ndarray, np.ndarray]:
 
     def update_mask_hsv(x):
         global lower_hsv, upper_hsv, mask, result
-        lower_hsv = np.array([cv2.getTrackbarPos('H_L', 'HSV Interface'),
-                              cv2.getTrackbarPos('S_L', 'HSV Interface'),
-                              cv2.getTrackbarPos('V_L', 'HSV Interface')])
+        lower_hsv = np.array([cv2.getTrackbarPos('Hue Min', 'HSV Interface'),
+                              cv2.getTrackbarPos('Satur Min', 'HSV Interface'),
+                              cv2.getTrackbarPos('Value Min', 'HSV Interface')])
 
-        upper_hsv = np.array([cv2.getTrackbarPos('H_U', 'HSV Interface'),
-                              cv2.getTrackbarPos('S_U', 'HSV Interface'),
-                              cv2.getTrackbarPos('V_U', 'HSV Interface')])
+        upper_hsv = np.array([cv2.getTrackbarPos('Hue Max', 'HSV Interface'),
+                              cv2.getTrackbarPos('Satur Max', 'HSV Interface'),
+                              cv2.getTrackbarPos('Value Max', 'HSV Interface')])
 
         mask = cv2.inRange(hsv_img, lower_hsv, upper_hsv)
         cv2.imshow('HSV Mask', mask)
@@ -226,13 +226,13 @@ def get_hsv_mask_with_sliders(image_path: str) -> Tuple[np.ndarray, np.ndarray]:
     cv2.namedWindow('Result')
 
     # Create sliders for HSV components
-    cv2.createTrackbar('H_L', 'HSV Interface', 0, 179, update_mask_hsv)
-    cv2.createTrackbar('S_L', 'HSV Interface', 0, 255, update_mask_hsv)
-    cv2.createTrackbar('V_L', 'HSV Interface', 0, 255, update_mask_hsv)
-    cv2.createTrackbar('H_U', 'HSV Interface', 179, 179, update_mask_hsv)
-    cv2.createTrackbar('S_U', 'HSV Interface', 255, 255, update_mask_hsv)
-    cv2.createTrackbar('V_U', 'HSV Interface', 255, 255, update_mask_hsv)
-
+    cv2.createTrackbar('Hue Min', 'HSV Interface', 0, 179, update_mask_hsv)
+    cv2.createTrackbar('Hue Max', 'HSV Interface', 179, 179, update_mask_hsv)
+    cv2.createTrackbar('Satur Min', 'HSV Interface', 0, 255, update_mask_hsv)
+    cv2.createTrackbar('Satur Max', 'HSV Interface', 255, 255, update_mask_hsv)
+    cv2.createTrackbar('Value Min', 'HSV Interface', 0, 255, update_mask_hsv)
+    cv2.createTrackbar('Value Max', 'HSV Interface', 255, 255, update_mask_hsv)
+    
     # Initialize HSV ranges
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 255])
@@ -369,5 +369,6 @@ if __name__ == '__main__':
     # print(get_shining_point_image("./example/image_source.png"))
     # array=give_array_from_image("./example/image_source.png")
     # save_image_from_array(array,"./example/image_source_rebuilt.png",(640,480))
-    H = get_homography_between_imgs("./example/image_ref.png", "./example/image_source.png", True)
-    print(H)
+    print(get_hsv_mask_with_sliders("./example/image_ref.png"))
+    # H = get_homography_between_imgs("./example/image_ref.png", "./example/image_source.png", True)
+    # print(H)

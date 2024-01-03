@@ -320,7 +320,9 @@ def apply_hsv_mask_to_ply(input_filename: str, output_filename: str, maskhsv: Tu
     Parameters:
     - input_filename (str): The path to the input PLY file.
     - output_filename (str): The name of the output PLY file after applying the HSV mask.
-    - maskhsv (List[List[int]]): The HSV values defining the color mask.
+    - maskhsv (Tuple[np.ndarray,np.ndarray]): The HSV mask to apply. The mask must be in the following from : [[H_L,S_L,V_L],[H_U,S_U,V_U]] with 
+    H_L,S_L,V_L the lower values of Hue, Saturation and Value, and H_L,S_L,V_L the upper values. 
+    You can generate such mask using the function "get_hsv_mask_with_sliders" in "processing_img.py".
 
     Returns:
     - None: The function does not return anything, but it creates a PLY file with colors filtered by the HSV mask.

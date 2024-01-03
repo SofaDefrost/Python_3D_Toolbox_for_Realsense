@@ -5,7 +5,7 @@ import pyrealsense2 as rs
 import numpy as np
 import logging
 
-from typing import Tuple
+from typing import Tuple, Optional
 
 from utils import processing_array as pa
 from utils import processing_ply as pp
@@ -40,8 +40,16 @@ class AppState:
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
 
-def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="") -> None:
+def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optional[str]="") -> None:
+    """
+    Capture 3D points and color information from a RealSense depth camera and save as a PLY file.
 
+    Parameters:
+    - path_name_ply (str): The path and name of the PLY file to save.
+    - image_name (str, optional): The name of the image file to save the color frame.
+
+    Returns: None
+    """
     state = AppState()
 
 # Configure depth and color streams
@@ -330,7 +338,16 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: str="
             save_ply_from_realsense(path_name_ply,image_name)
             break
 
-def get_points_and_colors_from_realsense(image_name: str = "") -> Tuple[np.ndarray]:
+def get_points_and_colors_from_realsense(image_name: Optional[str] = "") -> Tuple[np.ndarray]:
+    """
+    Capture 3D points and color information from a RealSense depth camera.
+
+    Parameters:
+    - image_name (str,optional): The name of the image file to save the color frame.
+
+    Returns:
+    Tuple[np.ndarray, np.ndarray]: A tuple containing the 3D points (vertices) and color image as NumPy arrays.
+    """
     try:
         # Create a context object. This object owns the handles to all connected realsense devices
         pipeline = rs.pipeline()
