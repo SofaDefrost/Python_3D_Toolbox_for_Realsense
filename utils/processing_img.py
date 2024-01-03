@@ -46,7 +46,7 @@ def get_size_of_image(image_path: str) -> Tuple[int, int]:
     return img_ref.size
 
 
-def save_image_from_array(pixels: np.ndarray, nom_fichier_sortie: str, shape: Tuple[int, int] = []) -> None:
+def save_image_from_array(pixels: np.ndarray, nom_fichier_sortie: str, shape: Optional[Tuple[int, int]] = []) -> None:
     """
     Save an image from a pixel array to a file using the PIL library.
 

@@ -11,9 +11,10 @@ from utils import processing_array as pa
 from utils import processing_ply as pp
 from utils import processing_img as pi
 
+
 class AppState:
 
-    def __init__(self,*args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         self.WIN_NAME = 'RealSense'
         self.pitch, self.yaw = math.radians(-10), math.radians(-15)
         self.translation = np.array([0, 0, -1], dtype=np.float32)
@@ -40,7 +41,7 @@ class AppState:
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
 
-def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optional[str]="") -> None:
+def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optional[str] = "") -> None:
     """
     Capture 3D points and color information from a RealSense depth camera and save as a PLY file.
 
@@ -48,7 +49,8 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optio
     - path_name_ply (str): The path and name of the PLY file to save.
     - image_name (str, optional): The name of the image file to save the color frame.
 
-    Returns: None
+    Returns:
+    None
     """
     state = AppState()
 
@@ -245,9 +247,9 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optio
         out[i[m], j[m]] = color[u[m], v[m]]
 
     out = np.empty((h, w, 3), dtype=np.uint8)
-    
+
     print("Press the 'q' key to save and finish the acquisition.")
-    
+
     while True:
         # Grab camera data
         if not state.paused:
@@ -309,10 +311,10 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optio
         cv2.setWindowTitle(
             state.WIN_NAME, "RealSense (%dx%d) %dFPS (%.2fms) %s" %
             (w, h, 1.0/dt, dt*1000, "PAUSED" if state.paused else ""))
-        
+
         cv2.imshow("Color Image", color_image)
         cv2.imshow(state.WIN_NAME, out)
-    
+
         key = cv2.waitKey(1)
 
         if key == ord("r"):
@@ -331,19 +333,20 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optio
 
         if key == ord("c"):
             state.color ^= True
-            
+
         if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
             # Stop streaming
             pipeline.stop()
-            save_ply_from_realsense(path_name_ply,image_name)
+            save_ply_from_realsense(path_name_ply, image_name)
             break
+
 
 def get_points_and_colors_from_realsense(image_name: Optional[str] = "") -> Tuple[np.ndarray]:
     """
     Capture 3D points and color information from a RealSense depth camera.
 
     Parameters:
-    - image_name (str,optional): The name of the image file to save the color frame.
+    - image_name (str, optional): The name of the image file to save the color frame.
 
     Returns:
     Tuple[np.ndarray, np.ndarray]: A tuple containing the 3D points (vertices) and color image as NumPy arrays.
@@ -374,18 +377,20 @@ def get_points_and_colors_from_realsense(image_name: Optional[str] = "") -> Tupl
         # Les vertices correpondent à nos coordonnées 3D
         vertices = np.array(points.get_vertices())
         color_image = np.array(color_frame.get_data())
-        if len(image_name)>0:
-            pi.save_image_from_array(color_image,image_name)
+        if len(image_name) > 0:
+            pi.save_image_from_array(color_image, image_name)
 
     except Exception as e:
         print(e)
         pass
     return vertices, color_image
 
-def save_ply_from_realsense(output_filename: str,image_name:str=""):
-    points,colors=get_points_and_colors_from_realsense(image_name)
-    new_colors=pa.array_to_line(colors)
-    pp.save_ply_file(output_filename,points,new_colors)
+
+def save_ply_from_realsense(output_filename: str, image_name: str = ""):
+    points, colors = get_points_and_colors_from_realsense(image_name)
+    new_colors = pa.array_to_line(colors)
+    pp.save_ply_file(output_filename, points, new_colors)
+
 
 if __name__ == '__main__':
-    save_ply_from_realsense("realsense.ply","realsense2.png")
+    save_ply_from_realsense("realsense.ply", "realsense2.png")

@@ -31,7 +31,7 @@ def is_homogenous_array_of_dim(array: np.ndarray, dimension: Optional[int] = -1)
 
     Parameters:
     - array (List[Union[int, float, str]]): The input array to be checked.
-    - dimension (Optional[int]): The expected dimension of the array. If not specified, any dimension is allowed.
+    - dimension (int, optional): The expected dimension of the array. If not specified, any dimension is allowed.
 
     Raises:
     - ValueError: If the array is empty, contains different types, or has an incorrect dimension.

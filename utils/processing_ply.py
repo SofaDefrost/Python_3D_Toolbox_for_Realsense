@@ -40,7 +40,7 @@ def save_ply_file(output_filename: str, points: np.ndarray, colors: Optional[np.
     Parameters:
     - output_filename (str): The name of the output PLY file.
     - points (np.ndarray): Array of 3D points, where each row represents a point.
-    - colors (Optional[np.ndarray], optional): Array of RGB colors corresponding to each point.
+    - colors (np.ndarray, optional): Array of RGB colors corresponding to each point.
       If not provided, the PLY file will only contain point coordinates.
 
     Raises:
@@ -333,7 +333,7 @@ def apply_hsv_mask_to_ply(input_filename: str, output_filename: str, maskhsv: Tu
     save_ply_file(output_filename, new_points, new_colors)
 
 
-def center_ply_on_image(input_filename: str, output_filename: str, image_target_path: str, shape: Tuple[int, int] = []) -> None:
+def center_ply_on_image(input_filename: str, output_filename: str, image_target_path: str, shape: Optional[Tuple[int, int]] = []) -> None:
     """
     Center a PLY file based on an associated image and save the result to a new file.
 
