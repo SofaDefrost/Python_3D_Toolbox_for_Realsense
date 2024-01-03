@@ -1,5 +1,6 @@
 import math
 import time
+import sys
 import cv2
 import pyrealsense2 as rs
 import numpy as np
@@ -7,9 +8,17 @@ import logging
 
 from typing import Tuple, Optional
 
-from utils import processing_array as pa
-from utils import processing_ply as pp
-from utils import processing_img as pi
+mod_name = vars(sys.modules[__name__])['__package__']
+if mod_name:
+    # Code executed as a module
+    from .utils import processing_array as pa
+    from .utils import processing_ply as pp
+    from .utils import processing_img as pi
+else:
+    # Code executed as a script
+    from utils import processing_array as pa
+    from utils import processing_ply as pp
+    from utils import processing_img as pi
 
 
 class AppState:
