@@ -105,7 +105,7 @@ def template_function_for_Tkinter_display(points: np.ndarray, parameter_that_you
     Parameters:
     - points (np.ndarray): Input 3D array of points.
     - parameter_that_you_want (float): The parameter you want to adjust.
-    - optional_other_arguments (Any, optional): Additional optional arguments. Default is None.
+    - optional_other_arguments (Any, optional): Additional optional arguments. Default is None. Nothing will be done with these parameters. 
 
     Returns:
     np.ndarray: The processed 3D array of points.

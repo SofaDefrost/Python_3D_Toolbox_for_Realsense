@@ -15,12 +15,14 @@ if mod_name:
     from . import processing_general as pg
     from . import processing_ply as pp
     from . import processing_float as pf
+    from . import display_function_Tkinter as tk
 else:
     # Code executed as a script
     import processing_ply as pp
     import processing_float as pf
     import processing_img as pi
     import processing_general as pg
+    import display_function_Tkinter as tk
 
 # Arrays
 
@@ -325,7 +327,7 @@ def centering_3Darray_on_mean_points(array: np.ndarray) -> np.ndarray:
 # Arrays and points clouds
 
 
-def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float, colors: np.ndarray = [], axis: str = "z") -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float, colors: Optional[np.ndarray] = [], axis: str = "z") -> Tuple[np.ndarray, Optional[np.ndarray]]:
     """
     Remove points from a 3D array based on a threshold along a specific axis.
 
@@ -369,7 +371,23 @@ def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float,
         return np.array(new_points)
 
 
-def reduce_density_of_array(points: np.ndarray, density: float, colors: np.ndarray = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def remove_points_of_array_below_threshold_with_interface(points: np.ndarray, colors: Optional[np.ndarray] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    """
+    Interface for removing points below a certain threshold from a 3D point cloud.
+
+    Parameters:
+    - points (np.ndarray): The 3D coordinates of the point cloud.
+    - colors (np.ndarray): The colors associated with each point. Default is an empty array.
+
+    Returns:
+    Tuple[np.ndarray, Optional[np.ndarray]]: Remaining points and remaining colors (if provided).
+    """
+    threshold = tk.get_parameter_function_on_array_Tkinter(
+        points, remove_points_of_array_below_threshold)
+    return remove_points_of_array_below_threshold(points, threshold, colors)
+
+
+def reduce_density_of_array(points: np.ndarray, density: float, colors: Optional[np.ndarray] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     """
     Reduce the density of a 3D point cloud by randomly selecting a fraction of the points.
 
@@ -407,7 +425,23 @@ def reduce_density_of_array(points: np.ndarray, density: float, colors: np.ndarr
     return np.array(points_reduits)
 
 
-def filter_array_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: np.ndarray = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def reduce_density_of_array_with_interface(points: np.ndarray, colors: np.ndarray = []) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Interface for reducing the density of a 3D point cloud.
+
+    Parameters:
+    - points (np.ndarray): The 3D coordinates of the point cloud.
+    - colors (np.ndarray): The colors associated with each point. Default is an empty array.
+
+    Returns:
+    Tuple[np.ndarray, np.ndarray]: Reduced points and reduced colors.
+    """
+    density = tk.get_parameter_function_on_array_Tkinter(
+        points, reduce_density_of_array)
+    return reduce_density_of_array(points, density, colors)
+
+
+def filter_array_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: Optional[np.ndarray] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     """
     Filter a 3D point cloud by keeping only the points within a sphere centered at the barycentre.
 
@@ -446,6 +480,24 @@ def filter_array_with_sphere_on_barycentre(points: np.ndarray, radius: float, co
     if len(colors) > 0:
         return np.array(filtered_points), np.array(filtered_colors)
     return np.array(filtered_points)
+
+
+def filter_array_with_sphere_on_barycentre_with_interface(points: np.ndarray, colors: Optional[np.ndarray] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    """
+    Interface for filtering a 3D point cloud based on a sphere around its barycenter.
+
+    Parameters:
+    - points (np.ndarray): The 3D coordinates of the point cloud.
+    - colors (np.ndarray): The colors associated with each point. Default is an empty array.
+    - tableau_indice (Optional[List[int]]): List of indices associated with each point. Default is an empty list.
+
+    Returns:
+    Tuple[np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]: Filtered points, filtered colors (if provided), and filtered indices (if provided).
+    """
+    radius = tk.get_parameter_function_on_array_Tkinter(
+        points, filter_array_with_sphere_on_barycentre)
+    return filter_array_with_sphere_on_barycentre(points, radius, colors, tableau_indice)
+
 
 # Points clouds
 
@@ -521,7 +573,7 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
         # Leave the programm if key 'c'
         if key == ord("q"):
             break
-    
+
     # Check if the selection has a valid shape
     if start_x == end_x or start_y == end_y:
         raise ValueError("Incorrect values for cropping selected")
@@ -551,7 +603,7 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
         i += 1
 
     cv2.destroyAllWindows()
-    
+
     if len(tableau_indice_crop) > 0:
         return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop)
     else:

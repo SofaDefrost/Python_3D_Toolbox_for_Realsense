@@ -209,10 +209,8 @@ def remove_points_of_ply_below_threshold_with_interface(input_filename: str, out
     None
     """
     points, colors = get_points_and_colors_of_ply(input_filename)
-    threshold = tk.get_parameter_function_on_array_Tkinter(
-        points, pa.remove_points_of_array_below_threshold)
-    new_points, new_colors = pa.remove_points_of_array_below_threshold(
-        points, threshold, colors)
+    new_points, new_colors = pa.remove_points_of_array_below_threshold_with_interface(
+        points, colors)
     save_ply_file(output_filename, new_points, new_colors)
 
 
@@ -246,10 +244,7 @@ def reduce_density_of_ply_with_interface(input_filename: str, output_filename: s
     None
     """
     points, colors = get_points_and_colors_of_ply(input_filename)
-    density = tk.get_parameter_function_on_array_Tkinter(
-        points, pa.reduce_density_of_array)
-    new_points, new_colors = pa.reduce_density_of_array(
-        points, density, colors)
+    new_points, new_colors=pa.reduce_density_of_array_with_interface(points,colors)
     save_ply_file(output_filename, new_points, new_colors)
 
 
@@ -283,10 +278,7 @@ def filter_array_with_sphere_on_barycentre_with_interface(input_filename: str, o
     None
     """
     points, colors = get_points_and_colors_of_ply(input_filename)
-    radius = tk.get_parameter_function_on_array_Tkinter(
-        points, pa.filter_array_with_sphere_on_barycentre)
-    new_points, new_colors = pa.filter_array_with_sphere_on_barycentre(
-        points, radius, colors)
+    new_points,new_colors=pa.filter_array_with_sphere_on_barycentre_with_interface(points,colors)
     save_ply_file(output_filename, new_points, new_colors)
 
 
@@ -363,5 +355,6 @@ if __name__ == '__main__':
     # save_ply_file("./example/test_with_colors.ply", points, colors)
     # save_ply_file("./example/test_without_colors.ply", points)
     # save_ply_from_map("test.map","ply_from_map.ply")
-    center_ply_on_image("./example/capture_with_image_ref.ply", "./example/capture_with_image_ref_centred.ply",
-                        "./example/image_ref.png", (640, 480))
+    reduce_density_of_ply_with_interface("./example/capture_with_image_ref.ply","./example/capture3.ply")
+    # center_ply_on_image("./example/capture_with_image_ref.ply", "./example/capture_with_image_ref_centred.ply",
+    #                     "./example/image_ref.png", (640, 480))
