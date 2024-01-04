@@ -133,7 +133,7 @@ def get_points_and_colors_of_ply(file_path: str) -> Tuple[np.ndarray, np.ndarray
     - tuple: A tuple containing a NumPy array of points and a NumPy array of colors.
     """
     # Guaranteed that the file exists
-    pg.open_file_and_give_content(file_path)
+    pg.is_existing_file(file_path)
 
     # Load data from the .ply file
     ply_data = o3d.io.read_point_cloud(file_path)
@@ -160,6 +160,16 @@ def centering_ply_on_mean_points(input_filename: str, output_filename: str) -> N
     new_points = pa.centering_3Darray_on_mean_points(points)
     save_ply_file(output_filename, new_points, colors)
 
+def resize_ply_with_scaling_factor(input_filename: str, output_filename: str, scaling_factor: float) -> None:
+    points, colors = get_points_and_colors_of_ply(input_filename)
+    new_points = pa.resize_point_cloud_with_scaling_factor(points,scaling_factor)
+    save_ply_file(output_filename,new_points,colors)
+
+def resize_ply_to_another_one(input_filename: str, reference_filename:str, output_filename: str,)->None:
+    points_input,colors_input = get_points_and_colors_of_ply(input_filename)
+    points_ref,_ = get_points_and_colors_of_ply(reference_filename)
+    new_points = pa.resize_point_cloud_to_another_one(points_input,points_ref)
+    save_ply_file(output_filename,new_points,colors_input)
 
 def color_ply_depending_on_axis(input_filename: str, output_filename: str, axis: str) -> None:
     """
@@ -355,6 +365,7 @@ if __name__ == '__main__':
     # save_ply_file("./example/test_with_colors.ply", points, colors)
     # save_ply_file("./example/test_without_colors.ply", points)
     # save_ply_from_map("test.map","ply_from_map.ply")
-    reduce_density_of_ply_with_interface("./example/capture_with_image_ref.ply","./example/capture3.ply")
+    resize_ply_to_another_one("./example/debug_filtre_bruit.ply","./example/debug_model_3D_reduit_densite.ply","./example/debug.ply")
+    # reduce_density_of_ply_with_interface("./example/capture_with_image_ref.ply","./example/capture3.ply")
     # center_ply_on_image("./example/capture_with_image_ref.ply", "./example/capture_with_image_ref_centred.ply",
     #                     "./example/image_ref.png", (640, 480))

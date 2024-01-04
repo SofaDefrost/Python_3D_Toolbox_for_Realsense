@@ -3,6 +3,13 @@ import logging
 
 from typing import List
 
+def is_existing_file(file_path: str) -> None:
+    # Unknwon file
+    if not os.path.exists(file_path):
+        raise ValueError(f"Unknown file: {file_path}")
+    # Umpty file
+    if os.path.getsize(file_path) == 0:
+        raise ValueError(f"Umpty file: {file_path}")
 
 def open_file_and_give_content(file_path: str) -> List[str]:
     """
@@ -17,12 +24,7 @@ def open_file_and_give_content(file_path: str) -> List[str]:
     Raises:
     - ValueError: If the file is unknown (does not exist) or empty.
     """
-    # Unknwon file
-    if not os.path.exists(file_path):
-        raise ValueError(f"Unknown file: {file_path}")
-    # Umpty file
-    if os.path.getsize(file_path) == 0:
-        raise ValueError(f"Umpty file: {file_path}")
+    is_existing_file(file_path)
     # Base case
     with open(file_path, 'r') as file:
         lines = file.readlines()

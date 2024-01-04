@@ -203,6 +203,21 @@ def give_min_mean_max_of_array(array: np.ndarray) -> Tuple[float, float, float]:
     array_mean = sum(array) / len(array)
     return array_min, array_mean, array_max
 
+def give_max_distance_of_array(points: np.ndarray) -> float:
+    
+    if len(points) < 2:
+        return 0.0
+
+    # Calculer toutes les distances entre les points en une seule opération
+    pairwise_distances = np.linalg.norm(points[:, np.newaxis] - points, axis=2)
+
+    # Ignorer les distances entre un point et lui-même (diagonale)
+    np.fill_diagonal(pairwise_distances, 0.0)
+
+    # Trouver la distance maximale
+    max_distance = np.max(pairwise_distances)
+
+    return max_distance
 
 def convert_rgb_array_to_hsv_array(colors: np.ndarray) -> np.ndarray:
     """
@@ -327,7 +342,7 @@ def centering_3Darray_on_mean_points(array: np.ndarray) -> np.ndarray:
 # Arrays and points clouds
 
 
-def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float, colors: Optional[np.ndarray] = [], axis: str = "z") -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float, colors: Optional[np.ndarray] = [], axis: str = "z") -> Tuple[np.ndarray, np.ndarray]:
     """
     Remove points from a 3D array based on a threshold along a specific axis.
 
@@ -338,7 +353,7 @@ def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float,
     - axis (str, optional): The axis along which to apply the threshold ('x', 'y', or 'z').
 
     Returns:
-    - np.ndarray: The filtered array of 3D points (and colors if provided).
+    - Tuple[np.ndarray, np.ndarray]: The filtered array of 3D points (and colors if provided).
 
     Raises:
     - ValueError: If the input array is not of the correct shape or if the axis is unknown.
@@ -362,16 +377,16 @@ def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float,
     if len(index[0]) == 0:
         raise ValueError("Every points have been removed")
 
+    new_colors = []
+    
     if len(colors) > 0:
-        new_points = points[index]
         new_colors = colors[index]
-        return np.array(new_points), np.array(new_colors)
-    else:
-        new_points = points[index]
-        return np.array(new_points)
+    
+    new_points = points[index]
+    return np.array(new_points), np.array(new_colors)
 
 
-def remove_points_of_array_below_threshold_with_interface(points: np.ndarray, colors: Optional[np.ndarray] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def remove_points_of_array_below_threshold_with_interface(points: np.ndarray, colors: Optional[np.ndarray] = []) -> Tuple[np.ndarray, np.ndarray]:
     """
     Interface for removing points below a certain threshold from a 3D point cloud.
 
@@ -387,7 +402,7 @@ def remove_points_of_array_below_threshold_with_interface(points: np.ndarray, co
     return remove_points_of_array_below_threshold(points, threshold, colors)
 
 
-def reduce_density_of_array(points: np.ndarray, density: float, colors: Optional[np.ndarray] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def reduce_density_of_array(points: np.ndarray, density: float, colors: Optional[np.ndarray] = []) -> Tuple[np.ndarray, np.ndarray]:
     """
     Reduce the density of a 3D point cloud by randomly selecting a fraction of the points.
 
@@ -397,7 +412,7 @@ def reduce_density_of_array(points: np.ndarray, density: float, colors: Optional
     - colors (np.ndarray, optional): The array of colors associated with the points.
 
     Returns:
-    - np.ndarray: The reduced array of 3D points (and colors if provided).
+    - Tuple[np.ndarray, np.ndarray]: The reduced array of 3D points and colors if provided.
 
     Raises:
     - ValueError: If the input array is not of the correct shape or if the density is outside the valid range.
@@ -420,9 +435,8 @@ def reduce_density_of_array(points: np.ndarray, density: float, colors: Optional
     points_reduits = points[indices_a_conserver, :]
     if len(colors) > 0:
         colors_reduits = colors[indices_a_conserver, :]
-        return np.array(points_reduits), np.array(colors_reduits)
 
-    return np.array(points_reduits)
+    return np.array(points_reduits), np.array(colors_reduits)
 
 
 def reduce_density_of_array_with_interface(points: np.ndarray, colors: np.ndarray = []) -> Tuple[np.ndarray, np.ndarray]:
@@ -434,14 +448,14 @@ def reduce_density_of_array_with_interface(points: np.ndarray, colors: np.ndarra
     - colors (np.ndarray): The colors associated with each point. Default is an empty array.
 
     Returns:
-    Tuple[np.ndarray, np.ndarray]: Reduced points and reduced colors.
+    Tuple[np.ndarray, np.ndarray]: Reduced points and reduced colors (if provided).
     """
     density = tk.get_parameter_function_on_array_Tkinter(
         points, reduce_density_of_array)
     return reduce_density_of_array(points, density, colors)
 
 
-def filter_array_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: Optional[np.ndarray] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def filter_array_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: Optional[np.ndarray] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Filter a 3D point cloud by keeping only the points within a sphere centered at the barycentre.
 
@@ -452,7 +466,7 @@ def filter_array_with_sphere_on_barycentre(points: np.ndarray, radius: float, co
     - indices (List[int], optional): The array of indices associated with the points.
 
     Returns:
-    - np.ndarray: The filtered array of 3D points (and colors and indices if provided).
+    - Tuple[np.ndarray, np.ndarray, np.ndarray]: The filtered array of 3D points and colors and indices (if provided).
 
     Raises:
     - ValueError: If the input array is not of the correct shape or if the radius is negative.
@@ -475,14 +489,11 @@ def filter_array_with_sphere_on_barycentre(points: np.ndarray, radius: float, co
                 filtered_colors.append(colors[i])
             if len(tableau_indice) > 0:
                 filtered_indice.append(tableau_indice[i])
-    if len(tableau_indice) > 0:
-        return np.array(filtered_points), np.array(filtered_colors), np.array(filtered_indice)
-    if len(colors) > 0:
-        return np.array(filtered_points), np.array(filtered_colors)
-    return np.array(filtered_points)
+
+    return np.array(filtered_points), np.array(filtered_colors), np.array(filtered_indice)
 
 
-def filter_array_with_sphere_on_barycentre_with_interface(points: np.ndarray, colors: Optional[np.ndarray] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def filter_array_with_sphere_on_barycentre_with_interface(points: np.ndarray, colors: Optional[np.ndarray] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray]:
     """
     Interface for filtering a 3D point cloud based on a sphere around its barycenter.
 
@@ -492,7 +503,7 @@ def filter_array_with_sphere_on_barycentre_with_interface(points: np.ndarray, co
     - tableau_indice (Optional[List[int]]): List of indices associated with each point. Default is an empty list.
 
     Returns:
-    Tuple[np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]: Filtered points, filtered colors (if provided), and filtered indices (if provided).
+    Tuple[np.ndarray, np.ndarray, np.ndarray]: Filtered points, filtered colors (if provided), and filtered indices (if provided).
     """
     radius = tk.get_parameter_function_on_array_Tkinter(
         points, filter_array_with_sphere_on_barycentre)
@@ -501,8 +512,24 @@ def filter_array_with_sphere_on_barycentre_with_interface(points: np.ndarray, co
 
 # Points clouds
 
+def resize_point_cloud_with_scaling_factor(points:np.ndarray,scaling_factor:float)-> np.ndarray:
 
-def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tuple[int, int] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+    # Apply scaling to points
+    scaled_points = points * scaling_factor
+
+    return np.array(scaled_points)
+
+def resize_point_cloud_to_another_one(points_input:np.ndarray, points_reference:np.ndarray)-> np.ndarray:
+
+    # Calculer les distances maximales des deux nuages de points
+    max_dist_pc_input = give_max_distance_of_array(points_input)
+    max_dist_pc_ref = give_max_distance_of_array(points_reference)
+
+    # Calculer le facteur de redimensionnement basé sur les distances maximales
+    scaling_factor = max_dist_pc_ref / max_dist_pc_input
+    return resize_point_cloud_with_scaling_factor(points_input,scaling_factor)
+
+def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tuple[int, int] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Crop a 3D point cloud based on user-defined rectangle selection.
 
@@ -513,7 +540,7 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
     - indices (List[int], optional): The array of indices associated with the points.
 
     Returns:
-    - Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]: The cropped array of 3D points, colors, and indices.
+    - Tuple[np.ndarray, np.ndarray, np.ndarray]: The cropped array of 3D points, colors (if provided), and indices (if provided).
 
     Raises:
     - ValueError: If the input array is not of the correct shape.
@@ -603,14 +630,11 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
         i += 1
 
     cv2.destroyAllWindows()
-
-    if len(tableau_indice_crop) > 0:
-        return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop)
-    else:
-        return np.array(points_cloud_crop), np.array(couleurs_crop)
+    
+    return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop)
 
 
-def apply_hsv_mask_to_pc(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.ndarray, np.ndarray], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+def apply_hsv_mask_to_pc(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.ndarray, np.ndarray], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Apply an HSV mask to a 3D point cloud.
 
@@ -623,7 +647,7 @@ def apply_hsv_mask_to_pc(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[
     - indices (List[int], optional): The array of indices associated with the points.
 
     Returns:
-    - Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]: The filtered array of 3D points, colors, and indices (if provided).
+    - Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]: The filtered array of 3D points, colors (if provided), and indices (if provided).
 
     Raises:
     - ValueError: If the input arrays are not of the correct shape.
@@ -647,9 +671,8 @@ def apply_hsv_mask_to_pc(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[
 
     if len(tableau_indice) > 0:
         tableau_indice = tableau_indice[msk]
-        return np.array(points), np.array(colors), np.array(tableau_indice)
 
-    return np.array(points), np.array(colors)
+    return np.array(points), np.array(colors), np.array(tableau_indice)
 
 
 def center_pc_on_image(points: np.ndarray, colors: np.ndarray, image_target: str, shape: Tuple[int, int] = []) -> Tuple[np.ndarray, np.ndarray]:
