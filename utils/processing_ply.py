@@ -2,6 +2,7 @@ import numpy as np
 import open3d as o3d
 import logging
 import sys
+import pymeshlab
 
 from typing import List, Tuple, Optional
 
@@ -396,6 +397,38 @@ def center_ply_on_image(input_filename: str, output_filename: str, image_target_
     save_ply_file(output_filename, new_points, new_colors)
 
 
+def create_and_save_mesh_from_ply(ply_filename: str, obj_filename: str, number_neighbors: Optional[int] = 100, reconstruction_depth: Optional[int] = 16) -> None:
+    """
+    Create and save a mesh in OBJ format from a PLY file using MeshLab commands.
+
+    Parameters:
+    - ply_filename (str): The path to the input PLY file.
+    - obj_filename (str): The path to save the output OBJ file. It must end with '.obj'.
+    - number_neighbors (int): The number of neighbors used in computing normals for point clouds (default: 100).
+    - reconstruction_depth (int): The depth parameter for surface reconstruction (default: 16).
+
+    Returns:
+    - None
+    """
+    if len(obj_filename) < 5:
+        raise ValueError(f"Incorrect filename {obj_filename}")
+    if obj_filename[-4:] != ".obj":
+        raise ValueError(
+            f"Incorrect filename {obj_filename} must end with '.obj'")
+
+    # create a new MeshSet
+    ms = pymeshlab.MeshSet()
+
+    # load mesh
+    ms.load_new_mesh(ply_filename)
+    ms.compute_normal_for_point_clouds(k=number_neighbors)
+    ms.generate_surface_reconstruction_screened_poisson(
+        depth=reconstruction_depth)
+
+    # save the current selected mesh
+    ms.save_current_mesh(obj_filename)
+
+
 if __name__ == '__main__':
     # filter_array_with_sphere_on_barycentre("./example/test.ply","./example/test_barycentre.ply",0.06)
     # crop_ply_from_pixels_selection("./example/test.ply","./example/test_cropped.ply",(640,480))
@@ -407,8 +440,9 @@ if __name__ == '__main__':
     # save_ply_file("./example/test_with_colors.ply", points, colors)
     # save_ply_file("./example/test_without_colors.ply", points)
     # save_ply_from_map("test.map","ply_from_map.ply")
-    resize_ply_to_another_one("./example/debug_filtre_bruit.ply",
-                              "./example/debug_model_3D_reduit_densite.ply", "./example/debug.ply")
+    # resize_ply_to_another_one("./example/debug_filtre_bruit.ply",
+    #                           "./example/debug_model_3D_reduit_densite.ply", "./example/debug.ply")
+    create_and_save_mesh_from_ply("test.ply", "test.obj")
     # reduce_density_of_ply_with_interface("./example/capture_with_image_ref.ply","./example/capture3.ply")
     # center_ply_on_image("./example/capture_with_image_ref.ply", "./example/capture_with_image_ref_centred.ply",
     #                     "./example/image_ref.png", (640, 480))

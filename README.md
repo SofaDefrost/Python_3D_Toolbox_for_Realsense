@@ -17,6 +17,7 @@ Python libraries required for the entire repository:
 
 ```console
 pip3 install numpy
+pip3 install pymeshlab
 pip3 install scipy
 pip3 install matplotlib
 pip3 install opencv-python
