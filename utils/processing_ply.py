@@ -145,6 +145,20 @@ def get_points_and_colors_of_ply(file_path: str) -> Tuple[np.ndarray, np.ndarray
     return points, colors
 
 
+def get_mean_point_of_ply(input_filename: str) -> [float, float, float]:
+    """
+    Get the mean point of a point cloud stored in a PLY file.
+
+    Parameters:
+    - input_filename (str): The path to the PLY file.
+
+    Returns:
+    - List[float, float, float]: The mean point as [x, y, z].
+    """
+    points, _ = get_points_and_colors_of_ply(input_filename)
+    return pa.get_mean_point_of_3Darray(points)
+
+
 def centering_ply_on_mean_points(input_filename: str, output_filename: str) -> None:
     """
     Center a PLY file based on the mean of its points and save the result to a new file.
@@ -160,16 +174,42 @@ def centering_ply_on_mean_points(input_filename: str, output_filename: str) -> N
     new_points = pa.centering_3Darray_on_mean_points(points)
     save_ply_file(output_filename, new_points, colors)
 
-def resize_ply_with_scaling_factor(input_filename: str, output_filename: str, scaling_factor: float) -> None:
-    points, colors = get_points_and_colors_of_ply(input_filename)
-    new_points = pa.resize_point_cloud_with_scaling_factor(points,scaling_factor)
-    save_ply_file(output_filename,new_points,colors)
 
-def resize_ply_to_another_one(input_filename: str, reference_filename:str, output_filename: str,)->None:
-    points_input,colors_input = get_points_and_colors_of_ply(input_filename)
-    points_ref,_ = get_points_and_colors_of_ply(reference_filename)
-    new_points = pa.resize_point_cloud_to_another_one(points_input,points_ref)
-    save_ply_file(output_filename,new_points,colors_input)
+def resize_ply_with_scaling_factor(input_filename: str, output_filename: str, scaling_factor: float) -> None:
+    """
+    Resize a PLY point cloud by applying a scaling factor and save the result.
+
+    Parameters:
+    - input_filename (str): The path to the input PLY file.
+    - output_filename (str): The path to save the resized PLY file.
+    - scaling_factor (float): The factor by which to scale the point cloud.
+
+    Returns:
+    - None
+    """
+    points, colors = get_points_and_colors_of_ply(input_filename)
+    new_points = pa.resize_point_cloud_with_scaling_factor(
+        points, scaling_factor)
+    save_ply_file(output_filename, new_points, colors)
+
+
+def resize_ply_to_another_one(input_filename: str, reference_filename: str, output_filename: str) -> None:
+    """
+    Resize a PLY point cloud to match the scale of another PLY point cloud and save the result.
+
+    Parameters:
+    - input_filename (str): The path to the input PLY file.
+    - reference_filename (str): The path to the reference PLY file for scaling.
+    - output_filename (str): The path to save the resized PLY file.
+
+    Returns:
+    - None
+    """
+    points_input, colors_input = get_points_and_colors_of_ply(input_filename)
+    points_ref, _ = get_points_and_colors_of_ply(reference_filename)
+    new_points = pa.resize_point_cloud_to_another_one(points_input, points_ref)
+    save_ply_file(output_filename, new_points, colors_input)
+
 
 def color_ply_depending_on_axis(input_filename: str, output_filename: str, axis: str) -> None:
     """
@@ -254,7 +294,8 @@ def reduce_density_of_ply_with_interface(input_filename: str, output_filename: s
     None
     """
     points, colors = get_points_and_colors_of_ply(input_filename)
-    new_points, new_colors=pa.reduce_density_of_array_with_interface(points,colors)
+    new_points, new_colors = pa.reduce_density_of_array_with_interface(
+        points, colors)
     save_ply_file(output_filename, new_points, new_colors)
 
 
@@ -288,7 +329,8 @@ def filter_array_with_sphere_on_barycentre_with_interface(input_filename: str, o
     None
     """
     points, colors = get_points_and_colors_of_ply(input_filename)
-    new_points,new_colors=pa.filter_array_with_sphere_on_barycentre_with_interface(points,colors)
+    new_points, new_colors = pa.filter_array_with_sphere_on_barycentre_with_interface(
+        points, colors)
     save_ply_file(output_filename, new_points, new_colors)
 
 
@@ -365,7 +407,8 @@ if __name__ == '__main__':
     # save_ply_file("./example/test_with_colors.ply", points, colors)
     # save_ply_file("./example/test_without_colors.ply", points)
     # save_ply_from_map("test.map","ply_from_map.ply")
-    resize_ply_to_another_one("./example/debug_filtre_bruit.ply","./example/debug_model_3D_reduit_densite.ply","./example/debug.ply")
+    resize_ply_to_another_one("./example/debug_filtre_bruit.ply",
+                              "./example/debug_model_3D_reduit_densite.ply", "./example/debug.ply")
     # reduce_density_of_ply_with_interface("./example/capture_with_image_ref.ply","./example/capture3.ply")
     # center_ply_on_image("./example/capture_with_image_ref.ply", "./example/capture_with_image_ref_centred.ply",
     #                     "./example/image_ref.png", (640, 480))

@@ -55,7 +55,10 @@ def update_display_Tkinter(event: Any, ax: Axes3D, canvas: Any, points: np.ndarr
     rayon = rayon_slider.get()
     new_points = fonction(
         points, rayon)
-    plot_3Darray_Tkinter(ax, new_points)
+    if len(new_points)==2 or len(new_points)==3:
+        plot_3Darray_Tkinter(ax, new_points[0])
+    else:
+        plot_3Darray_Tkinter(ax, new_points)
     canvas.draw()
 
 

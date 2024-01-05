@@ -3,13 +3,24 @@ import logging
 
 from typing import List
 
+
 def is_existing_file(file_path: str) -> None:
+    """
+    Check if a file exists and is not empty.
+
+    Parameters:
+    - file_path (str): The path to the file.
+
+    Raises:
+    - ValueError: If the file does not exist or is empty.
+    """
     # Unknwon file
     if not os.path.exists(file_path):
-        raise ValueError(f"Unknown file: {file_path}")
-    # Umpty file
+        raise ValueError(f"File not found: {file_path}")
+    # Empty file
     if os.path.getsize(file_path) == 0:
-        raise ValueError(f"Umpty file: {file_path}")
+        raise ValueError(f"Empty file: {file_path}")
+
 
 def open_file_and_give_content(file_path: str) -> List[str]:
     """

@@ -203,8 +203,17 @@ def give_min_mean_max_of_array(array: np.ndarray) -> Tuple[float, float, float]:
     array_mean = sum(array) / len(array)
     return array_min, array_mean, array_max
 
+
 def give_max_distance_of_array(points: np.ndarray) -> float:
-    
+    """
+    Calculate the maximum pairwise distance between points in a 3D point cloud.
+
+    Parameters:
+    - points (np.ndarray): The 3D coordinates of the point cloud.
+
+    Returns:
+    float: The maximum pairwise distance between points.
+    """
     if len(points) < 2:
         return 0.0
 
@@ -218,6 +227,7 @@ def give_max_distance_of_array(points: np.ndarray) -> float:
     max_distance = np.max(pairwise_distances)
 
     return max_distance
+
 
 def convert_rgb_array_to_hsv_array(colors: np.ndarray) -> np.ndarray:
     """
@@ -306,18 +316,15 @@ def get_color_3D_array_depending_on_axis(points: np.ndarray, axis: str) -> np.nd
     return np.array(colors)
 
 
-def centering_3Darray_on_mean_points(array: np.ndarray) -> np.ndarray:
+def get_mean_point_of_3Darray(array: np.ndarray) -> [float, float, float]:
     """
-    Center a 3D array of points around their mean.
+    Calculate the mean point of a 3D array.
 
     Parameters:
-    - array (np.ndarray): The input array of 3D points.
+    - array (np.ndarray): The 3D array containing points.
 
     Returns:
-    - np.ndarray: The array of 3D points centered around their mean.
-
-    Raises:
-    - ValueError: If the input array is not of the correct shape.
+    np.ndarray: The mean point [mean_x, mean_y, mean_z].
     """
     is_homogenous_array_of_dim(array, 3)
     tab_x = []
@@ -333,7 +340,24 @@ def centering_3Darray_on_mean_points(array: np.ndarray) -> np.ndarray:
     milieu_y = np.mean(tab_y)
     milieu_z = np.mean(tab_z)
 
-    pt_milieu = [milieu_x, milieu_y, milieu_z]
+    return [milieu_x, milieu_y, milieu_z]
+
+
+def centering_3Darray_on_mean_points(array: np.ndarray) -> np.ndarray:
+    """
+    Center a 3D array of points around their mean.
+
+    Parameters:
+    - array (np.ndarray): The input array of 3D points.
+
+    Returns:
+    - np.ndarray: The array of 3D points centered around their mean.
+
+    Raises:
+    - ValueError: If the input array is not of the correct shape.
+    """
+
+    pt_milieu = get_mean_point_of_3Darray(array)
 
     new_vertices = [point - pt_milieu for point in array]
 
@@ -378,10 +402,10 @@ def remove_points_of_array_below_threshold(points: np.ndarray, threshold: float,
         raise ValueError("Every points have been removed")
 
     new_colors = []
-    
+
     if len(colors) > 0:
         new_colors = colors[index]
-    
+
     new_points = points[index]
     return np.array(new_points), np.array(new_colors)
 
@@ -512,22 +536,42 @@ def filter_array_with_sphere_on_barycentre_with_interface(points: np.ndarray, co
 
 # Points clouds
 
-def resize_point_cloud_with_scaling_factor(points:np.ndarray,scaling_factor:float)-> np.ndarray:
+def resize_point_cloud_with_scaling_factor(points: np.ndarray, scaling_factor: float) -> np.ndarray:
+    """
+    Resize a point cloud by applying a scaling factor to each point.
 
+    Parameters:
+    - points (np.ndarray): The input point cloud represented as a 2D numpy array.
+    - scaling_factor (float): The scaling factor to be applied to the point cloud.
+
+    Returns:
+    np.ndarray: The resized point cloud.
+    """
     # Apply scaling to points
     scaled_points = points * scaling_factor
 
     return np.array(scaled_points)
 
-def resize_point_cloud_to_another_one(points_input:np.ndarray, points_reference:np.ndarray)-> np.ndarray:
 
+def resize_point_cloud_to_another_one(points_input: np.ndarray, points_reference: np.ndarray) -> np.ndarray:
+    """
+    Resize a point cloud to match the scale of another point cloud.
+
+    Parameters:
+    - points_input (np.ndarray): The input point cloud to be resized.
+    - points_reference (np.ndarray): The reference point cloud with the desired scale.
+
+    Returns:
+    np.ndarray: The resized point cloud.
+    """
     # Calculer les distances maximales des deux nuages de points
     max_dist_pc_input = give_max_distance_of_array(points_input)
     max_dist_pc_ref = give_max_distance_of_array(points_reference)
 
     # Calculer le facteur de redimensionnement basé sur les distances maximales
     scaling_factor = max_dist_pc_ref / max_dist_pc_input
-    return resize_point_cloud_with_scaling_factor(points_input,scaling_factor)
+    return resize_point_cloud_with_scaling_factor(points_input, scaling_factor)
+
 
 def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tuple[int, int] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -630,7 +674,7 @@ def crop_pc_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: T
         i += 1
 
     cv2.destroyAllWindows()
-    
+
     return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop)
 
 
