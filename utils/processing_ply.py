@@ -194,6 +194,25 @@ def resize_ply_with_scaling_factor(input_filename: str, output_filename: str, sc
     save_ply_file(output_filename, new_points, colors)
 
 
+def get_scaling_factor_between_ply(input_filename: str, reference_filename: str) -> float:
+    """
+    Calculate the scaling factor between two PLY files based on their point clouds.
+
+    Args:
+    - input_filename (str): Filepath of the input PLY file.
+    - reference_filename (str): Filepath of the reference PLY file.
+
+    Returns:
+    - float: Scaling factor.
+    """
+    # Extract points from PLY files
+    points_input, _ = get_points_and_colors_of_ply(input_filename)
+    points_reference, _ = get_points_and_colors_of_ply(reference_filename)
+
+    # Calculate the scaling factor between point clouds
+    return pa.get_scaling_factor_between_point_cloud(points_input, points_reference)
+
+
 def resize_ply_to_another_one(input_filename: str, reference_filename: str, output_filename: str) -> None:
     """
     Resize a PLY point cloud to match the scale of another PLY point cloud and save the result.

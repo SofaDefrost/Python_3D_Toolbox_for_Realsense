@@ -553,6 +553,30 @@ def resize_point_cloud_with_scaling_factor(points: np.ndarray, scaling_factor: f
     return np.array(scaled_points)
 
 
+def get_scaling_factor_between_point_cloud(points_input: np.ndarray, points_reference: np.ndarray) -> float:
+    """
+    Calculate the scaling factor between two point clouds based on their maximum distances.
+
+    Args:
+    - points_input (np.ndarray): Input point cloud.
+    - points_reference (np.ndarray): Reference point cloud.
+
+    Returns:
+    - float: Scaling factor.
+    """
+    # Check if the point clouds are not empty
+    if len(points_input) < 2 or len(points_reference) < 2:
+        raise ValueError(
+            "Point clouds must have at least two points for scaling factor calculation.")
+
+    # Calculate the maximum distances of the two point clouds
+    max_dist_pc_input = give_max_distance_of_array(points_input)
+    max_dist_pc_ref = give_max_distance_of_array(points_reference)
+
+    # Calculate the scaling factor based on the maximum distances
+    return max_dist_pc_ref / max_dist_pc_input
+
+
 def resize_point_cloud_to_another_one(points_input: np.ndarray, points_reference: np.ndarray) -> np.ndarray:
     """
     Resize a point cloud to match the scale of another point cloud.
@@ -564,12 +588,8 @@ def resize_point_cloud_to_another_one(points_input: np.ndarray, points_reference
     Returns:
     np.ndarray: The resized point cloud.
     """
-    # Calculer les distances maximales des deux nuages de points
-    max_dist_pc_input = give_max_distance_of_array(points_input)
-    max_dist_pc_ref = give_max_distance_of_array(points_reference)
-
-    # Calculer le facteur de redimensionnement basé sur les distances maximales
-    scaling_factor = max_dist_pc_ref / max_dist_pc_input
+    scaling_factor = get_scaling_factor_between_point_cloud(
+        points_input, points_reference)
     return resize_point_cloud_with_scaling_factor(points_input, scaling_factor)
 
 
