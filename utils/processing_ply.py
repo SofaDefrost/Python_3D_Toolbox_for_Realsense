@@ -410,12 +410,6 @@ def create_and_save_mesh_from_ply(ply_filename: str, obj_filename: str, number_n
     Returns:
     - None
     """
-    if len(obj_filename) < 5:
-        raise ValueError(f"Incorrect filename {obj_filename}")
-    if obj_filename[-4:] != ".obj":
-        raise ValueError(
-            f"Incorrect filename {obj_filename} must end with '.obj'")
-
     # create a new MeshSet
     ms = pymeshlab.MeshSet()
 
