@@ -50,7 +50,7 @@ class AppState:
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
 
-def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optional[str] = "") -> None:
+def get_points_colors_from_realsense_with_interface(image_name: Optional[str] = "") -> None:
     """
     Capture 3D points and color information from a RealSense depth camera and save as a PLY file.
 
@@ -257,7 +257,7 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optio
 
     out = np.empty((h, w, 3), dtype=np.uint8)
 
-    print("Press the 'q' key to save and finish the acquisition.")
+    print("Press the 'q' key to finish the acquisition.")
 
     while True:
         # Grab camera data
@@ -344,62 +344,93 @@ def save_ply_from_realsense_with_interface(path_name_ply: str, image_name: Optio
             state.color ^= True
 
         if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
-            # Stop streaming
-            pipeline.stop()
-            save_ply_from_realsense(path_name_ply, image_name)
-            break
+            depth_frame = frames.get_depth_frame()
+            pc = rs.pointcloud()
+            pc.map_to(depth_frame)
+            points = pc.calculate(depth_frame)
+            vertices = np.array(points.get_vertices())
+            return vertices,color_image[:, :, ::-1]
 
 
-def get_points_and_colors_from_realsense(image_name: Optional[str] = "") -> Tuple[np.ndarray]:
+def init_realsense(width: int, height: int):
     """
-    Capture 3D points and color information from a RealSense depth camera.
+    Initialize a RealSense pipeline with specified width and height for depth and color streams.
 
     Parameters:
-    - image_name (str, optional): The name of the image file to save the color frame.
+    - width (int): Width of the streams.
+    - height (int): Height of the streams.
 
     Returns:
-    Tuple[np.ndarray, np.ndarray]: A tuple containing the 3D points (vertices) and color image as NumPy arrays.
+    - pipeline: Initialized RealSense pipeline.
     """
     try:
         # Create a context object. This object owns the handles to all connected realsense devices
         pipeline = rs.pipeline()
-
         # Configure streams
         config = rs.config()
-        config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        config.enable_stream(rs.stream.color, 640, 480, rs.format.rgb8, 30)
-
+        config.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
+        config.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
         # Start streaming
         pipeline.start(config)
-        # This call waits until a new coherent set of frames is available on a device
-        # Calls to get_frame_data(...) and get_frame_timestamp(...) on a device will return stable values until wait_for_frames(...) is called
-        frames = pipeline.wait_for_frames()
-        depth_frame = frames.get_depth_frame()
-        color_frame = frames.get_color_frame()
-
-        # Get the 3D and 2D coordinates
-        pc = rs.pointcloud()
-        pc.map_to(depth_frame)
-        points = pc.calculate(depth_frame)
-
-        # Convert the coordinates to NumPy arrays
-        # Les vertices correpondent à nos coordonnées 3D
-        vertices = np.array(points.get_vertices())
-        color_image = np.array(color_frame.get_data())
-        if len(image_name) > 0:
-            pi.save_image_from_array(color_image, image_name)
-
     except Exception as e:
-        print(e)
-        pass
+        raise ValueError(f"Error: {e}")
+    return pipeline
+
+def get_points_and_colors_from_realsense(pipeline,image_name: Optional[str] = "") -> Tuple[np.ndarray]:
+    """
+    Capture les coordonnées 3D et les couleurs associées à partir d'une caméra Intel RealSense.
+
+    Parameters:
+        pipeline (rs.pipeline): Objet de pipeline RealSense.
+        image_name (str, optional): Nom du fichier pour enregistrer l'image couleur. Par défaut, pas d'enregistrement.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: Tuple contenant les coordonnées 3D (vertices) et l'image couleur (color_image).
+    """
+    # This call waits until a new coherent set of frames is available on a device
+    # Calls to get_frame_data(...) and get_frame_timestamp(...) on a device will return stable values until wait_for_frames(...) is called
+    frames = pipeline.wait_for_frames()
+    depth_frame = frames.get_depth_frame()
+    color_frame = frames.get_color_frame()
+
+    # Get the 3D and 2D coordinates
+    pc = rs.pointcloud()
+    pc.map_to(depth_frame)
+    points = pc.calculate(depth_frame)
+
+    # Convert the coordinates to NumPy arrays
+    vertices = np.array(points.get_vertices())
+    color_image = np.array(color_frame.get_data())
+    if len(image_name) > 0:
+        pi.save_image_from_array(color_image, image_name)
     return vertices, color_image
 
 
 def save_ply_from_realsense(output_filename: str, image_name: str = ""):
-    points, colors = get_points_and_colors_from_realsense(image_name)
+    """
+    Capturer des points et des couleurs à partir d'une caméra Intel RealSense et enregistrer un fichier PLY.
+
+    Parameters:
+        output_filename (str): Nom du fichier PLY de sortie.
+        image_name (str, optional): Nom du fichier pour enregistrer l'image couleur. Par défaut, pas d'enregistrement.
+
+    Returns:
+        None
+    """
+    pipeline=init_realsense(640,480)
+    points, colors = get_points_and_colors_from_realsense(pipeline,image_name)
     new_colors = pa.array_to_line(colors)
     pp.save_ply_file(output_filename, points, new_colors)
 
 
 if __name__ == '__main__':
-    save_ply_from_realsense("realsense.ply", "realsense2.png")
+    p,c=get_points_colors_from_realsense_with_interface()
+    new_colors = pa.array_to_line(c)
+    pp.save_ply_file("test.ply",p,new_colors)
+    pipeline=init_realsense(640,480)
+    get_points_and_colors_from_realsense(pipeline)
+    get_points_and_colors_from_realsense(pipeline)
+    get_points_and_colors_from_realsense(pipeline)
+    get_points_and_colors_from_realsense(pipeline)
+    get_points_and_colors_from_realsense(pipeline)
+    #save_ply_from_realsense("realsense.ply", "realsense2.png")

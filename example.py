@@ -16,9 +16,10 @@ from utils import processing_img as pi
 from utils import display_function_Tkinter as dpt
 from utils import processing_array as pa
 
-
-aq.save_ply_from_realsense_with_interface(
-    path_name_ply="example/capture_realsense.ply", image_name="example/capture_realsense.png")
+pipeline=aq.init_realsense(640,480)
+p,c=aq.get_points_and_colors_from_realsense(pipeline,"example/capture_realsense.png")
+new_colors = pa.array_to_line(c)
+pp.save_ply_file(output_filename="example/capture_realsense.ply",points=p,colors=new_colors)
 
 pp.crop_ply_from_pixels_selection(input_filename="example/capture_realsense.ply",
                                   output_filename="example/capture_cropped.ply", shape=(640, 480))
