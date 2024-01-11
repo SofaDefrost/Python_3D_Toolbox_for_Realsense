@@ -11,17 +11,13 @@ mod_name = vars(sys.modules[__name__])['__package__']
 if mod_name:
     # Code executed as a module
     from .utils import array as array
-    from .utils import files as file
     from .utils import float as float
-    from . import processing_img as pi
-    from . import processing_ply as pp
+    from . import processing_pixel_list as pixel
 else:
     # Code executed as a script
     import utils.array as array
-    import utils.files as file
     import utils.float as float
-    import processing_ply as pp
-    import processing_img as pi
+    import processing_pixel_list as pixel
 
 
 def plot(points: np.ndarray) -> None:
@@ -400,7 +396,7 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
             raise ValueError(
                 f"Incorrect dimension for the array, expected 3 and given {np.shape(colors)[2]}")
         colors_image = colors.astype(np.uint8)
-        colors = array.array_to_line(colors)
+        colors = array.to_line(colors)
         height, length = np.shape(colors_image)[0], np.shape(colors_image)[1]
 
     # Create a window for the display
@@ -411,7 +407,7 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
     print("Use the mouse to select the cropping rectangle. Press the 'q' to finish cropping.")
 
     while True:
-        cv2.imshow("Cropping", colors_image[:, :, ::-1])
+        cv2.imshow("Cropping", colors_image)
         key = cv2.waitKey(1) & 0xFF
 
         # Leave the programm if key 'c'
@@ -470,7 +466,7 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     - ValueError: If the input arrays are not of the correct shape.
     """
     # Convert RGB colors to HSV
-    colorshsv = array.convert_from_rgb_to_hsv(colors)
+    colorshsv = pixel.convert_from_rgb_to_hsv(colors)
     # Construct the mask
     msk = [False for i in range(0, len(colors))]
     for i in range(0, len(colors)):
@@ -492,14 +488,14 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     return np.array(points), np.array(colors), np.array(tableau_indice)
 
 
-def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: str, shape: Tuple[int, int] = []) -> Tuple[np.ndarray, np.ndarray]:
+def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.ndarray, shape: Tuple[int, int] = []) -> Tuple[np.ndarray, np.ndarray]:
     """
     Center a point cloud on the target image.
 
     Parameters:
     - points (np.ndarray): The array of 3D points.
     - colors (np.ndarray): The array of colors associated with the points.
-    - image_target (str): The path to the target image.
+    - image_target (np.ndarray): The array of target image.
     - shape (Tuple[int, int], optional): The shape of the image.
 
     Returns:
@@ -507,30 +503,25 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: str, s
     """
     # Get the size of the target image
 
-    largeur, hauteur = pi.get_size_of_image(image_target)
+    hauteur,largeur = image_target.shape[:2]
 
     # Calculate the center of the image in pixel coordinates
     centre_image_ref = np.array(
         [int(largeur/2), int(hauteur/2), 1])  # En pixel
 
-    image_source = "center_pc_on_image.png"
-
-    # Save the colors as an image for homography calculation
-    pi.save_image_from_array(colors, image_source, shape)
-
+    image_source=array.line_to_3Darray(colors,(480,640))
+    image_source = cv2.convertScaleAbs(image_source)
     # Get the size of the source image
-    longueur, _ = pi.get_size_of_image(image_source)
-
+    h, w = image_source.shape[:2]
     # Calculate the coordinates of the center in the source image (in pixel coordinates)
-    homography_matrix = pi.get_homography_between_imgs(
+    homography_matrix = pixel.get_homography(
         image_target, image_source)
-    file.delete(image_source)
 
-    projected_center = np.dot(homography_matrix, centre_image_ref)  # en pixel
+    projected_center = np.dot(homography_matrix, centre_image_ref)  # in pixel
 
     # Convert to depth coordinates
-    origine_nuage = points[(int(projected_center[1])-1)
-                           * longueur + int(projected_center[0])]
+    origine_nuage = points[(round(projected_center[1])-1)
+                           * w + int(projected_center[0])]
 
     # Reposition the point cloud to be centered around the origin point
     nuage_point_centred = [(x[0] - origine_nuage[0], x[1] -
@@ -538,12 +529,3 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: str, s
 
     return nuage_point_centred, colors
 
-
-if __name__ == '__main__':
-    # l = np.array([1, 2, 3])
-    points, colors = pp.get_points_and_colors("./example/test.ply")
-    # crop_pc_from_zone_selection(points, colors, (640, 480))
-    # pi.save_image_from_array(new_colors,"oui.png")
-    # plot_3D_array(points)
-    # test=[[0,0,0],[1,0,0],[0,1,0],[1,1,0]]
-    # liste_triangles=build_mesh_from_3Darray(test)

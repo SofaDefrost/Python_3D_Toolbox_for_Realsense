@@ -11,14 +11,14 @@ from typing import Tuple, Optional
 mod_name = vars(sys.modules[__name__])['__package__']
 if mod_name:
     # Code executed as a module
-    from .utils import processing_array as pa
-    from .utils import processing_ply as pp
-    from .utils import processing_img as pi
+    from .functions.utils import array as array
+    from .functions import processing_ply as ply
+    from .functions import processing_img as img
 else:
     # Code executed as a script
-    from utils import processing_array as pa
-    from utils import processing_ply as pp
-    from utils import processing_img as pi
+    from functions.utils import array as array
+    from functions import processing_ply as ply
+    from functions import processing_img as img
 
 
 class AppState:
@@ -402,33 +402,16 @@ def get_points_and_colors_from_realsense(pipeline,image_name: Optional[str] = ""
     vertices = np.array(points.get_vertices())
     color_image = np.array(color_frame.get_data())
     if len(image_name) > 0:
-        pi.save_image_from_array(color_image, image_name)
-    return vertices, color_image
-
-
-def save_ply_from_realsense(output_filename: str, image_name: str = ""):
-    """
-    Capturer des points et des couleurs à partir d'une caméra Intel RealSense et enregistrer un fichier PLY.
-
-    Parameters:
-        output_filename (str): Nom du fichier PLY de sortie.
-        image_name (str, optional): Nom du fichier pour enregistrer l'image couleur. Par défaut, pas d'enregistrement.
-
-    Returns:
-        None
-    """
-    pipeline=init_realsense(640,480)
-    points, colors = get_points_and_colors_from_realsense(pipeline,image_name)
-    new_colors = pa.array_to_line(colors)
-    pp.save_ply_file(output_filename, points, new_colors)
-
+        img.save(color_image[:, :, ::-1], image_name)
+    return vertices, color_image[:, :, ::-1]
 
 if __name__ == '__main__':
-    p,c=get_points_colors_from_realsense_with_interface()
-    new_colors = pa.array_to_line(c)
-    pp.save_ply_file("test.ply",p,new_colors)
+    points,colors=get_points_colors_from_realsense_with_interface()
+    new_colors = array.to_line(colors)
+    ply.save("example/output/test_acquisition.ply",points,new_colors)
     pipeline=init_realsense(640,480)
-    get_points_and_colors_from_realsense(pipeline)
+    points,colors=get_points_and_colors_from_realsense(pipeline,"example/output/test_acquisition.png")
+    new_colors = array.to_line(colors)
     get_points_and_colors_from_realsense(pipeline)
     get_points_and_colors_from_realsense(pipeline)
     get_points_and_colors_from_realsense(pipeline)

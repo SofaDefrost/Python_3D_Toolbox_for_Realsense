@@ -11,36 +11,37 @@
 
 import acquisition_realsense as aq
 
-from utils import processing_ply as pp
-from utils import processing_img as pi
-from utils import display_function_Tkinter as dpt
-from utils import processing_array as pa
+from functions.utils import array as array
+from functions import processing_ply as ply
+from functions import processing_img as img
+from functions import processing_pixel_list as pixels
+from functions import apply_functions_display as aTk
+from functions import processing_point_cloud as pc
 
+# Init acquisition
 pipeline=aq.init_realsense(640,480)
-p,c=aq.get_points_and_colors_from_realsense(pipeline,"example/capture_realsense.png")
-new_colors = pa.array_to_line(c)
-pp.save_ply_file(output_filename="example/capture_realsense.ply",points=p,colors=new_colors)
 
-pp.crop_ply_from_pixels_selection(input_filename="example/capture_realsense.ply",
-                                  output_filename="example/capture_cropped.ply", shape=(640, 480))
+points,colors=aq.get_points_and_colors_from_realsense(pipeline,"h.png")
 
-maskhsv = pi.get_hsv_mask_with_sliders(
-    image_path="example/capture_realsense.png")
+point_cropped, color_cropped,_ = pc.crop_from_zone_selection(points,colors)
 
-pp.apply_hsv_mask_to_ply(input_filename="example/capture_cropped.ply",
-                         output_filename="example/masked_capture_realsense.ply", maskhsv=maskhsv)
+maskhsv = pixels.get_hsv_mask_with_sliders(colors)
 
-pp.filter_array_with_sphere_on_barycentre_with_interface(
-    input_filename="example/masked_capture_realsense.ply", output_filename="example/sphere_capture_realsense.ply")
+points_hsv,colors_hsv,_ = pc.apply_hsv_mask(points,array.to_line(colors[:, :, ::-1]),maskhsv)
 
-pp.color_ply_depending_on_axis(input_filename="example/capture_realsense.ply",
-                               output_filename="example/capture_realsense_rainbow_colored.ply", axis="x")
+ply.save("example/output/capture_realsense_hsv.ply",points_hsv,colors_hsv)
 
-pp.centering_ply_on_mean_points(input_filename="example/capture_realsense.ply",
-                                output_filename="example/capture_realsense_centered.ply")
+# pp.filter_array_with_sphere_on_barycentre_with_interface(
+#     input_filename="example/masked_capture_realsense.ply", output_filename="example/sphere_capture_realsense.ply")
 
-pp.center_ply_on_image(input_filename="example/capture_with_image_ref.ply",
-                       output_filename="example/capture_centered_on_image_ref.ply", image_target_path="example/image_ref.png", shape=(640, 480))
+# pp.color_ply_depending_on_axis(input_filename="example/capture_realsense.ply",
+#                                output_filename="example/capture_realsense_rainbow_colored.ply", axis="x")
+
+# pp.centering_ply_on_mean_points(input_filename="example/capture_realsense.ply",
+#                                 output_filename="example/capture_realsense_centered.ply")
+
+# pp.center_ply_on_image(input_filename="example/capture_with_image_ref.ply",
+#                        output_filename="example/capture_centered_on_image_ref.ply", image_target_path="example/image_ref.png", shape=(640, 480))
 
 
-print("All outcomes will be stored in the 'example' folder.")
+print("All outcomes will be stored in the 'example/output' folder.")

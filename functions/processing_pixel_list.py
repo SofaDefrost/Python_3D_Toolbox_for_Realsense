@@ -9,10 +9,8 @@ mod_name = vars(sys.modules[__name__])['__package__']
 if mod_name:
     # Code executed as a module
     from .utils import array as array
-    from . import processing_img as img
 else:
     # Code executed as a script
-    import processing_img as img
     import utils.array as array
 
 
@@ -89,11 +87,11 @@ def display(pixels: np.ndarray, window_name: str, shape: List[int] = []) -> None
 
 def get_homography(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
     """
-    Find the homography matrix between two grayscale images using ORB features.
+    Find the homography matrix between two images using ORB features.
 
     Parameters:
-        image1 (np.ndarray): The first grayscale image.
-        image2 (np.ndarray): The second grayscale image.
+        image1 (np.ndarray): The first image.
+        image2 (np.ndarray): The second image.
 
     Returns:
         np.ndarray: The 3x3 homography matrix.
@@ -101,9 +99,12 @@ def get_homography(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
     # Initialize the ORB detector
     orb = cv2.ORB_create()
 
+    image1_grayscale = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
+    image2_grayscale = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
+
     # Find keypoints and descriptors with ORB
-    kp1, des1 = orb.detectAndCompute(image1, None)
-    kp2, des2 = orb.detectAndCompute(image2, None)
+    kp1, des1 = orb.detectAndCompute(image1_grayscale, None)
+    kp2, des2 = orb.detectAndCompute(image2_grayscale, None)
 
     # Use the BFMatcher to find the best matches
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
@@ -123,7 +124,7 @@ def get_homography(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
 
     # Find the homography matrix
     H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-
+    
     return H
 
 
@@ -316,30 +317,3 @@ def convert_from_rgb_to_hsv(pixels: np.ndarray) -> np.ndarray:
         colorshsv[i][1] = s*255
         colorshsv[i][2] = v*255
     return colorshsv
-
-
-if __name__ == '__main__':
-    # Loading colors
-    image1 = img.load("./example/image_ref.png")
-    image2 = img.load("./example/image_source.png")
-    # Loading grayscale
-    image1_gray = img.load("./example/image_ref.png", 0)
-    image2_gray = img.load("./example/image_source.png", 0)
-    # Test homography
-    H = get_homography(image1_gray, image2_gray)
-    transformed_image1 = apply_transformation_matrix(image1, H)
-    image2_with_homography = add_polygon(
-        image2, transformed_image1, (0, 255, 0))
-    display(image2_with_homography, "Homography test")
-    # Test shining point detection
-    shining_point = get_shining_point(image2)
-    image2_with_shining_point = add_point(
-        image2, shining_point[0], shining_point[1], (0, 255, 0))
-    display(image2_with_shining_point, "Shining point detection test")
-    # HSV Mask
-    Mask = get_hsv_mask_with_sliders(image2)
-    shining_point_hsv = get_shining_point_with_hsv_mask(image2, Mask)
-    image2_with_shining_point_hsv = add_point(
-        image2, shining_point_hsv[0], shining_point_hsv[1], (0, 255, 0))
-    display(image2_with_shining_point_hsv,
-            "Shining point detection test with hsv mask")
