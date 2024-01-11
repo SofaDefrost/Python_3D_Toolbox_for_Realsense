@@ -10,26 +10,9 @@ mod_name = vars(sys.modules[__name__])['__package__']
 if mod_name:
     # Code executed as a module
     from .utils import files as file
-    from . import processing_point_cloud as pc
 else:
     # Code executed as a script
     import utils.files as file
-    import processing_point_cloud as pc
-
-
-def plot(input_filename: str) -> None:
-    """
-    Plot 3D points from PLY file.
-
-    Parameters:
-    - path_name (string): The name of the ply to plot
-
-    Returns:
-    - None
-    """
-    points, colors = get_points_and_colors(input_filename)
-    vertices = [point + color for point, color in zip(points, colors)]
-    pc.plot(np.array(vertices))
 
 
 def save(output_filename: str, points: np.ndarray, colors: Optional[np.ndarray] = []) -> None:
@@ -176,4 +159,3 @@ if __name__ == '__main__':
     # save_ply_file("./example/test_without_colors.ply", points)
     # create_and_save_ply_from_map("test.map","ply_from_map.ply")
     create_and_save_mesh_from_ply("./example/test.ply", "./example/test.obj")
-

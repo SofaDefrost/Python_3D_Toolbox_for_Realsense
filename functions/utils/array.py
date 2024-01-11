@@ -106,55 +106,6 @@ def give_min_mean_max(array: np.ndarray) -> Tuple[float, float, float]:
     return array_min, array_mean, array_max
 
 
-def convert_from_rgb_to_hsv(colors: np.ndarray) -> np.ndarray:
-    """
-    Convert an array of RGB colors to an array of HSV colors.
-
-    Parameters:
-    - colors (np.ndarray): The input array of RGB colors with shape (N, 3).
-
-    Returns:
-    - np.ndarray: The converted array of HSV colors.
-
-    Raises:
-    - ValueError: If the input array is not of the correct shape.
-    """
-    is_homogenous_of_dim(colors, 3)
-    colorshsv = np.asarray([[i, i, i] for i in range(len(colors))])
-    for i in range(len(colors)):
-        r = colors[i][0]/255
-        g = colors[i][1]/255
-        b = colors[i][2]/255
-        maximum = max([r, g, b])
-        minimum = min([r, g, b])
-        v = maximum
-        if (v == 0):
-            s = 0
-        else:
-            s = (maximum-minimum)/maximum
-
-        if (maximum-minimum == 0):
-            h = 0
-        else:
-            if (v == r):
-                h = 60*(g-b)/(maximum-minimum)
-
-            if (v == g):
-                h = 120 + 60*(b-r)/(maximum-minimum)
-
-            if (v == b):
-                h = 240+60*(r-g)/(maximum-minimum)
-
-        if (h < 0):
-            h = h+360
-
-        h = h/360
-        colorshsv[i][0] = h*255
-        colorshsv[i][1] = s*255
-        colorshsv[i][2] = v*255
-    return colorshsv
-
-
 if __name__ == '__main__':
     points = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]])
     print(add_list_at_each_rows(points, [0., 0., 0., 1.]))
