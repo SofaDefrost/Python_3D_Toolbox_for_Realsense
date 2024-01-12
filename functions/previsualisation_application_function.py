@@ -62,7 +62,7 @@ def update_display_Tkinter(event: Any, ax: Axes3D, canvas: Any, points: np.ndarr
     canvas.draw()
 
 
-def apply_function_using_Tkinter(points: np.ndarray, fonction,name_slider:str="", start_slider: int = 0.01, end_slider: int = 1, resolution: float = 0.01) -> float:
+def get_parameter_using_preview(points: np.ndarray, fonction,name_slider:str="", start_slider: int = 0.01, end_slider: int = 1, resolution: float = 0.01) -> float:
     """
     Get a parameter value interactively using Tkinter GUI.
 
@@ -99,7 +99,7 @@ def apply_function_using_Tkinter(points: np.ndarray, fonction,name_slider:str=""
 
     root.mainloop()
 
-    return fonction(points, slider.get())
+    return slider.get()
 
 
 def template_function_for_Tkinter_display(points: np.ndarray, parameter_that_you_want: float, optional_other_arguments: Optional[Any] = None) -> np.ndarray:
@@ -121,10 +121,10 @@ def template_function_for_Tkinter_display(points: np.ndarray, parameter_that_you
 
 
 if __name__ == '__main__':
-    points, colors = ply.get_points_and_colors("./example/test.ply")
-    apply_function_using_Tkinter(
+    points, colors = ply.get_points_and_colors("./example/input/test.ply")
+    get_parameter_using_preview(
         points, pc.reduce_density,"Density")
-    apply_function_using_Tkinter(
+    get_parameter_using_preview(
         points, pc.filter_with_sphere_on_barycentre,"Rayon")
-    apply_function_using_Tkinter(
+    get_parameter_using_preview(
         points, pc.remove_points_below_threshold,"Threshold")

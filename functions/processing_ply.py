@@ -162,6 +162,4 @@ if __name__ == '__main__':
     points, colors = get_points_and_colors('./example/input/capture_with_image_ref.ply')
     centered_points,centered_colors=pc.center_on_image(points,colors,image_ref)
     save("./example/output/capture_centered_image_ref.ply",centered_points,centered_colors)
-    points_cropped,colors_cropped,_=pc.crop_from_zone_selection(points,colors,(640,480))
-    save("./example/output/capture_zone.ply",points_cropped,colors_cropped)
     # create_and_save_mesh_from_ply("./example/input/test.ply", "./example/output/test.obj")

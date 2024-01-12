@@ -351,7 +351,8 @@ def get_points_colors_from_realsense_with_interface(image_name: Optional[str] = 
             pc.map_to(depth_frame)
             points = pc.calculate(depth_frame)
             vertices = np.array(points.get_vertices())
-            return vertices,color_image
+            vertices_well_shaped=np.array([np.array([point[0],point[1],point[2]]) for point in vertices])
+            return vertices_well_shaped,color_image
 
 
 def init_realsense(width: int, height: int):
@@ -405,7 +406,8 @@ def get_points_and_colors_from_realsense(pipeline,image_name: Optional[str] = ""
     color_image = np.array(color_frame.get_data())
     if len(image_name) > 0:
         img.save(color_image, image_name)
-    return vertices, color_image
+    vertices_well_shaped=np.array([np.array([point[0],point[1],point[2]]) for point in vertices])
+    return vertices_well_shaped , color_image
 
 if __name__ == '__main__':
     # points,colors=get_points_colors_from_realsense_with_interface()
@@ -423,7 +425,7 @@ if __name__ == '__main__':
     # Pour des acquisitions en masse
     i=0
     name_folder="example/output/Labo/"
-    name_file="_boeuf_et_poulet_"
+    name_file="6_boeuf_et_poulet_"
     pipeline=init_realsense(640,480)
     while True:
         points,colors=get_points_and_colors_from_realsense(pipeline,name_folder+name_file+str(i)+".png")
