@@ -55,13 +55,13 @@ def save(pixels: np.ndarray, output_filename: str, shape: Optional[Tuple[int, in
     - None: The function does not return anything, but it saves an image file.
     """
     if shape == []:
-        cv2.imwrite(output_filename, pixels)
+        cv2.imwrite(output_filename, pixels[:, :, ::-1])
         logging.info(f"Image saved under the name '{output_filename}'.")
     else:
         if np.shape(shape) != (2,):
             raise ValueError(f"Incorrect shape {shape} for the display")
         pixels = array.line_to_3Darray(pixels, (shape[0], shape[1]))
-        cv2.imwrite(output_filename, pixels)
+        cv2.imwrite(output_filename, pixels[:, :, ::-1])
         logging.info(f"Image saved under the name '{output_filename}'.")
 
 

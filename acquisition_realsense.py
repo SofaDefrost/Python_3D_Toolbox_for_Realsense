@@ -14,11 +14,13 @@ if mod_name:
     from .functions.utils import array as array
     from .functions import processing_ply as ply
     from .functions import processing_img as img
+    from .functions import processing_pixel_list as pixels
 else:
     # Code executed as a script
     from functions.utils import array as array
     from functions import processing_ply as ply
     from functions import processing_img as img
+    from functions import processing_pixel_list as pixels
 
 
 class AppState:
@@ -349,7 +351,7 @@ def get_points_colors_from_realsense_with_interface(image_name: Optional[str] = 
             pc.map_to(depth_frame)
             points = pc.calculate(depth_frame)
             vertices = np.array(points.get_vertices())
-            return vertices,color_image[:, :, ::-1]
+            return vertices,color_image
 
 
 def init_realsense(width: int, height: int):
@@ -402,18 +404,30 @@ def get_points_and_colors_from_realsense(pipeline,image_name: Optional[str] = ""
     vertices = np.array(points.get_vertices())
     color_image = np.array(color_frame.get_data())
     if len(image_name) > 0:
-        img.save(color_image[:, :, ::-1], image_name)
-    return vertices, color_image[:, :, ::-1]
+        img.save(color_image, image_name)
+    return vertices, color_image
 
 if __name__ == '__main__':
-    points,colors=get_points_colors_from_realsense_with_interface()
-    new_colors = array.to_line(colors)
-    ply.save("example/output/test_acquisition.ply",points,new_colors)
+    # points,colors=get_points_colors_from_realsense_with_interface()
+    # new_colors = array.to_line(colors)
+    # ply.save("example/output/test_acquisition.ply",points,new_colors)
+    # pipeline=init_realsense(640,480)
+    # points,colors=get_points_and_colors_from_realsense(pipeline,"example/output/test_acquisition.png")
+    # new_colors = array.to_line(colors)
+    # get_points_and_colors_from_realsense(pipeline)
+    # get_points_and_colors_from_realsense(pipeline)
+    # get_points_and_colors_from_realsense(pipeline)
+    # get_points_and_colors_from_realsense(pipeline)
+    # #save_ply_from_realsense("realsense.ply", "realsense2.png")
+    
+    # Pour des acquisitions en masse
+    i=0
+    name_folder="example/output/Labo/"
+    name_file="_boeuf_et_poulet_"
     pipeline=init_realsense(640,480)
-    points,colors=get_points_and_colors_from_realsense(pipeline,"example/output/test_acquisition.png")
-    new_colors = array.to_line(colors)
-    get_points_and_colors_from_realsense(pipeline)
-    get_points_and_colors_from_realsense(pipeline)
-    get_points_and_colors_from_realsense(pipeline)
-    get_points_and_colors_from_realsense(pipeline)
-    #save_ply_from_realsense("realsense.ply", "realsense2.png")
+    while True:
+        points,colors=get_points_and_colors_from_realsense(pipeline,name_folder+name_file+str(i)+".png")
+        new_colors = array.to_line(colors)
+        ply.save(name_folder+name_file+str(i)+".ply",points,new_colors)
+        pixels.display(colors,str(i))
+        i+=1

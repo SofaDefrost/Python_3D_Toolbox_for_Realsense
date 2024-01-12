@@ -21,13 +21,13 @@ from functions import processing_point_cloud as pc
 # Init acquisition
 pipeline=aq.init_realsense(640,480)
 
-points,colors=aq.get_points_and_colors_from_realsense(pipeline,"h.png")
+points,colors=aq.get_points_and_colors_from_realsense(pipeline)
 
 point_cropped, color_cropped,_ = pc.crop_from_zone_selection(points,colors)
 
 maskhsv = pixels.get_hsv_mask_with_sliders(colors)
 
-points_hsv,colors_hsv,_ = pc.apply_hsv_mask(points,array.to_line(colors[:, :, ::-1]),maskhsv)
+points_hsv,colors_hsv,_ = pc.apply_hsv_mask(points,array.to_line(colors),maskhsv)
 
 ply.save("example/output/capture_realsense_hsv.ply",points_hsv,colors_hsv)
 

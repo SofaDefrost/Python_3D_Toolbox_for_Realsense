@@ -380,7 +380,7 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
             # Draw selection
             cv2.rectangle(colors_image, (start_x, start_y),
                           (end_x, end_y), (0, 255, 0), 2)
-            cv2.imshow("Cropping", colors_image)
+            cv2.imshow("Cropping", colors_image[:, :, ::-1])
 
     if shape != []:
         if np.shape(shape) != (2,):
@@ -407,7 +407,7 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
     print("Use the mouse to select the cropping rectangle. Press the 'q' to finish cropping.")
 
     while True:
-        cv2.imshow("Cropping", colors_image)
+        cv2.imshow("Cropping", colors_image[:, :, ::-1])
         key = cv2.waitKey(1) & 0xFF
 
         # Leave the programm if key 'c'

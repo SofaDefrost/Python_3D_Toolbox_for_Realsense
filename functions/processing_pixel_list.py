@@ -80,7 +80,7 @@ def display(pixels: np.ndarray, window_name: str, shape: List[int] = []) -> None
     if shape != []:
         pixels = array.line_to_3Darray(pixels, (shape[0], shape[1]))
     # Display the resulting image
-    cv2.imshow(window_name, pixels)
+    cv2.imshow(window_name, pixels[:, :, ::-1])
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
@@ -155,7 +155,7 @@ def get_hsv_mask_with_sliders(image: np.ndarray) -> Tuple[np.ndarray, np.ndarray
         result = cv2.bitwise_and(image, image, mask=mask)
         cv2.imshow('Result', result)
         return np.array(lower_hsv), np.array(upper_hsv)
-
+    image=image[:, :, ::-1] # Conversion RGB to BGR
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # Create windows
