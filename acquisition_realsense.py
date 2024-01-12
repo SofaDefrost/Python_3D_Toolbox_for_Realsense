@@ -425,7 +425,7 @@ if __name__ == '__main__':
     # Pour des acquisitions en masse
     i=0
     name_folder="example/output/Labo/"
-    name_file="6_boeuf_et_poulet_"
+    name_file="2_poulet_"
     pipeline=init_realsense(640,480)
     while True:
         points,colors=get_points_and_colors_from_realsense(pipeline,name_folder+name_file+str(i)+".png")

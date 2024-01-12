@@ -3,10 +3,9 @@
     When the code is executed, it initiates the acquisition of the RealSense Camera 
     and processes the obtained file in the following steps:
         - The user can select a specific area of the point cloud acquired by drawing a rectangle on an image.        -
-        - The PLY file acquired will be colored based on its axes.
-        - The PLY file acquired will be repositioned so that its mean point becomes the center.
-        - Finally, another PLY file (named capture_with_image_ref.ply) will be repositioned to the center of the "image_ref.png" picture.
-    All outcomes will be stored in the 'example' folder.
+        - The user will then be able to choose a HSV mask using an interface. This mask will then be applied.
+        - Finally, another interface will be opened to help the user to choose the parameter of a filter. 
+    At the end, the final result will be saved.
 """
 import acquisition_realsense as aq
 
@@ -19,7 +18,7 @@ from functions import processing_point_cloud as pc
 
 # Init acquisition
 pipeline=aq.init_realsense(640,480)
-#Acquisition
+# Acquisition
 points,colors=aq.get_points_and_colors_from_realsense(pipeline)
 # Zone Selection
 point_cropped, color_cropped,_ = pc.crop_from_zone_selection(points,colors)
@@ -34,4 +33,4 @@ points_filtre,colors_filtre,_=pc.filter_with_sphere_on_barycentre(points_hsv,rad
 # Save result
 ply.save("example/output/capture_realsense_out.ply",points_filtre,colors_filtre)
 
-print("All outcomes will be stored in the 'example/output' folder.")
+print("Outcome(s) will be stored in the 'example/output' folder.")
