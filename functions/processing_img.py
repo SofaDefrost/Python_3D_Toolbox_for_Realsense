@@ -36,7 +36,7 @@ def load(image_path: str, mode: Optional[int] = 1) -> Optional[np.ndarray]:
         raise ValueError(
             f"The image is empty. Please check if the path {image_path} is correct ")
     # Load the image
-    return image
+    return image[:, :, ::-1]
 
 
 def save(pixels: np.ndarray, output_filename: str, shape: Optional[Tuple[int, int]] = []) -> None:
