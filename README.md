@@ -9,6 +9,7 @@ To test the code, execute the Python script example.py:
 python3 example.py
 ```
 All outcomes will be stored in the 'example/output' folder.
+
 ## Prerequisites
 
 This repository has been created using Python 3.8.10. Using another version may result in some problems. 

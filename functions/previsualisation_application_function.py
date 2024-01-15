@@ -77,6 +77,7 @@ def get_parameter_using_preview(points: np.ndarray, fonction,name_slider:str="",
     float: The selected parameter value.
     """
     root = tk.Tk()
+    points=np.array([np.array([point[0],point[1],point[2]]) for point in points])
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
