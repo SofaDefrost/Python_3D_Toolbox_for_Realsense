@@ -25,7 +25,7 @@ point_cropped, color_cropped,_ = pc.crop_from_zone_selection(points,colors)
 # Choose mask
 maskhsv = pixels.get_hsv_mask_with_sliders(colors)
 # Apply mask
-points_hsv,colors_hsv,_ = pc.apply_hsv_mask(point_cropped,array.to_line(color_cropped),maskhsv)
+points_hsv,colors_hsv,_ = pc.apply_hsv_mask(point_cropped,color_cropped,maskhsv)
 # Choose radius filter
 radius=aTk.get_parameter_using_preview(point_cropped,pc.filter_with_sphere_on_barycentre,"Radius")
 # Apply radius filter

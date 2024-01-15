@@ -382,13 +382,18 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
             cv2.rectangle(colors_image, (start_x, start_y),
                           (end_x, end_y), (0, 255, 0), 2)
             cv2.imshow("Cropping", colors_image[:, :, ::-1])
-
     if shape != []:
         if np.shape(shape) != (2,):
-            raise ValueError(f"Incorrect shape {shape} for the display")
-        length, height = shape
-        colors_image = array.line_to_3Darray(
-            colors, (height, length)).astype(np.uint8)
+                raise ValueError(f"Incorrect shape {shape} for the display")
+        if shape[1] == np.shape(colors)[0] and shape[0] == np.shape(colors)[1] and 3 == np.shape(colors)[2]:
+            colors_image = colors.astype(np.uint8)
+            colors = array.to_line(colors)
+            height, length = np.shape(colors_image)[0], np.shape(colors_image)[1]
+        else:
+            length,height  = shape
+            colors_image = array.line_to_3Darray(
+                colors, (height,length)).astype(np.uint8)
+            colors = array.to_line(colors)
     else:
         if len(np.shape(colors)) != 3:
             raise ValueError(
@@ -466,6 +471,8 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     Raises:
     - ValueError: If the input arrays are not of the correct shape.
     """
+    points=np.array([np.array([point[0],point[1],point[2]]) for point in points])
+    colors = array.to_line(colors)
     # Convert RGB colors to HSV
     colorshsv = pixel.convert_from_rgb_to_hsv(colors)
     # Construct the mask
