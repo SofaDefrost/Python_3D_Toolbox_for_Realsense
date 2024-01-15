@@ -284,36 +284,27 @@ def convert_from_rgb_to_hsv(pixels: np.ndarray) -> np.ndarray:
     - ValueError: If the input array is not of the correct shape.
     """
     array.is_homogenous_of_dim(pixels, 3)
-    colorshsv = np.asarray([[i, i, i] for i in range(len(pixels))])
-    for i in range(len(pixels)):
-        r = pixels[i][0]/255
-        g = pixels[i][1]/255
-        b = pixels[i][2]/255
-        maximum = max([r, g, b])
-        minimum = min([r, g, b])
-        v = maximum
-        if (v == 0):
-            s = 0
-        else:
-            s = (maximum-minimum)/maximum
 
-        if (maximum-minimum == 0):
-            h = 0
-        else:
-            if (v == r):
-                h = 60*(g-b)/(maximum-minimum)
+    r, g, b = pixels[:, 0] / 255, pixels[:, 1] / 255, pixels[:, 2] / 255
+    maximum = np.maximum.reduce([r, g, b])
+    minimum = np.minimum.reduce([r, g, b])
+    v = maximum
 
-            if (v == g):
-                h = 120 + 60*(b-r)/(maximum-minimum)
+    # Compute saturation
+    s = np.where(v == 0, 0, (maximum - minimum) / maximum)
 
-            if (v == b):
-                h = 240+60*(r-g)/(maximum-minimum)
+    # Compute hue
+    h = np.zeros_like(v)
+    non_zero_mask = (maximum - minimum) != 0
 
-        if (h < 0):
-            h = h+360
+    h[non_zero_mask] = np.where(v == r[non_zero_mask], 60 * (g[non_zero_mask] - b[non_zero_mask]) / (maximum[non_zero_mask] - minimum[non_zero_mask]),
+                           np.where(v == g[non_zero_mask], 120 + 60 * (b[non_zero_mask] - r[non_zero_mask]) / (maximum[non_zero_mask] - minimum[non_zero_mask]),
+                                    240 + 60 * (r[non_zero_mask] - g[non_zero_mask]) / (maximum[non_zero_mask] - minimum[non_zero_mask])))
 
-        h = h/360
-        colorshsv[i][0] = h*255
-        colorshsv[i][1] = s*255
-        colorshsv[i][2] = v*255
+    h[h < 0] += 360
+    h /= 360
+
+    # Convert to 8-bit integer values
+    colorshsv = np.column_stack((h * 255, s * 255, v * 255))
+
     return colorshsv

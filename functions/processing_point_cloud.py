@@ -471,20 +471,15 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     Raises:
     - ValueError: If the input arrays are not of the correct shape.
     """
-    points=np.array([np.array([point[0],point[1],point[2]]) for point in points])
     colors = array.to_line(colors)
     # Convert RGB colors to HSV
     colorshsv = pixel.convert_from_rgb_to_hsv(colors)
-    # Construct the mask
-    msk = [False for i in range(0, len(colors))]
-    for i in range(0, len(colors)):
-        # Condition : the three hsv values of the colors must be in maskhsv
-        if ((colorshsv[i][0] > maskhsv[0][0]) and (colorshsv[i][0] < maskhsv[1][0])):  # Composante h
-            # s
-            if ((colorshsv[i][1] > maskhsv[0][1]) and (colorshsv[i][1] < maskhsv[1][1])):
-                # v
-                if ((colorshsv[i][2] > maskhsv[0][2]) and (colorshsv[i][2] < maskhsv[1][2])):
-                    msk[i] = True
+    # Create the mask using vectorized operations
+    h_mask = np.logical_and(colorshsv[:, 0] > maskhsv[0][0], colorshsv[:, 0] < maskhsv[1][0])
+    s_mask = np.logical_and(colorshsv[:, 1] > maskhsv[0][1], colorshsv[:, 1] < maskhsv[1][1])
+    v_mask = np.logical_and(colorshsv[:, 2] > maskhsv[0][2], colorshsv[:, 2] < maskhsv[1][2])
+
+    msk = h_mask & s_mask & v_mask
 
     # Apply the mask to filter points, colors, and indices (if provided)
     points = points[msk]
