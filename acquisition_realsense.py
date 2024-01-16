@@ -351,8 +351,7 @@ def get_points_colors_from_realsense_with_interface(image_name: Optional[str] = 
             pc.map_to(depth_frame)
             points = pc.calculate(depth_frame)
             vertices = np.array(points.get_vertices())
-            vertices_well_shaped=np.array([np.array([point[0],point[1],point[2]]) for point in vertices])
-            return vertices_well_shaped,color_image
+            return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)),color_image
 
 
 def init_realsense(width: int, height: int):
@@ -406,30 +405,47 @@ def get_points_and_colors_from_realsense(pipeline,image_name: Optional[str] = ""
     color_image = np.array(color_frame.get_data())
     if len(image_name) > 0:
         img.save(color_image, image_name)
-    vertices_well_shaped=np.array([np.array([point[0],point[1],point[2]]) for point in vertices])
-    return vertices_well_shaped , color_image
+    return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)) , color_image
 
 if __name__ == '__main__':
     # points,colors=get_points_colors_from_realsense_with_interface()
     # new_colors = array.to_line(colors)
     # ply.save("example/output/test_acquisition.ply",points,new_colors)
-    # pipeline=init_realsense(640,480)
-    # points,colors=get_points_and_colors_from_realsense(pipeline,"example/output/test_acquisition.png")
+    pipeline=init_realsense(640,480)
+    points,colors=get_points_and_colors_from_realsense(pipeline)
     # new_colors = array.to_line(colors)
-    # get_points_and_colors_from_realsense(pipeline)
-    # get_points_and_colors_from_realsense(pipeline)
-    # get_points_and_colors_from_realsense(pipeline)
-    # get_points_and_colors_from_realsense(pipeline)
+    debut = time.time()
+    get_points_and_colors_from_realsense(pipeline)
+    fin = time.time()
+    temps_ecoule = fin - debut
+    print(f"Temps d'exécution de votre_fonction : {temps_ecoule} secondes")
+    debut = time.time()
+    get_points_and_colors_from_realsense(pipeline)
+    fin = time.time()
+    temps_ecoule = fin - debut
+    print(f"Temps d'exécution de votre_fonction : {temps_ecoule} secondes")
+    
+    debut = time.time()
+    get_points_and_colors_from_realsense(pipeline)
+    fin = time.time()
+    temps_ecoule = fin - debut
+    print(f"Temps d'exécution de votre_fonction : {temps_ecoule} secondes")
+    
+    debut = time.time()
+    get_points_and_colors_from_realsense(pipeline)
+    fin = time.time()
+    temps_ecoule = fin - debut
+    print(f"Temps d'exécution de votre_fonction : {temps_ecoule} secondes")
     # #save_ply_from_realsense("realsense.ply", "realsense2.png")
     
-    # Pour des acquisitions en masse
-    i=0
-    name_folder="example/output/Labo/"
-    name_file="2_poulet_"
-    pipeline=init_realsense(640,480)
-    while True:
-        points,colors=get_points_and_colors_from_realsense(pipeline,name_folder+name_file+str(i)+".png")
-        new_colors = array.to_line(colors)
-        ply.save(name_folder+name_file+str(i)+".ply",points,new_colors)
-        pixels.display(colors,str(i))
-        i+=1
+    # # Pour des acquisitions en masse
+    # i=0
+    # name_folder="example/output/Labo/"
+    # name_file="6_boeuf_et_poulet_"
+    # pipeline=init_realsense(640,480)
+    # while True:
+    #     points,colors=get_points_and_colors_from_realsense(pipeline,name_folder+name_file+str(i)+".png")
+    #     new_colors = array.to_line(colors)
+    #     ply.save(name_folder+name_file+str(i)+".ply",points,new_colors)
+    #     pixels.display(colors,str(i))
+    #     i+=1
