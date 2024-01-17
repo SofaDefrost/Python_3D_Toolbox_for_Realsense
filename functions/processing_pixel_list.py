@@ -9,9 +9,11 @@ mod_name = vars(sys.modules[__name__])['__package__']
 if mod_name:
     # Code executed as a module
     from .utils import array as array
+    from . import processing_point_cloud as pc
 else:
     # Code executed as a script
     import utils.array as array
+    import processing_point_cloud as pc
 
 
 def add_point(pixels: np.ndarray, coordinate_x: int, coordinate_y: int, colors_rgb: Tuple[int, int, int]) -> np.ndarray:
@@ -124,20 +126,24 @@ def get_homography(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
 
     # Find the homography matrix
     H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-    
+
     return H
 
 
 def get_hsv_mask_with_sliders(image: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Create an HSV mask using trackbars for interactive threshold adjustment.
+    Obtain an HSV mask using sliders.
 
-    Parameters:
-        image (np.ndarray): The input BGR image.
+    Args:
+        image (np.ndarray): Input image in RGB format.
 
     Returns:
-        Tuple[np.ndarray, np.ndarray]: Lower and upper HSV threshold values.
+        Tuple[np.ndarray, np.ndarray]: Lower and upper HSV values.
     """
+    image = cv2.convertScaleAbs(image)
+    cv2.normalize(image, image, 0, 255, cv2.NORM_MINMAX)
+    image = image.astype(np.uint8)
+
     def update_mask_hsv(x):
         global lower_hsv, upper_hsv, mask, result
         lower_hsv = np.array([cv2.getTrackbarPos('Hue Min', 'HSV Interface'),
@@ -150,12 +156,11 @@ def get_hsv_mask_with_sliders(image: np.ndarray) -> Tuple[np.ndarray, np.ndarray
 
         mask = cv2.inRange(hsv_img, lower_hsv, upper_hsv)
         cv2.imshow('HSV Mask', mask)
-
         # Apply the mask to the original image
         result = cv2.bitwise_and(image, image, mask=mask)
         cv2.imshow('Result', result)
-        return np.array(lower_hsv), np.array(upper_hsv)
-    image=image[:, :, ::-1] # Conversion RGB to BGR
+        return lower_hsv, upper_hsv
+    image = image[:, :, ::-1]  # Conversion RGB to BGR
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # Create windows
@@ -195,9 +200,9 @@ def get_hsv_mask_with_sliders(image: np.ndarray) -> Tuple[np.ndarray, np.ndarray
 
     # Once the user presses 'q', return the mask
     cv2.destroyAllWindows()
-    logging.info(f"Mask hsv [{lower_hsv},{upper_hsv}] exported !")
+    logging.info(f"Mask hsv exported !")
 
-    return np.array(lower_hsv), np.array(upper_hsv)
+    return lower_hsv, upper_hsv
 
 
 def get_shining_point(pixels: np.ndarray) -> Tuple[int, int]:
@@ -298,8 +303,8 @@ def convert_from_rgb_to_hsv(pixels: np.ndarray) -> np.ndarray:
     non_zero_mask = (maximum - minimum) != 0
 
     h[non_zero_mask] = np.where(v == r[non_zero_mask], 60 * (g[non_zero_mask] - b[non_zero_mask]) / (maximum[non_zero_mask] - minimum[non_zero_mask]),
-                           np.where(v == g[non_zero_mask], 120 + 60 * (b[non_zero_mask] - r[non_zero_mask]) / (maximum[non_zero_mask] - minimum[non_zero_mask]),
-                                    240 + 60 * (r[non_zero_mask] - g[non_zero_mask]) / (maximum[non_zero_mask] - minimum[non_zero_mask])))
+                                np.where(v == g[non_zero_mask], 120 + 60 * (b[non_zero_mask] - r[non_zero_mask]) / (maximum[non_zero_mask] - minimum[non_zero_mask]),
+                                         240 + 60 * (r[non_zero_mask] - g[non_zero_mask]) / (maximum[non_zero_mask] - minimum[non_zero_mask])))
 
     h[h < 0] += 360
     h /= 360

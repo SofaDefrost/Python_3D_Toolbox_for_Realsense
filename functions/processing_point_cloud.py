@@ -263,7 +263,8 @@ def filter_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: 
     Raises:
     - ValueError: If the input array is not of the correct shape or if the radius is negative.
     """
-    points=np.array([np.array([point[0],point[1],point[2]]) for point in points])
+    points = np.array([np.array([point[0], point[1], point[2]])
+                      for point in points])
     array.is_homogenous_of_dim(points, 3)
     if radius < 0:
         raise ValueError("Radius must be non-negative")
@@ -343,23 +344,20 @@ def resize_point_cloud_to_another_one(points_input: np.ndarray, points_reference
     return resize_with_scaling_factor(points_input, scaling_factor)
 
 
-def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tuple[int, int] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tuple[int, int] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]:
     """
-    Crop a 3D point cloud based on user-defined rectangle selection.
+    Crop a region of interest (ROI) from a point cloud based on user selection.
 
-    Parameters:
-    - points (np.ndarray): The input array of 3D points.
-    - colors (np.ndarray): The array of colors associated with the points.
-    - shape (Tuple[int, int], optional): The shape of the display window. Default is an empty tuple.
-    - indices (List[int], optional): The array of indices associated with the points.
+    Args:
+        points (np.ndarray): Input point cloud coordinates.
+        colors (np.ndarray): Input point cloud colors.
+        shape (Tuple[int, int], optional): Shape of the display window. Defaults to [].
+        tableau_indice (Optional[List[int]], optional): List of indices for the point cloud. Defaults to [].
 
     Returns:
-    - Tuple[np.ndarray, np.ndarray, np.ndarray]: The cropped array of 3D points, colors (if provided), and indices (if provided).
-
-    Raises:
-    - ValueError: If the input array is not of the correct shape.
+        Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]: Cropped point cloud, colors, indices, and new shape.
     """
-    # Globa variables to store information of mouseclick
+    # Global variables to store information of mouseclick
     start_x, start_y = -1, -1
     end_x, end_y = -1, -1
     cropping = False
@@ -384,15 +382,16 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
             cv2.imshow("Cropping", colors_image[:, :, ::-1])
     if shape != []:
         if np.shape(shape) != (2,):
-                raise ValueError(f"Incorrect shape {shape} for the display")
+            raise ValueError(f"Incorrect shape {shape} for the display")
         if shape[1] == np.shape(colors)[0] and shape[0] == np.shape(colors)[1] and 3 == np.shape(colors)[2]:
             colors_image = colors.astype(np.uint8)
             colors = array.to_line(colors)
-            height, length = np.shape(colors_image)[0], np.shape(colors_image)[1]
+            height, length = np.shape(colors_image)[
+                0], np.shape(colors_image)[1]
         else:
-            length,height  = shape
+            length, height = shape
             colors_image = array.line_to_3Darray(
-                colors, (height,length)).astype(np.uint8)
+                colors, (height, length)).astype(np.uint8)
             colors = array.to_line(colors)
     else:
         if len(np.shape(colors)) != 3:
@@ -433,6 +432,8 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
     top_left_corner = (y_max-1)*length + x_min
     bottom_right_corner = (y_min-1)*length + x_max
 
+    new_shape = (abs(y_max-y_min)+1, abs(x_max-x_min))
+
     i = 0
     points_cloud_crop = []
     couleurs_crop = []
@@ -449,46 +450,52 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
         i += 1
 
     cv2.destroyAllWindows()
+    return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop), new_shape
 
-    return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop)
 
-
-def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.ndarray, np.ndarray], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.ndarray, np.ndarray], shape: Tuple[int, int], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Apply an HSV mask to a 3D point cloud.
+    Apply an HSV mask to filter points and colors.
 
-    Parameters:
-    - points (np.ndarray): The input array of 3D points.
-    - colors (np.ndarray): The array of colors associated with the points.
-    - mask_hsv (Tuple[np.ndarray,np.ndarray]): The HSV mask to apply. The mask must be in the following from : [[H_L,S_L,V_L],[H_U,S_U,V_U]] with 
-    H_L,S_L,V_L the lower values of Hue, Saturation and Value, and H_L,S_L,V_L the upper values. 
-    You can generate such mask using the function "get_hsv_mask_with_sliders" in "processing_img.py".
-    - indices (List[int], optional): The array of indices associated with the points.
+    Args:
+        points (np.ndarray): Input array of 3D coordinates.
+        colors (np.ndarray): Input array of colors.
+        maskhsv (Tuple[np.ndarray, np.ndarray]): Tuple containing lower and upper HSV values.
+        shape (Tuple[int, int]): Shape of the original data.
+        tableau_indice (Optional[List[int]]): Optional array of indices.
 
     Returns:
-    - Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]: The filtered array of 3D points, colors (if provided), and indices (if provided).
-
-    Raises:
-    - ValueError: If the input arrays are not of the correct shape.
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: Filtered points, colors, and indices.
     """
-    colors = array.to_line(colors)
-    # Convert RGB colors to HSV
-    colorshsv = pixel.convert_from_rgb_to_hsv(colors)
-    # Create the mask using vectorized operations
-    h_mask = np.logical_and(colorshsv[:, 0] > maskhsv[0][0], colorshsv[:, 0] < maskhsv[1][0])
-    s_mask = np.logical_and(colorshsv[:, 1] > maskhsv[0][1], colorshsv[:, 1] < maskhsv[1][1])
-    v_mask = np.logical_and(colorshsv[:, 2] > maskhsv[0][2], colorshsv[:, 2] < maskhsv[1][2])
+    colors = cv2.convertScaleAbs(colors)
+    cv2.normalize(colors, colors, 0, 255, cv2.NORM_MINMAX)
+    colors = colors.astype(np.uint8)
+    colors_3D = array.line_to_3Darray(colors, (shape[0], shape[1]))
 
-    msk = h_mask & s_mask & v_mask
+    # Mask reconstruction
+    lower_hsv, upper_hsv = maskhsv
+    image = colors_3D[:, :, ::-1]  # Conversion RGB to BGR
+    hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv_img, lower_hsv, upper_hsv)
 
-    # Apply the mask to filter points, colors, and indices (if provided)
-    points = points[msk]
-    colors = colors[msk]
+    binary_mask = mask > 0
+
+    # Mask application
+    colors_filtre = colors_3D[binary_mask]
+
+    points_line = array.line_to_3Darray(points, (shape[0], shape[1]))
+    points_filtre = points_line[binary_mask]
+    points_filtre = array.to_line(points_filtre)
 
     if len(tableau_indice) > 0:
-        tableau_indice = tableau_indice[msk]
+        tableau_indice_line = tableau_indice.reshape((shape[0], shape[1], 1))
+        tableau_indice_filtre = tableau_indice_line[binary_mask]
+        tableau_indice_filtre = tableau_indice_filtre.reshape(
+            (np.shape(tableau_indice_filtre)[0]*np.shape(tableau_indice_filtre)[1], 1))
+    else:
+        tableau_indice_filtre = []
 
-    return np.array(points), np.array(colors), np.array(tableau_indice)
+    return np.array(points_filtre), np.array(colors_filtre), np.array(tableau_indice_filtre)
 
 
 def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.ndarray, shape: Tuple[int, int] = []) -> Tuple[np.ndarray, np.ndarray]:
@@ -506,13 +513,13 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
     """
     # Get the size of the target image
 
-    hauteur,largeur = image_target.shape[:2]
+    hauteur, largeur = image_target.shape[:2]
 
     # Calculate the center of the image in pixel coordinates
     centre_image_ref = np.array(
         [int(largeur/2), int(hauteur/2), 1])  # En pixel
 
-    image_source=array.line_to_3Darray(colors,(480,640))
+    image_source = array.line_to_3Darray(colors, (480, 640))
     image_source = cv2.convertScaleAbs(image_source)
     # Get the size of the source image
     h, w = image_source.shape[:2]
@@ -531,4 +538,3 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
                             origine_nuage[1], x[2] - origine_nuage[2]) for x in points]
 
     return nuage_point_centred, colors
-
