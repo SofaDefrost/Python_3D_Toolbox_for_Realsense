@@ -2,6 +2,15 @@
 
 This repository provides a set of Python scripts useful for 3D file processing, particularly for files obtained using Realsense depth cameras. It includes an *acquisition_realsense.py* file for capturing and recording with a Realsense camera, as well as a *functions* folder containing a collection of processing functions (point cloud, ply, pixels...) and a subfolder *utils* containing some other useful functions.
 
+Thanks to this repository you should be able to:
+
+- Filter point cloud (density, threshold, radius, ...) thanks (or not) to users interface. 
+- Process point cloud (resize, center on image, color, ...).
+- Cut point cloud by selecting a zone with an interface.
+- Find the homography between two images.
+- Determine and apply an HSV mask to a point cloud.
+- ...
+
 ## Usage
 
 To test the code, execute the Python script example.py:
