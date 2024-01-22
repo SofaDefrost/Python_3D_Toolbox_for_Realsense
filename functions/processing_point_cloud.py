@@ -5,6 +5,7 @@ import sys
 
 from matplotlib import pyplot as plt
 from scipy.spatial import Delaunay
+from scipy.spatial.distance import pdist, squareform
 from typing import List, Optional, Tuple
 
 mod_name = vars(sys.modules[__name__])['__package__']
@@ -65,19 +66,16 @@ def give_max_distance(points: np.ndarray) -> float:
     Returns:
     float: The maximum pairwise distance between points.
     """
-    if len(points) < 2:
-        return 0.0
-
-    # Calculer toutes les distances entre les points en une seule opération
-    pairwise_distances = np.linalg.norm(points[:, np.newaxis] - points, axis=2)
-
-    # Ignorer les distances entre un point et lui-même (diagonale)
-    np.fill_diagonal(pairwise_distances, 0.0)
-
-    # Trouver la distance maximale
-    max_distance = np.max(pairwise_distances)
-
-    return max_distance
+    # Compute every pairs of distances
+    distances_paires = pdist(points)
+    
+    # Convert pairs in a matrix
+    distances_matrice = squareform(distances_paires)
+    
+    # Find the max of this matrix
+    distance_max = np.max(distances_matrice)
+    
+    return distance_max
 
 
 def get_color_depending_on_axis(points: np.ndarray, axis: str) -> np.ndarray:
