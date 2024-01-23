@@ -12,12 +12,12 @@ mod_name = vars(sys.modules[__name__])['__package__']
 if mod_name:
     # Code executed as a module
     from .utils import array as array
-    from .utils import float as float
+    from .utils import float as f
     from . import processing_pixel_list as pixel
 else:
     # Code executed as a script
     import utils.array as array
-    import utils.float as float
+    import utils.float as f
     import processing_pixel_list as pixel
 
 
@@ -68,13 +68,13 @@ def give_max_distance(points: np.ndarray) -> float:
     """
     # Compute every pairs of distances
     distances_paires = pdist(points)
-    
+
     # Convert pairs in a matrix
     distances_matrice = squareform(distances_paires)
-    
+
     # Find the max of this matrix
     distance_max = np.max(distances_matrice)
-    
+
     return distance_max
 
 
@@ -111,9 +111,46 @@ def get_color_depending_on_axis(points: np.ndarray, axis: str) -> np.ndarray:
         axis_coordinates)
 
     for i in range(len(colors)):
-        colors[i] = float.convert_float_in_range_to_rgb(
+        colors[i] = f.convert_float_in_range_to_rgb(
             points[i][axis_int], min_coord, mean_coord, max_coord)
     return np.array(colors)
+
+
+def get_center_geometry(points: np.ndarray) -> List[float]:
+    """
+    Calculate the center coordinates of a set of 3D points.
+
+    Args:
+        points (np.ndarray): Input array of 3D coordinates.
+
+    Returns:
+        List[float]: Center coordinates [x, y, z].
+    """
+    coord_x = [point[0] for point in points]
+    coord_y = [point[1] for point in points]
+    coord_z = [point[2] for point in points]
+    max_x = max(coord_x)
+    min_x = min(coord_x)
+    max_y = max(coord_y)
+    min_y = min(coord_y)
+    max_z = max(coord_z)
+    min_z = min(coord_z)
+    return [(max_x+min_x)/2, (max_y+min_y)/2, (max_z+min_z)/2]
+
+
+def centers_points_on_geometry(points: np.ndarray) -> np.ndarray:
+    """
+    Center a set of 3D points around their mean.
+
+    Args:
+        points (np.ndarray): Input array of 3D coordinates.
+
+    Returns:
+        np.ndarray: Centered 3D points.
+    """
+    mean_point = get_center_geometry(points)
+    new_vertices = [point - mean_point for point in points]
+    return np.array(new_vertices)
 
 
 def get_mean_point(points: np.ndarray) -> [float, float, float]:
