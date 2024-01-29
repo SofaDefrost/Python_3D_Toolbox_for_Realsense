@@ -15,7 +15,6 @@ else:
     import utils.array as array
     import processing_point_cloud as pc
 
-
 def add_point(pixels: np.ndarray, coordinate_x: int, coordinate_y: int, colors_rgb: Tuple[int, int, int]) -> np.ndarray:
     """
     Adds a colored point to an image by first copying the existing pixels.
@@ -80,7 +79,7 @@ def display(pixels: np.ndarray, window_name: str, shape: List[int] = []) -> None
         shape (List[int], optional): Shape of the image (height, width) if applicable. Defaults to [].
     """
     if shape != []:
-        pixels = array.line_to_3Darray(pixels, (shape[0], shape[1]))
+        pixels = array.line_to_2Darray(pixels, (shape[0], shape[1]))
     # Display the resulting image
     cv2.imshow(window_name, pixels[:, :, ::-1])
     cv2.waitKey(0)
@@ -130,16 +129,21 @@ def get_homography(image1: np.ndarray, image2: np.ndarray) -> np.ndarray:
     return H
 
 
-def get_hsv_mask_with_sliders(image: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def get_hsv_mask_with_sliders(image: np.ndarray,shape:List[int]= []) -> Tuple[np.ndarray, np.ndarray]:
     """
     Obtain an HSV mask using sliders.
 
     Args:
         image (np.ndarray): Input image in RGB format.
+        shape (List[int], optional): Shape of the image (height, width) if applicable. Defaults to [].
 
     Returns:
         Tuple[np.ndarray, np.ndarray]: Lower and upper HSV values.
     """
+    
+    if shape != []:
+        image = array.line_to_2Darray(image,shape)
+    
     image = cv2.convertScaleAbs(image)
     cv2.normalize(image, image, 0, 255, cv2.NORM_MINMAX)
     image = image.astype(np.uint8)

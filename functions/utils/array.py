@@ -67,16 +67,16 @@ def to_line(array: np.ndarray) -> np.ndarray:
     return array.reshape((np.shape(array)[0]*np.shape(array)[1], 3))
 
 
-def line_to_3Darray(line: np.ndarray, shape: Tuple[int, int]) -> np.ndarray:
+def line_to_2Darray(line: np.ndarray, shape: Tuple[int, int]) -> np.ndarray:
     """
-    Convert a 1D array to a 3D array with the specified shape.
+    Convert a 1D array to a 2D array with the specified shape.
 
     Parameters:
     - line (np.ndarray): The input 1D array.
-    - shape (Tuple[int, int]): The desired shape of the output 3D array.
+    - shape (Tuple[int, int]): The desired shape of the output 2D array.
 
     Returns:
-    - np.ndarray: The converted 3D array.
+    - np.ndarray: The converted 2D array.
 
     Raises:
     - ValueError: If the input array is not of the correct shape.

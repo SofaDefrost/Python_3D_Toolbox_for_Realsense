@@ -23,14 +23,15 @@ points,colors=aq.get_points_and_colors_from_realsense(pipeline)
 # Zone Selection
 point_cropped, color_cropped,_,new_shape = pc.crop_from_zone_selection(points,colors)
 # Choose mask
-maskhsv = pixels.get_hsv_mask_with_sliders(array.line_to_3Darray(color_cropped,new_shape))
+maskhsv = pixels.get_hsv_mask_with_sliders(color_cropped,new_shape)
 # Apply mask
 points_hsv,colors_hsv,_ = pc.apply_hsv_mask(point_cropped,color_cropped,maskhsv,new_shape)
 # Choose radius filter
 radius=aTk.get_parameter_using_preview(points_hsv,pc.filter_with_sphere_on_barycentre,"Radius")
 # Apply radius filter
 points_filtre,colors_filtre,_=pc.filter_with_sphere_on_barycentre(points_hsv,radius,colors_hsv)
-# Save result
+# Save results
 ply.save("example/output/capture_realsense_out.ply",points_filtre,colors_filtre)
+img.save(colors,"example/output/capture_realsense_out.png")
 
 print("Outcome(s) will be stored in the 'example/output' folder.")

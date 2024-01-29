@@ -10,11 +10,13 @@ mod_name = vars(sys.modules[__name__])['__package__']
 if mod_name:
     # Code executed as a module
     from .utils import files as file
+    from .utils import array as array
     from . import processing_img as img
     from . import processing_point_cloud as pc
 else:
     # Code executed as a script
     import utils.files as file
+    import utils.array as array
     import processing_img as img
     import processing_point_cloud as pc
 
@@ -37,6 +39,9 @@ def save(output_filename: str, points: np.ndarray, colors: Optional[np.ndarray] 
     Returns:
     - None: The function does not return anything, but it creates a PLY file with the specified data.
     """
+
+    colors = array.to_line(colors)
+    
     if len(output_filename) < 5:
         raise ValueError(f"Incorrect filename {output_filename}")
     if output_filename[-4:] != ".ply":

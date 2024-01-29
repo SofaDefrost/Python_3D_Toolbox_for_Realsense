@@ -52,14 +52,13 @@ class AppState:
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
 
 
-def get_points_colors_from_realsense_with_interface(image_name: Optional[str] = "") -> None:
+def get_points_colors_from_realsense_with_interface() -> None:
     """
     Capture 3D points and color information from a RealSense depth camera and save as a PLY file.
 
     Parameters:
     - path_name_ply (str): The path and name of the PLY file to save.
-    - image_name (str, optional): The name of the image file to save the color frame.
-
+    
     Returns:
     None
     """
@@ -378,14 +377,13 @@ def init_realsense(width: int, height: int):
         raise ValueError(f"Error: {e}")
     return pipeline
 
-def get_points_and_colors_from_realsense(pipeline,image_name: Optional[str] = "") -> Tuple[np.ndarray]:
+def get_points_and_colors_from_realsense(pipeline) -> Tuple[np.ndarray]:
     """
     Capture les coordonnées 3D et les couleurs associées à partir d'une caméra Intel RealSense.
 
     Parameters:
         pipeline (rs.pipeline): Objet de pipeline RealSense.
-        image_name (str, optional): Nom du fichier pour enregistrer l'image couleur. Par défaut, pas d'enregistrement.
-
+        
     Returns:
         Tuple[np.ndarray, np.ndarray]: Tuple contenant les coordonnées 3D (vertices) et l'image couleur (color_image).
     """
@@ -403,17 +401,14 @@ def get_points_and_colors_from_realsense(pipeline,image_name: Optional[str] = ""
     # Convert the coordinates to NumPy arrays
     vertices = np.array(points.get_vertices())
     color_image = np.array(color_frame.get_data())
-    if len(image_name) > 0:
-        img.save(color_image, image_name)
+    
     return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)) , color_image
 
 if __name__ == '__main__':
     # points,colors=get_points_colors_from_realsense_with_interface()
-    # new_colors = array.to_line(colors)
     # ply.save("example/output/test_acquisition.ply",points,new_colors)
     pipeline=init_realsense(640,480)
     points,colors=get_points_and_colors_from_realsense(pipeline)
-    # new_colors = array.to_line(colors)
     debut = time.time()
     get_points_and_colors_from_realsense(pipeline)
     fin = time.time()
@@ -445,7 +440,6 @@ if __name__ == '__main__':
     # pipeline=init_realsense(640,480)
     # while True:
     #     points,colors=get_points_and_colors_from_realsense(pipeline,name_folder+name_file+str(i)+".png")
-    #     new_colors = array.to_line(colors)
-    #     ply.save(name_folder+name_file+str(i)+".ply",points,new_colors)
+    #     ply.save(name_folder+name_file+str(i)+".ply",points,colors)
     #     pixels.display(colors,str(i))
     #     i+=1

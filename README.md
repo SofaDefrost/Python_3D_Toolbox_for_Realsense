@@ -36,6 +36,12 @@ pip3 install pyvista
 pip3 install open3d
 ```
 
+## Important notes
+
+- Please be careful of the shape of lists of colors when working with point clouds. Indeed, if this list is from a camera's acquisition it would be 2D-shaped according to the parameters of the camera (in our case (480,640,3)) but otherwise if this list is get from a *.ply* file it would be 1D-shaped (in our case (307200,3)). You can switch between the two shapes by using the functions in *functions/utils/array.py* : *to_line* and *line_to_2Darray*. Most of the functions developed in this repository have been written with respect to this property : if the list of colors is not 2D-shaped you can specify the shape expected as an argument of the function.
+
+- Please be careful to the type of lists of colors when working with images. Indeed all this repository has been built for RGB's images but because of OpenCV (one of the libraries used which is working with BGR's images) you might encounter problems of colors : red and blue pixels could be exchanged. If you are facing this problem you can switch between an RGB and an BGR list by using the code ```[:, :, ::-1]```. For example if ```colors``` is a RGB list, ```colors[:, :, ::-1]``` will be an BGR list (and vice versa).
+
 For additional information about Realsense with Python, visit: https://dev.intelrealsense.com/docs/python2
 
 Authors: Thibaud Piccinali, Tinhinane Smail

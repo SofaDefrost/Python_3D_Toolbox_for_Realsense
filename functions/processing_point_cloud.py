@@ -425,7 +425,7 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
                 0], np.shape(colors_image)[1]
         else:
             length, height = shape
-            colors_image = array.line_to_3Darray(
+            colors_image = array.line_to_2Darray(
                 colors, (height, length)).astype(np.uint8)
             colors = array.to_line(colors)
     else:
@@ -505,7 +505,7 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     colors = cv2.convertScaleAbs(colors)
     cv2.normalize(colors, colors, 0, 255, cv2.NORM_MINMAX)
     colors = colors.astype(np.uint8)
-    colors_3D = array.line_to_3Darray(colors, (shape[0], shape[1]))
+    colors_3D = array.line_to_2Darray(colors, (shape[0], shape[1]))
 
     # Mask reconstruction
     lower_hsv, upper_hsv = maskhsv
@@ -518,7 +518,7 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     # Mask application
     colors_filtre = colors_3D[binary_mask]
 
-    points_line = array.line_to_3Darray(points, (shape[0], shape[1]))
+    points_line = array.line_to_2Darray(points, (shape[0], shape[1]))
     points_filtre = points_line[binary_mask]
     points_filtre = array.to_line(points_filtre)
 
@@ -554,7 +554,7 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
     centre_image_ref = np.array(
         [int(largeur/2), int(hauteur/2), 1])  # En pixel
 
-    image_source = array.line_to_3Darray(colors, (480, 640))
+    image_source = array.line_to_2Darray(colors, (480, 640))
     image_source = cv2.convertScaleAbs(image_source)
     # Get the size of the source image
     h, w = image_source.shape[:2]
