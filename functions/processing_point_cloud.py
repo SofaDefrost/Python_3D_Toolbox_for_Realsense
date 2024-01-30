@@ -488,6 +488,42 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
     return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop), new_shape
 
 
+def apply_binary_mask(points: np.ndarray, colors: np.ndarray, mask: np.ndarray, shape: Tuple[int, int], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Apply a binary mask to filter points and colors.
+
+    Args:
+        points (np.ndarray): Input array of 3D coordinates.
+        colors (np.ndarray): Input array of colors.
+        mask (np.ndarray): Binary mask to apply.
+        shape (Tuple[int, int]): Shape of the original data.
+        tableau_indice (Optional[List[int]]): Optional array of indices.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: Filtered points, colors, and optional indices.
+    """
+    colors = cv2.convertScaleAbs(colors)
+    cv2.normalize(colors, colors, 0, 255, cv2.NORM_MINMAX)
+    colors = colors.astype(np.uint8)
+    colors_3D = array.line_to_2Darray(colors, (shape[0], shape[1]))
+    # Mask application
+    colors_filtre = colors_3D[mask]
+
+    points_line = array.line_to_2Darray(points, (shape[0], shape[1]))
+    points_filtre = points_line[mask]
+    points_filtre = array.to_line(points_filtre)
+
+    if len(tableau_indice) > 0:
+        tableau_indice_line = tableau_indice.reshape((shape[0], shape[1], 1))
+        tableau_indice_filtre = tableau_indice_line[mask]
+        tableau_indice_filtre = tableau_indice_filtre.reshape(
+            (np.shape(tableau_indice_filtre)[0]*np.shape(tableau_indice_filtre)[1], 1))
+    else:
+        tableau_indice_filtre = []
+
+    return np.array(points_filtre), np.array(colors_filtre), np.array(tableau_indice_filtre)
+
+
 def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.ndarray, np.ndarray], shape: Tuple[int, int], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Apply an HSV mask to filter points and colors.
@@ -515,22 +551,7 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
 
     binary_mask = mask > 0
 
-    # Mask application
-    colors_filtre = colors_3D[binary_mask]
-
-    points_line = array.line_to_2Darray(points, (shape[0], shape[1]))
-    points_filtre = points_line[binary_mask]
-    points_filtre = array.to_line(points_filtre)
-
-    if len(tableau_indice) > 0:
-        tableau_indice_line = tableau_indice.reshape((shape[0], shape[1], 1))
-        tableau_indice_filtre = tableau_indice_line[binary_mask]
-        tableau_indice_filtre = tableau_indice_filtre.reshape(
-            (np.shape(tableau_indice_filtre)[0]*np.shape(tableau_indice_filtre)[1], 1))
-    else:
-        tableau_indice_filtre = []
-
-    return np.array(points_filtre), np.array(colors_filtre), np.array(tableau_indice_filtre)
+    return apply_binary_mask(points, colors, binary_mask, shape, tableau_indice)
 
 
 def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.ndarray, shape: Tuple[int, int] = []) -> Tuple[np.ndarray, np.ndarray]:
