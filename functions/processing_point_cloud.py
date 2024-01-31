@@ -6,6 +6,7 @@ import sys
 from matplotlib import pyplot as plt
 from scipy.spatial import Delaunay
 from scipy.spatial.distance import pdist, squareform
+from scipy.spatial import cKDTree
 from typing import List, Optional, Tuple
 
 mod_name = vars(sys.modules[__name__])['__package__']
@@ -594,3 +595,27 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
                             origine_nuage[1], x[2] - origine_nuage[2]) for x in points]
 
     return nuage_point_centred, colors
+
+def find_nearest_neighbors_between_pc(source_points: np.ndarray, target_points: np.ndarray, nearest_neigh_num: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Find the nearest neighbors in the source point cloud for each point in the target point cloud.
+
+    Args:
+    - source_points (np.ndarray): Source point cloud.
+    - target_points (np.ndarray): Target point cloud.
+    - nearest_neigh_num (int): Number of nearest neighbors to find.
+
+    Returns:
+    - Tuple[np.ndarray, np.ndarray]: Nearest neighbor points and their indices in the source point cloud.
+    """    
+    # Create a KD-Tree from the source points
+    source_kdtree = cKDTree(source_points)
+
+    # Find nearest neighbors for each point in the target point cloud
+    distances, indices = source_kdtree.query(target_points, k=nearest_neigh_num)
+
+    # Retrieve the nearest neighbor points
+    
+    nearest_neighbors = source_points[indices]
+
+    return nearest_neighbors, np.array(indices)
