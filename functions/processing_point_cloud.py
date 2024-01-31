@@ -596,6 +596,7 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
 
     return nuage_point_centred, colors
 
+
 def find_nearest_neighbors_between_pc(source_points: np.ndarray, target_points: np.ndarray, nearest_neigh_num: int) -> Tuple[np.ndarray, np.ndarray]:
     """
     Find the nearest neighbors in the source point cloud for each point in the target point cloud.
@@ -607,15 +608,16 @@ def find_nearest_neighbors_between_pc(source_points: np.ndarray, target_points: 
 
     Returns:
     - Tuple[np.ndarray, np.ndarray]: Nearest neighbor points and their indices in the source point cloud.
-    """    
+    """
     # Create a KD-Tree from the source points
     source_kdtree = cKDTree(source_points)
 
     # Find nearest neighbors for each point in the target point cloud
-    distances, indices = source_kdtree.query(target_points, k=nearest_neigh_num)
+    distances, indices = source_kdtree.query(
+        target_points, k=nearest_neigh_num)
 
     # Retrieve the nearest neighbor points
-    
+
     nearest_neighbors = source_points[indices]
 
     return nearest_neighbors, np.array(indices)

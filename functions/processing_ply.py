@@ -39,8 +39,6 @@ def save(output_filename: str, points: np.ndarray, colors: Optional[np.ndarray] 
     Returns:
     - None: The function does not return anything, but it creates a PLY file with the specified data.
     """
-
-    colors = array.to_line(colors)
     
     if len(output_filename) < 5:
         raise ValueError(f"Incorrect filename {output_filename}")
@@ -51,6 +49,7 @@ def save(output_filename: str, points: np.ndarray, colors: Optional[np.ndarray] 
         raise ValueError("No points to create the file")
     with_color = False
     if len(colors) > 0:
+        colors = array.to_line(colors)
         with_color = True
 
     if (len(points) != len(colors)) and with_color:
