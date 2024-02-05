@@ -419,15 +419,15 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
     if shape != []:
         if np.shape(shape) != (2,):
             raise ValueError(f"Incorrect shape {shape} for the display")
-        if shape[1] == np.shape(colors)[0] and shape[0] == np.shape(colors)[1] and 3 == np.shape(colors)[2]:
+        if shape[0] == np.shape(colors)[0] and shape[1] == np.shape(colors)[1] and 3 == np.shape(colors)[2]:
             colors_image = colors.astype(np.uint8)
             colors = array.to_line(colors)
             height, length = np.shape(colors_image)[
                 0], np.shape(colors_image)[1]
         else:
-            length, height = shape
+            height,length = shape
             colors_image = array.line_to_2Darray(
-                colors, (height, length)).astype(np.uint8)
+                colors, (length,height)).astype(np.uint8)
             colors = array.to_line(colors)
     else:
         if len(np.shape(colors)) != 3:
@@ -438,7 +438,7 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
                 f"Incorrect dimension for the array, expected 3 and given {np.shape(colors)[2]}")
         colors_image = colors.astype(np.uint8)
         colors = array.to_line(colors)
-        height, length = np.shape(colors_image)[0], np.shape(colors_image)[1]
+        length, height = np.shape(colors_image)[0], np.shape(colors_image)[1]
 
     # Create a window for the display
     cv2.namedWindow("Cropping")
@@ -464,11 +464,11 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
     x_max, y_max = max(start_x, end_x), max(start_y, end_y)
 
     # Filtering of the points
-    bottom_left_corner = (y_min-1)*length + x_min
-    top_left_corner = (y_max-1)*length + x_min
-    bottom_right_corner = (y_min-1)*length + x_max
+    bottom_left_corner = (y_min-1)*height + x_min
+    top_left_corner = (y_max-1)*height + x_min
+    bottom_right_corner = (y_min-1)*height + x_max
 
-    new_shape = (abs(y_max-y_min)+1, abs(x_max-x_min))
+    new_shape = (abs(x_max-x_min),abs(y_max-y_min)+1)
 
     i = 0
     points_cloud_crop = []
@@ -481,8 +481,8 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
             colors_crop.append(colors[j])
             if len(tab_index) > 0:
                 tab_index_crop.append(tab_index[j])
-        bottom_left_corner = (y_min+i-1)*length + x_min
-        bottom_right_corner = (y_min+i-1)*length + x_max
+        bottom_left_corner = (y_min+i-1)*height + x_min
+        bottom_right_corner = (y_min+i-1)*height + x_max
         i += 1
 
     cv2.destroyAllWindows()
@@ -506,16 +506,16 @@ def apply_binary_mask(points: np.ndarray, colors: np.ndarray, mask: np.ndarray, 
     colors = cv2.convertScaleAbs(colors)
     cv2.normalize(colors, colors, 0, 255, cv2.NORM_MINMAX)
     colors = colors.astype(np.uint8)
-    colors_3D = array.line_to_2Darray(colors, (shape[0], shape[1]))
+    colors_3D = array.line_to_2Darray(colors, (shape[1], shape[0]))
     # Mask application
     colors_filter = colors_3D[mask]
 
-    points_line = array.line_to_2Darray(points, (shape[0], shape[1]))
+    points_line = array.line_to_2Darray(points, (shape[1], shape[0]))
     points_filter = points_line[mask]
     points_filter = array.to_line(points_filter)
 
     if len(tab_index) > 0:
-        tab_index_line = tab_index.reshape((shape[0], shape[1], 1))
+        tab_index_line = tab_index.reshape((shape[1], shape[0], 1))
         tab_index_filter = tab_index_line[mask]
         tab_index_filter = tab_index_filter.reshape(
             (np.shape(tab_index_filter)[0]*np.shape(tab_index_filter)[1], 1))
@@ -542,7 +542,7 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     colors = cv2.convertScaleAbs(colors)
     cv2.normalize(colors, colors, 0, 255, cv2.NORM_MINMAX)
     colors = colors.astype(np.uint8)
-    colors_3D = array.line_to_2Darray(colors, (shape[0], shape[1]))
+    colors_3D = array.line_to_2Darray(colors, (shape[1], shape[0]))
 
     # Mask reconstruction
     lower_hsv, upper_hsv = maskhsv

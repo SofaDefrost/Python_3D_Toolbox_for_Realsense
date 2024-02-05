@@ -79,7 +79,7 @@ def display(pixels: np.ndarray, window_name: str, shape: List[int] = []) -> None
         shape (List[int], optional): Shape of the image (height, width) if applicable. Defaults to [].
     """
     if shape != []:
-        pixels = array.line_to_2Darray(pixels, (shape[0], shape[1]))
+        pixels = array.line_to_2Darray(pixels, (shape[1], shape[0]))
     # Display the resulting image
     cv2.imshow(window_name, pixels[:, :, ::-1])
     cv2.waitKey(0)
@@ -142,7 +142,7 @@ def get_hsv_mask_with_sliders(image: np.ndarray,shape:List[int]= []) -> Tuple[np
     """
     
     if shape != []:
-        image = array.line_to_2Darray(image,shape)
+        image = array.line_to_2Darray(image,(shape[1],shape[0]))
     
     image = cv2.convertScaleAbs(image)
     cv2.normalize(image, image, 0, 255, cv2.NORM_MINMAX)
