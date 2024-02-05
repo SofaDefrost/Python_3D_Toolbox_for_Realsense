@@ -174,11 +174,11 @@ def get_mean_point(points: np.ndarray) -> [float, float, float]:
         tab_y.append(i[1])
         tab_z.append(i[2])
 
-    milieu_x = np.mean(tab_x)
-    milieu_y = np.mean(tab_y)
-    milieu_z = np.mean(tab_z)
+    middle_x = np.mean(tab_x)
+    middle_y = np.mean(tab_y)
+    middle_z = np.mean(tab_z)
 
-    return [milieu_x, milieu_y, milieu_z]
+    return [middle_x, middle_y, middle_z]
 
 
 def centering_on_mean_points(points: np.ndarray) -> np.ndarray:
@@ -195,9 +195,9 @@ def centering_on_mean_points(points: np.ndarray) -> np.ndarray:
     - ValueError: If the input array is not of the correct shape.
     """
 
-    pt_milieu = get_mean_point(points)
+    pt_middle = get_mean_point(points)
 
-    new_vertices = [point - pt_milieu for point in points]
+    new_vertices = [point - pt_middle for point in points]
 
     return np.array(new_vertices)
 
@@ -266,24 +266,24 @@ def reduce_density(points: np.ndarray, density: float, colors: Optional[np.ndarr
     if not (0 < density <= 1):
         raise ValueError("Density must be in the range (0, 1]")
 
-    colors_reduits = []
+    colors_reduced = []
 
     # Calculate the number of points to keep
-    nombre_points = int(len(points) * density)
+    number_points = int(len(points) * density)
 
     # Randomly select indices of points to keep
-    indices_a_conserver = np.random.choice(
-        len(points), nombre_points, replace=False)
+    indices_to_keep = np.random.choice(
+        len(points), number_points, replace=False)
 
     # Extract the selected points
-    points_reduits = points[indices_a_conserver, :]
+    points_reduits = points[indices_to_keep, :]
     if len(colors) > 0:
-        colors_reduits = colors[indices_a_conserver, :]
+        colors_reduced = colors[indices_to_keep, :]
 
-    return np.array(points_reduits), np.array(colors_reduits)
+    return np.array(points_reduits), np.array(colors_reduced)
 
 
-def filter_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: Optional[np.ndarray] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def filter_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: Optional[np.ndarray] = [], tab_index: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Filter a 3D point cloud by keeping only the points within a sphere centered at the barycentre.
 
@@ -306,19 +306,19 @@ def filter_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: 
         raise ValueError("Radius must be non-negative")
 
     barycentre = np.mean(points, axis=0)
-    rayon_filtrage = radius
+    radius_filter = radius
     filtered_points = []
     filtered_colors = []
     filtered_indice = []
 
     for i, point in enumerate(points):
         distance = np.linalg.norm(point - barycentre)
-        if distance <= rayon_filtrage:
+        if distance <= radius_filter:
             filtered_points.append(point)
             if len(colors) > 0:
                 filtered_colors.append(colors[i])
-            if len(tableau_indice) > 0:
-                filtered_indice.append(tableau_indice[i])
+            if len(tab_index) > 0:
+                filtered_indice.append(tab_index[i])
 
     return np.array(filtered_points), np.array(filtered_colors), np.array(filtered_indice)
 
@@ -380,7 +380,7 @@ def resize_point_cloud_to_another_one(points_input: np.ndarray, points_reference
     return resize_with_scaling_factor(points_input, scaling_factor)
 
 
-def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tuple[int, int] = [], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]:
+def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tuple[int, int] = [], tab_index: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]:
     """
     Crop a region of interest (ROI) from a point cloud based on user selection.
 
@@ -388,7 +388,7 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
         points (np.ndarray): Input point cloud coordinates.
         colors (np.ndarray): Input point cloud colors.
         shape (Tuple[int, int], optional): Shape of the display window. Defaults to [].
-        tableau_indice (Optional[List[int]], optional): List of indices for the point cloud. Defaults to [].
+        tab_index (Optional[List[int]], optional): List of indices for the point cloud. Defaults to [].
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]: Cropped point cloud, colors, indices, and new shape.
@@ -472,24 +472,24 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
 
     i = 0
     points_cloud_crop = []
-    couleurs_crop = []
-    tableau_indice_crop = []
+    colors_crop = []
+    tab_index_crop = []
 
     while (bottom_left_corner != top_left_corner):
         for j in range(bottom_left_corner, bottom_right_corner):
             points_cloud_crop.append(points[j])
-            couleurs_crop.append(colors[j])
-            if len(tableau_indice) > 0:
-                tableau_indice_crop.append(tableau_indice[j])
+            colors_crop.append(colors[j])
+            if len(tab_index) > 0:
+                tab_index_crop.append(tab_index[j])
         bottom_left_corner = (y_min+i-1)*length + x_min
         bottom_right_corner = (y_min+i-1)*length + x_max
         i += 1
 
     cv2.destroyAllWindows()
-    return np.array(points_cloud_crop), np.array(couleurs_crop), np.array(tableau_indice_crop), new_shape
+    return np.array(points_cloud_crop), np.array(colors_crop), np.array(tab_index_crop), new_shape
 
 
-def apply_binary_mask(points: np.ndarray, colors: np.ndarray, mask: np.ndarray, shape: Tuple[int, int], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def apply_binary_mask(points: np.ndarray, colors: np.ndarray, mask: np.ndarray, shape: Tuple[int, int], tab_index: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Apply a binary mask to filter points and colors.
 
@@ -498,7 +498,7 @@ def apply_binary_mask(points: np.ndarray, colors: np.ndarray, mask: np.ndarray, 
         colors (np.ndarray): Input array of colors.
         mask (np.ndarray): Binary mask to apply.
         shape (Tuple[int, int]): Shape of the original data.
-        tableau_indice (Optional[List[int]]): Optional array of indices.
+        tab_index (Optional[List[int]]): Optional array of indices.
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray]: Filtered points, colors, and optional indices.
@@ -508,24 +508,24 @@ def apply_binary_mask(points: np.ndarray, colors: np.ndarray, mask: np.ndarray, 
     colors = colors.astype(np.uint8)
     colors_3D = array.line_to_2Darray(colors, (shape[0], shape[1]))
     # Mask application
-    colors_filtre = colors_3D[mask]
+    colors_filter = colors_3D[mask]
 
     points_line = array.line_to_2Darray(points, (shape[0], shape[1]))
-    points_filtre = points_line[mask]
-    points_filtre = array.to_line(points_filtre)
+    points_filter = points_line[mask]
+    points_filter = array.to_line(points_filter)
 
-    if len(tableau_indice) > 0:
-        tableau_indice_line = tableau_indice.reshape((shape[0], shape[1], 1))
-        tableau_indice_filtre = tableau_indice_line[mask]
-        tableau_indice_filtre = tableau_indice_filtre.reshape(
-            (np.shape(tableau_indice_filtre)[0]*np.shape(tableau_indice_filtre)[1], 1))
+    if len(tab_index) > 0:
+        tab_index_line = tab_index.reshape((shape[0], shape[1], 1))
+        tab_index_filter = tab_index_line[mask]
+        tab_index_filter = tab_index_filter.reshape(
+            (np.shape(tab_index_filter)[0]*np.shape(tab_index_filter)[1], 1))
     else:
-        tableau_indice_filtre = []
+        tab_index_filter = []
 
-    return np.array(points_filtre), np.array(colors_filtre), np.array(tableau_indice_filtre)
+    return np.array(points_filter), np.array(colors_filter), np.array(tab_index_filter)
 
 
-def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.ndarray, np.ndarray], shape: Tuple[int, int], tableau_indice: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.ndarray, np.ndarray], shape: Tuple[int, int], tab_index: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Apply an HSV mask to filter points and colors.
 
@@ -534,7 +534,7 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
         colors (np.ndarray): Input array of colors.
         maskhsv (Tuple[np.ndarray, np.ndarray]): Tuple containing lower and upper HSV values.
         shape (Tuple[int, int]): Shape of the original data.
-        tableau_indice (Optional[List[int]]): Optional array of indices.
+        tab_index (Optional[List[int]]): Optional array of indices.
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray]: Filtered points, colors, and indices.
@@ -552,7 +552,7 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
 
     binary_mask = mask > 0
 
-    return apply_binary_mask(points, colors, binary_mask, shape, tableau_indice)
+    return apply_binary_mask(points, colors, binary_mask, shape, tab_index)
 
 
 def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.ndarray, shape: Tuple[int, int] = []) -> Tuple[np.ndarray, np.ndarray]:
@@ -570,11 +570,11 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
     """
     # Get the size of the target image
 
-    hauteur, largeur = image_target.shape[:2]
+    height, width = image_target.shape[:2]
 
     # Calculate the center of the image in pixel coordinates
-    centre_image_ref = np.array(
-        [int(largeur/2), int(hauteur/2), 1])  # En pixel
+    center_image_ref = np.array(
+        [int(width/2), int(height/2), 1])  # En pixel
 
     image_source = array.line_to_2Darray(colors, (480, 640))
     image_source = cv2.convertScaleAbs(image_source)
@@ -584,17 +584,17 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
     homography_matrix = pixel.get_homography(
         image_target, image_source)
 
-    projected_center = np.dot(homography_matrix, centre_image_ref)  # in pixel
+    projected_center = np.dot(homography_matrix, center_image_ref)  # in pixel
 
     # Convert to depth coordinates
-    origine_nuage = points[(round(projected_center[1])-1)
-                           * w + int(projected_center[0])]
+    pc_original = points[(round(projected_center[1])-1)
+                         * w + int(projected_center[0])]
 
     # Reposition the point cloud to be centered around the origin point
-    nuage_point_centred = [(x[0] - origine_nuage[0], x[1] -
-                            origine_nuage[1], x[2] - origine_nuage[2]) for x in points]
+    pc_centered = [(x[0] - pc_original[0], x[1] -
+                    pc_original[1], x[2] - pc_original[2]) for x in points]
 
-    return nuage_point_centred, colors
+    return pc_centered, colors
 
 
 def find_nearest_neighbors_between_pc(source_points: np.ndarray, target_points: np.ndarray, nearest_neigh_num: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -613,7 +613,7 @@ def find_nearest_neighbors_between_pc(source_points: np.ndarray, target_points: 
     source_kdtree = cKDTree(source_points)
 
     # Find nearest neighbors for each point in the target point cloud
-    distances, indices = source_kdtree.query(
+    _, indices = source_kdtree.query(
         target_points, k=nearest_neigh_num)
 
     # Retrieve the nearest neighbor points
