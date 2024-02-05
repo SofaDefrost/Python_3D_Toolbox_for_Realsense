@@ -20,6 +20,7 @@ from functions import processing_point_cloud as pc
 pipeline=aq.init_realsense(640,480)
 # Acquisition
 points,colors=aq.get_points_and_colors_from_realsense(pipeline)
+img.save(colors,"example/output/capture_realsense_out.png")
 # Zone Selection
 point_cropped, color_cropped,_,new_shape = pc.crop_from_zone_selection(points,colors)
 # Choose mask
@@ -32,6 +33,5 @@ radius=aTk.get_parameter_using_preview(points_hsv,pc.filter_with_sphere_on_baryc
 points_filtre,colors_filtre,_=pc.filter_with_sphere_on_barycentre(points_hsv,radius,colors_hsv)
 # Save results
 ply.save("example/output/capture_realsense_out.ply",points_filtre,colors_filtre)
-img.save(colors,"example/output/capture_realsense_out.png")
 
 print("Outcome(s) will be stored in the 'example/output' folder.")

@@ -1,7 +1,7 @@
 import numpy as np
 import pyrealsense2 as rs
 
-def recover_matrix_calib() -> np.ndarray:
+def recover_matrix_calib(width: int, height: int) -> np.ndarray:
     """
     Recover the calibration matrix from the depth stream.
 
@@ -10,7 +10,7 @@ def recover_matrix_calib() -> np.ndarray:
     """
     pipeline = rs.pipeline()
     config = rs.config()
-    config.enable_stream(rs.stream.depth, 0, 0, rs.format.z16, 30)  # Configure depth stream
+    config.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)  # Configure depth stream
     profile = pipeline.start(config)
 
     depth_profile = profile.get_stream(rs.stream.depth)
@@ -26,5 +26,9 @@ def recover_matrix_calib() -> np.ndarray:
     return calibration_matrix
 
 if __name__ == '__main__':
-    calibration_matrix = recover_matrix_calib()
+    print("Calibration matrix (640,480)")
+    calibration_matrix = recover_matrix_calib(640,480)
+    print(calibration_matrix)
+    print("Calibration matrix (1280,720)")
+    calibration_matrix = recover_matrix_calib(1280,720)
     print(calibration_matrix)
