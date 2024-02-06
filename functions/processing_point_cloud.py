@@ -299,8 +299,6 @@ def filter_with_sphere_on_barycentre(points: np.ndarray, radius: float, colors: 
     Raises:
     - ValueError: If the input array is not of the correct shape or if the radius is negative.
     """
-    points = np.array([np.array([point[0], point[1], point[2]])
-                      for point in points])
     array.is_homogenous_of_dim(points, 3)
     if radius < 0:
         raise ValueError("Radius must be non-negative")
