@@ -16,8 +16,9 @@ def is_homogenous_of_dim(array: np.ndarray, dimension: Optional[int] = -1) -> No
     """
     if len(array) == 0:
         raise ValueError(f"Empty array {array}")
-    if not all(isinstance(element, type(array[0])) for element in array):
-        raise ValueError(f"Different type in the array {array}")
+    # Removed because it take too many time to execute
+    # if not all(isinstance(element, type(array[0])) for element in array):
+    #     raise ValueError(f"Different type in the array {array}")
     if dimension > 0:
         taille = np.shape(array)
         if not (len(taille) == 1 and dimension == 1):
