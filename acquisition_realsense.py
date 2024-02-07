@@ -373,6 +373,7 @@ def init_realsense(width: int, height: int):
         config.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
         # Start streaming
         pipeline.start(config)
+        time.sleep(2) # Because the camera need time to be fully operationnal
     except Exception as e:
         raise ValueError(f"Error: {e}")
     return pipeline
