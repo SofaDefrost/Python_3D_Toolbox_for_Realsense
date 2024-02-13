@@ -553,15 +553,15 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     return apply_binary_mask(points, colors, binary_mask, shape, tab_index)
 
 
-def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.ndarray, shape: Tuple[int, int] = []) -> Tuple[np.ndarray, np.ndarray]:
+def center_on_image(points: np.ndarray, colors: np.ndarray,shape_pc: Tuple[int, int], image_target: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     Center a point cloud on the target image.
 
     Parameters:
     - points (np.ndarray): The array of 3D points.
     - colors (np.ndarray): The array of colors associated with the points.
+    - shape (Tuple[int, int], optional): The shape of the points cloud.
     - image_target (np.ndarray): The array of target image.
-    - shape (Tuple[int, int], optional): The shape of the image.
 
     Returns:
     - Tuple[np.ndarray, np.ndarray]: The centered array of 3D points and colors.
@@ -572,9 +572,9 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
 
     # Calculate the center of the image in pixel coordinates
     center_image_ref = np.array(
-        [int(width/2), int(height/2), 1])  # En pixel
+        [int(width/2), int(height/2), 1])  # In pixel
 
-    image_source = array.line_to_2Darray(colors, (480, 640))
+    image_source = array.line_to_2Darray(colors, shape_pc)
     image_source = cv2.convertScaleAbs(image_source)
     # Get the size of the source image
     h, w = image_source.shape[:2]
@@ -592,7 +592,7 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, image_target: np.nda
     pc_centered = [(x[0] - pc_original[0], x[1] -
                     pc_original[1], x[2] - pc_original[2]) for x in points]
 
-    return pc_centered, colors
+    return np.array(pc_centered), colors
 
 
 def find_nearest_neighbors_between_pc(source_points: np.ndarray, target_points: np.ndarray, nearest_neigh_num: int) -> Tuple[np.ndarray, np.ndarray]:
