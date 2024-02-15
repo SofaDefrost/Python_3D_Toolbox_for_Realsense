@@ -1,4 +1,4 @@
-# RealSense
+# Python 3D Toolbox for Realsense
 
 This repository provides a set of Python scripts useful for 3D file processing, particularly for files obtained using Realsense depth cameras. It includes an *acquisition_realsense.py* file for capturing and recording with a Realsense camera, as well as a *functions* folder containing a collection of processing functions (point cloud, ply, pixels...) and a subfolder *utils* containing some other useful functions.
 
