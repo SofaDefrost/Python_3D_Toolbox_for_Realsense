@@ -405,35 +405,66 @@ def get_points_and_colors_from_realsense(pipeline) -> Tuple[np.ndarray]:
     
     return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)) , color_image
 
+def test_double_acquisition(width: int, height: int):
+    pipeline_1 = rs.pipeline()
+    config_1 = rs.config()
+    config_1.enable_device('218622271199')
+    config_1.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
+    config_1.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
+    # ...from Camera 2
+    pipeline_2 = rs.pipeline()
+    config_2 = rs.config()
+    config_2.enable_device('218722270817')
+    config_2.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
+    config_2.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
+
+
+    # Start streaming from both cameras
+    pipeline_1.start(config_1)
+    pipeline_2.start(config_2)
+
+    try:
+        # Camera 1
+        # Wait for a coherent pair of frames: depth and color
+        frames_1 = pipeline_1.wait_for_frames()
+        depth_frame_1 = frames_1.get_depth_frame()
+        color_frame_1 = frames_1.get_color_frame()
+
+        # Get the 3D and 2D coordinates
+        pc = rs.pointcloud()
+        pc.map_to(depth_frame_1)
+        points = pc.calculate(depth_frame_1)
+
+        # Convert the coordinates to NumPy arrays
+        vertices_1 = np.array(points.get_vertices())
+        color_image_1 = np.array(color_frame_1.get_data())
+
+        # Camera 2
+        # Wait for a coherent pair of frames: depth and color
+        frames_2 = pipeline_2.wait_for_frames()
+        depth_frame_2 = frames_2.get_depth_frame()
+        color_frame_2 = frames_2.get_color_frame()
+        
+        # Get the 3D and 2D coordinates
+        pc = rs.pointcloud()
+        pc.map_to(depth_frame_2)
+        points = pc.calculate(depth_frame_2)
+        
+        # Convert the coordinates to NumPy arrays
+        vertices_2 = np.array(points.get_vertices())
+        color_image_2 = np.array(color_frame_2.get_data())
+        
+        return [[vertices_1.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices_1.shape + (-1,)) , color_image_1],[vertices_2.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices_2.shape + (-1,)) , color_image_2]]
+
+        
+    except Exception as e:
+        raise ValueError(f"Error: {e}")
+    
+
 if __name__ == '__main__':
-    # points,colors=get_points_colors_from_realsense_with_interface()
-    # ply.save("example/output/test_acquisition.ply",points,new_colors)
-    pipeline=init_realsense(640,480)
-    points,colors=get_points_and_colors_from_realsense(pipeline)
-    debut = time.time()
-    get_points_and_colors_from_realsense(pipeline)
-    fin = time.time()
-    temps_ecoule = fin - debut
-    print(f"Temps d'exécution de votre_fonction : {temps_ecoule} secondes")
-    debut = time.time()
-    get_points_and_colors_from_realsense(pipeline)
-    fin = time.time()
-    temps_ecoule = fin - debut
-    print(f"Temps d'exécution de votre_fonction : {temps_ecoule} secondes")
-    
-    debut = time.time()
-    get_points_and_colors_from_realsense(pipeline)
-    fin = time.time()
-    temps_ecoule = fin - debut
-    print(f"Temps d'exécution de votre_fonction : {temps_ecoule} secondes")
-    
-    debut = time.time()
-    get_points_and_colors_from_realsense(pipeline)
-    fin = time.time()
-    temps_ecoule = fin - debut
-    print(f"Temps d'exécution de votre_fonction : {temps_ecoule} secondes")
-    # #save_ply_from_realsense("realsense.ply", "realsense2.png")
-    
+    list_pc=test_double_acquisition(1280,720)
+    ply.save("cam1.ply",list_pc[0][0],list_pc[0][1])
+    ply.save("cam2.ply",list_pc[1][0],list_pc[1][1])
     # # Pour des acquisitions en masse
     # i=0
     # name_folder="example/output/Labo/"
