@@ -15,12 +15,14 @@ if mod_name:
     from .functions import processing_ply as ply
     from .functions import processing_img as img
     from .functions import processing_pixel_list as pixels
+    from . import info_realsense as ir
 else:
     # Code executed as a script
     from functions.utils import array as array
     from functions import processing_ply as ply
     from functions import processing_img as img
     from functions import processing_pixel_list as pixels
+    import info_realsense as ir
 
 
 class AppState:
@@ -58,7 +60,7 @@ def get_points_colors_from_realsense_with_interface() -> None:
 
     Parameters:
     - path_name_ply (str): The path and name of the PLY file to save.
-    
+
     Returns:
     None
     """
@@ -350,16 +352,17 @@ def get_points_colors_from_realsense_with_interface() -> None:
             pc.map_to(depth_frame)
             points = pc.calculate(depth_frame)
             vertices = np.array(points.get_vertices())
-            return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)),color_image
+            return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)), color_image
 
 
-def init_realsense(width: int, height: int):
+def init_realsense(width: int, height: int, serial_number: str = ""):
     """
     Initialize a RealSense pipeline with specified width and height for depth and color streams.
 
     Parameters:
     - width (int): Width of the streams.
     - height (int): Height of the streams.
+    - serial_number (str): Serial number of the RealSense camera. Defaults to "" : it means that it will choose the camera automatically (useful when only one camera is connected).
 
     Returns:
     - pipeline: Initialized RealSense pipeline.
@@ -369,14 +372,18 @@ def init_realsense(width: int, height: int):
         pipeline = rs.pipeline()
         # Configure streams
         config = rs.config()
+        if len(serial_number) > 0:
+            config.enable_device(serial_number)
         config.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
-        config.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
+        config.enable_stream(rs.stream.color, width,
+                             height, rs.format.rgb8, 30)
         # Start streaming
         pipeline.start(config)
-        time.sleep(2) # Because the camera need time to be fully operationnal
+        time.sleep(2)  # Because the camera need time to be fully operationnal
     except Exception as e:
         raise ValueError(f"Error: {e}")
     return pipeline
+
 
 def get_points_and_colors_from_realsense(pipeline) -> Tuple[np.ndarray]:
     """
@@ -384,7 +391,7 @@ def get_points_and_colors_from_realsense(pipeline) -> Tuple[np.ndarray]:
 
     Parameters:
         pipeline (rs.pipeline): Objet de pipeline RealSense.
-        
+
     Returns:
         Tuple[np.ndarray, np.ndarray]: Tuple contenant les coordonnées 3D (vertices) et l'image couleur (color_image).
     """
@@ -402,69 +409,21 @@ def get_points_and_colors_from_realsense(pipeline) -> Tuple[np.ndarray]:
     # Convert the coordinates to NumPy arrays
     vertices = np.array(points.get_vertices())
     color_image = np.array(color_frame.get_data())
-    
-    return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)) , color_image
 
-def test_double_acquisition(width: int, height: int):
-    pipeline_1 = rs.pipeline()
-    config_1 = rs.config()
-    config_1.enable_device('218622271199')
-    config_1.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
-    config_1.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
-    # ...from Camera 2
-    pipeline_2 = rs.pipeline()
-    config_2 = rs.config()
-    config_2.enable_device('218722270817')
-    config_2.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
-    config_2.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
+    return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)), color_image
 
-
-    # Start streaming from both cameras
-    pipeline_1.start(config_1)
-    pipeline_2.start(config_2)
-
-    try:
-        # Camera 1
-        # Wait for a coherent pair of frames: depth and color
-        frames_1 = pipeline_1.wait_for_frames()
-        depth_frame_1 = frames_1.get_depth_frame()
-        color_frame_1 = frames_1.get_color_frame()
-
-        # Get the 3D and 2D coordinates
-        pc = rs.pointcloud()
-        pc.map_to(depth_frame_1)
-        points = pc.calculate(depth_frame_1)
-
-        # Convert the coordinates to NumPy arrays
-        vertices_1 = np.array(points.get_vertices())
-        color_image_1 = np.array(color_frame_1.get_data())
-
-        # Camera 2
-        # Wait for a coherent pair of frames: depth and color
-        frames_2 = pipeline_2.wait_for_frames()
-        depth_frame_2 = frames_2.get_depth_frame()
-        color_frame_2 = frames_2.get_color_frame()
-        
-        # Get the 3D and 2D coordinates
-        pc = rs.pointcloud()
-        pc.map_to(depth_frame_2)
-        points = pc.calculate(depth_frame_2)
-        
-        # Convert the coordinates to NumPy arrays
-        vertices_2 = np.array(points.get_vertices())
-        color_image_2 = np.array(color_frame_2.get_data())
-        
-        return [[vertices_1.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices_1.shape + (-1,)) , color_image_1],[vertices_2.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices_2.shape + (-1,)) , color_image_2]]
-
-        
-    except Exception as e:
-        raise ValueError(f"Error: {e}")
-    
 
 if __name__ == '__main__':
-    list_pc=test_double_acquisition(1280,720)
-    ply.save("cam1.ply",list_pc[0][0],list_pc[0][1])
-    ply.save("cam2.ply",list_pc[1][0],list_pc[1][1])
+    # When two cameras connected
+    serial_numbers = ir.get_serial_number()
+    pipeline_1 = init_realsense(1280, 720, serial_numbers[0])
+    pipeline_2 = init_realsense(640, 480, serial_numbers[1])
+
+    points_1, colors_1 = get_points_and_colors_from_realsense(pipeline_1)
+    points_2, colors_2 = get_points_and_colors_from_realsense(pipeline_2)
+
+    ply.save("example/output/cam1.ply", points_1, colors_1)
+    ply.save("example/output/cam2.ply", points_2, colors_2)
     # # Pour des acquisitions en masse
     # i=0
     # name_folder="example/output/Labo/"

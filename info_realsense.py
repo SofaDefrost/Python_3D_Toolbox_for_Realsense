@@ -4,7 +4,7 @@ import pyrealsense2 as rs
 from typing import List
 
 
-def recover_matrix_calib(width: int, height: int, serial_number: str = "") -> np.ndarray:
+def get_matrix_calib(width: int, height: int, serial_number: str = "") -> np.ndarray:
     """
     Recover the calibration matrix from a RealSense camera.
 
@@ -37,7 +37,7 @@ def recover_matrix_calib(width: int, height: int, serial_number: str = "") -> np
     return calibration_matrix
 
 
-def recover_serial_number() -> List[str]:
+def get_serial_number() -> List[str]:
     """
     Recover the serial numbers of connected RealSense cameras.
 
