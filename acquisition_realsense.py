@@ -57,10 +57,8 @@ class AppState:
 def get_points_colors_from_realsense_with_interface() -> None:
     """
     Capture 3D points and color information from a RealSense depth camera and save as a PLY file.
-
-    Parameters:
-    - path_name_ply (str): The path and name of the PLY file to save.
-
+    This version runs with an interface. It is not recommended to use this version (except for tests).
+        
     Returns:
     None
     """

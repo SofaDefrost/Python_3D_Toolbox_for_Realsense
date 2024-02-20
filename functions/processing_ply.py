@@ -57,7 +57,7 @@ def save(output_filename: str, points: np.ndarray, colors: Optional[np.ndarray] 
             "The number of points must match the number of colors.")
 
     with open(output_filename, 'w') as ply_file:
-        # Écriture de l'en-tête PLY
+        # Write the head of the file
         ply_file.write("ply\n")
         ply_file.write("format ascii 1.0\n")
         ply_file.write(f"element vertex {len(points)}\n")
@@ -72,7 +72,7 @@ def save(output_filename: str, points: np.ndarray, colors: Optional[np.ndarray] 
 
         ply_file.write("end_header\n")
 
-        # Écriture des données de points et couleurs
+        # Write the data of the point cloud (points and colors)
         if with_color:
             for point, color in zip(points, colors):
                 x = point[0]
