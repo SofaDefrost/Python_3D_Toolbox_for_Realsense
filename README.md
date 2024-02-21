@@ -4,6 +4,7 @@ This repository provides a set of Python scripts useful for 3D file processing, 
 
 Thanks to this repository you should be able to:
 
+- Connect multiple realsense's cameras to one computer and process acquisitions.
 - Filter point cloud (density, threshold, radius, ...) thanks (or not) to users interface. 
 - Process point cloud (resize, center on image, color, ...).
 - Cut point cloud by selecting a zone with an interface.
