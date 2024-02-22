@@ -8,7 +8,6 @@
     At the end, the final result will be saved.
 """
 import acquisition_realsense as aq
-
 from functions.utils import array as array
 from functions import processing_ply as ply
 from functions import processing_img as img
@@ -17,21 +16,26 @@ from functions import previsualisation_application_function as aTk
 from functions import processing_point_cloud as pc
 
 # Init acquisition
-pipeline=aq.init_realsense(640,480)
+pipeline = aq.init_realsense(640, 480)
 # Acquisition
-points,colors=aq.get_points_and_colors_from_realsense(pipeline)
-img.save(colors,"example/output/capture_realsense_out.png")
+points, colors = aq.get_points_and_colors_from_realsense(pipeline)
+img.save(colors, "example/output/capture_realsense_out.png")
 # Zone Selection
-point_cropped, color_cropped,_,new_shape = pc.crop_from_zone_selection(points,colors)
+point_cropped, color_cropped, _, new_shape = pc.crop_from_zone_selection(
+    points, colors)
 # Choose mask
-maskhsv = pixels.get_hsv_mask_with_sliders(color_cropped,new_shape)
+maskhsv = pixels.get_hsv_mask_with_sliders(color_cropped, new_shape)
 # Apply mask
-points_hsv,colors_hsv,_ = pc.apply_hsv_mask(point_cropped,color_cropped,maskhsv,new_shape)
+points_hsv, colors_hsv, _ = pc.apply_hsv_mask(
+    point_cropped, color_cropped, maskhsv, new_shape)
 # Choose radius filter
-radius=aTk.get_parameter_using_preview(points_hsv,pc.filter_with_sphere_on_barycentre,"Radius")
+radius = aTk.get_parameter_using_preview(
+    points_hsv, pc.filter_with_sphere_on_barycentre, "Radius")
 # Apply radius filter
-points_filtre,colors_filtre,_=pc.filter_with_sphere_on_barycentre(points_hsv,radius,colors_hsv)
+points_filtre, colors_filtre, _ = pc.filter_with_sphere_on_barycentre(
+    points_hsv, radius, colors_hsv)
 # Save results
-ply.save("example/output/capture_realsense_out.ply",points_filtre,colors_filtre)
+ply.save("example/output/capture_realsense_out.ply",
+         points_filtre, colors_filtre)
 
 print("Outcome(s) will be stored in the 'example/output' folder.")
