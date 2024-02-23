@@ -1,6 +1,6 @@
 # Output folder for storing tests results
 
-example/output/
+example/output/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

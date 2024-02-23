@@ -128,4 +128,4 @@ if __name__ == '__main__':
     get_parameter_using_preview(
         points, pc.filter_with_sphere_on_barycentre,"Rayon")
     get_parameter_using_preview(
-        points, pc.remove_points_below_threshold,"Threshold")
+        points, pc.remove_points_threshold,"Threshold")
