@@ -15,6 +15,10 @@ from functions import processing_pixel_list as pixels
 from functions import previsualisation_application_function as aTk
 from functions import processing_point_cloud as pc
 
+p,c=ply.get_points_and_colors("debug_filtre.ply")
+z= aTk.get_parameter_using_preview(
+    p, pc.remove_points_threshold, "z")
+
 # Init acquisition
 pipeline = aq.init_realsense(640, 480)
 # Acquisition

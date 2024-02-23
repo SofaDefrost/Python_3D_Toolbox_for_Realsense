@@ -202,13 +202,14 @@ def centering_on_mean_points(points: np.ndarray) -> np.ndarray:
     return np.array(new_vertices)
 
 
-def remove_points_below_threshold(points: np.ndarray, threshold: float, colors: Optional[np.ndarray] = [], axis: str = "z") -> Tuple[np.ndarray, np.ndarray]:
+def remove_points_threshold(points: np.ndarray, threshold: float, position: int = 1, colors: Optional[np.ndarray] = [], axis: str = "z") -> Tuple[np.ndarray, np.ndarray]:
     """
     Remove points from a 3D array based on a threshold along a specific axis.
 
     Parameters:
     - points (np.ndarray): The input array of 3D points.
     - threshold (float): The threshold value for removing points.
+    - position (int): 1 for above, -1 for below
     - colors (np.ndarray, optional): The array of colors associated with the points.
     - axis (str, optional): The axis along which to apply the threshold ('x', 'y', or 'z').
 
@@ -218,6 +219,11 @@ def remove_points_below_threshold(points: np.ndarray, threshold: float, colors: 
     Raises:
     - ValueError: If the input array is not of the correct shape or if the axis is unknown.
     """
+
+    if (position != -1) and (position != 1):
+        raise ValueError(
+            f"Incorrect position, given {position} expected 1 or -1.")
+
     array.is_homogenous_of_dim(points, 3)
 
     if axis != "x" and axis != "y" and axis != "z":
@@ -230,8 +236,11 @@ def remove_points_below_threshold(points: np.ndarray, threshold: float, colors: 
     if axis == "z":
         axis_int = 2
 
-    # Select indices of points whose coordinate along the specified axis is greater than or equal to the threshold
-    index = np.where(points[:, axis_int] >= threshold)
+    if position == -1:
+        # Select indices of points whose coordinate along the specified axis is greater than or equal to the threshold
+        index = np.where(points[:, axis_int] >= threshold)
+    else:
+        index = np.where(points[:, axis_int] <= threshold)
 
     # Check if the filtered point cloud is not empty
     if len(index[0]) == 0:
@@ -423,9 +432,9 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
             height, length = np.shape(colors_image)[
                 0], np.shape(colors_image)[1]
         else:
-            height,length = shape
+            height, length = shape
             colors_image = array.line_to_2Darray(
-                colors, (length,height)).astype(np.uint8)
+                colors, (length, height)).astype(np.uint8)
             colors = array.to_line(colors)
     else:
         if len(np.shape(colors)) != 3:
@@ -466,7 +475,7 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
     top_left_corner = (y_max-1)*height + x_min
     bottom_right_corner = (y_min-1)*height + x_max
 
-    new_shape = (abs(x_max-x_min),abs(y_max-y_min)+1)
+    new_shape = (abs(x_max-x_min), abs(y_max-y_min)+1)
 
     i = 0
     points_cloud_crop = []
@@ -553,7 +562,7 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     return apply_binary_mask(points, colors, binary_mask, shape, tab_index)
 
 
-def center_on_image(points: np.ndarray, colors: np.ndarray,shape_pc: Tuple[int, int], image_target: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def center_on_image(points: np.ndarray, colors: np.ndarray, shape_pc: Tuple[int, int], image_target: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     Center a point cloud on the target image.
 
