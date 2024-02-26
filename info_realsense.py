@@ -34,6 +34,7 @@ def get_matrix_calib(width: int, height: int, serial_number: str = "") -> np.nda
     calibration_matrix = np.array([[fx, 0, cx],
                                    [0, fy, cy],
                                    [0, 0, 1]], dtype=np.float32)
+    pipeline.stop()
     return calibration_matrix
 
 
@@ -54,11 +55,11 @@ def get_serial_number() -> List[str]:
 
 if __name__ == '__main__':
     print("Serial number(s) of camera(s) connected")
-    serial_number = recover_serial_number()
+    serial_number = get_matrix_calib()
     print(serial_number)
     print("Calibration matrix (640,480)")
-    calibration_matrix = recover_matrix_calib(640, 480, serial_number[0])
+    calibration_matrix = get_matrix_calib(640, 480, serial_number[0])
     print(calibration_matrix)
     print("Calibration matrix (1280,720)")
-    calibration_matrix = recover_matrix_calib(1280, 720)
+    calibration_matrix = get_matrix_calib(1280, 720)
     print(calibration_matrix)
