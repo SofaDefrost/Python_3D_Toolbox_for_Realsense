@@ -15,6 +15,7 @@ from functions import processing_pixel_list as pixels
 from functions import previsualisation_application_function as aTk
 from functions import processing_point_cloud as pc
 
+
 # Init acquisition
 pipeline = aq.init_realsense(640, 480)
 # Acquisition

@@ -80,8 +80,8 @@ def display(pixels: np.ndarray, window_name: str, shape: List[int] = []) -> None
     """
     if shape != []:
         pixels = array.line_to_2Darray(pixels, (shape[1], shape[0]))
+    pixels = pixels.astype(np.uint8) 
     # Display the resulting image
-    print(np.shape(pixels))
     cv2.imshow(window_name, pixels[:, :, ::-1])
     cv2.waitKey(0)
     cv2.destroyAllWindows()
