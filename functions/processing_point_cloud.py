@@ -583,7 +583,7 @@ def center_on_image(points: np.ndarray, colors: np.ndarray, shape_pc: Tuple[int,
     center_image_ref = np.array(
         [int(width/2), int(height/2), 1])  # In pixel
 
-    image_source = array.line_to_2Darray(colors, shape_pc)
+    image_source = array.line_to_2Darray(colors, [shape_pc[1],shape_pc[0]])
     image_source = cv2.convertScaleAbs(image_source)
     # Get the size of the source image
     h, w = image_source.shape[:2]

@@ -82,5 +82,5 @@ def is_good_type(value, intended_type):
 
 if __name__ == '__main__':
     is_good_type(7, int)
-    print(open_and_give_content("realsense/utils/processing_general.py"))
+    print(open_and_give_content("./functions/utils/array.py"))
     open_and_give_content("?")

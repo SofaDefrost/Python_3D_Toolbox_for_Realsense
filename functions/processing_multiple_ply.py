@@ -115,9 +115,3 @@ def get_point_cloud(file_path, pc_index):
             colors.append([int(x) for x in data[-3:]])
         line = file.readline()
     return np.array(points), np.array(colors)
-
-
-if __name__ == '__main__':
-    import processing_ply as ply
-    list_pc=get_point_cloud("test.mply",239)
-    ply.save("test.ply",list_pc[0],list_pc[1])

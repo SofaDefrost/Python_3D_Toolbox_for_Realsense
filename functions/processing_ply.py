@@ -164,6 +164,6 @@ def get_points_and_colors(file_path: str) -> Tuple[np.ndarray, np.ndarray]:
 if __name__ == '__main__':
     image_ref=img.load("./example/input/image_ref.png")
     points, colors = get_points_and_colors('./example/input/capture_with_image_ref.ply')
-    centered_points,centered_colors=pc.center_on_image(points,colors,image_ref)
+    centered_points,centered_colors=pc.center_on_image(points,colors,(640,480),image_ref)
     save("./example/output/capture_centered_image_ref.ply",centered_points,centered_colors)
-    # create_and_save_mesh_from_ply("./example/input/test.ply", "./example/output/test.obj")
+    create_and_save_mesh_from_ply("./example/input/test.ply", "./example/output/test.obj")

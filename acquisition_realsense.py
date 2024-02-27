@@ -412,7 +412,7 @@ def get_points_and_colors_from_realsense(pipeline) -> Tuple[np.ndarray]:
 
 
 if __name__ == '__main__':
-    # When two cameras connected
+    # When two cameras are connected
     serial_numbers = ir.get_serial_number()
     pipeline_1 = init_realsense(1280, 720, serial_numbers[0])
     pipeline_2 = init_realsense(640, 480, serial_numbers[1])
@@ -422,13 +422,3 @@ if __name__ == '__main__':
 
     ply.save("example/output/cam1.ply", points_1, colors_1)
     ply.save("example/output/cam2.ply", points_2, colors_2)
-    # # Pour des acquisitions en masse
-    # i=0
-    # name_folder="example/output/Labo/"
-    # name_file="6_boeuf_et_poulet_"
-    # pipeline=init_realsense(640,480)
-    # while True:
-    #     points,colors=get_points_and_colors_from_realsense(pipeline,name_folder+name_file+str(i)+".png")
-    #     ply.save(name_folder+name_file+str(i)+".ply",points,colors)
-    #     pixels.display(colors,str(i))
-    #     i+=1
