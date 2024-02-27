@@ -1,7 +1,7 @@
 # Output folder for storing tests results
 
 example/output/*
-!example/output/
+!example/output/README.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
