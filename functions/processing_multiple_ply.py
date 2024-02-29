@@ -1,3 +1,9 @@
+"""
+This module provides functionality for saving and retrieving point cloud data in the .mply file format.
+.mply is a custom file format used for storing multiple .ply files in one. 
+Each .mply file consists of a header section followed by the data section.
+"""
+
 import numpy as np
 import sys
 

@@ -15,6 +15,7 @@ if mod_name:
     from .functions import processing_ply as ply
     from .functions import processing_img as img
     from .functions import processing_pixel_list as pixels
+    from .functions import processing_multiple_ply as mply
     from . import info_realsense as ir
 else:
     # Code executed as a script
@@ -22,6 +23,7 @@ else:
     from functions import processing_ply as ply
     from functions import processing_img as img
     from functions import processing_pixel_list as pixels
+    from functions import processing_multiple_ply as mply
     import info_realsense as ir
 
 
@@ -412,7 +414,8 @@ def get_points_and_colors_from_realsense(pipeline) -> Tuple[np.ndarray]:
 
 
 if __name__ == '__main__':
-    # When two cameras are connected
+    ## Help to deal with several cameras
+    
     serial_numbers = ir.get_serial_number()
     pipeline_1 = init_realsense(1280, 720, serial_numbers[0])
     pipeline_2 = init_realsense(640, 480, serial_numbers[1])
@@ -422,3 +425,26 @@ if __name__ == '__main__':
 
     ply.save("example/output/cam1.ply", points_1, colors_1)
     ply.save("example/output/cam2.ply", points_2, colors_2)
+    
+    ## Help to generate .mply files
+    list_pc=[]
+    time_exe=[]
+    nb_images=10
+    pipeline=init_realsense(1280,720)
+    points,colors=get_points_and_colors_from_realsense(pipeline)
+    points,colors=get_points_and_colors_from_realsense(pipeline)
+    for i in range(nb_images):
+        temps_start = time.time()
+        points,colors=get_points_and_colors_from_realsense(pipeline)
+        list_pc.append([points,colors])
+        temps_end = time.time()
+        temps_processing = temps_end - temps_start
+        time_exe.append(temps_processing)
+        print(f"Time for acquisition: {temps_processing} seconds")
+    fps = 1/(sum(time_exe)/len(time_exe))
+    print(fps)
+    temps_start = time.time()
+    mply.save("example/output/test.mply",list_pc)
+    temps_end = time.time()
+    temps_processing = temps_end - temps_start
+    print(f"Time for saving: {temps_processing} seconds")
