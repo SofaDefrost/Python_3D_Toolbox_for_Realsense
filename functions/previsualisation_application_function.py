@@ -88,10 +88,11 @@ def get_parameter_using_preview(points: np.ndarray, fonction,name_slider:str="",
     slider_label.pack()
     slider = tk.Scale(root, from_=start_slider, to=end_slider, resolution=resolution, orient="horizontal", command=lambda event: update_display_Tkinter(
         event, ax, canvas, points, fonction, slider))
+    slider.set(end_slider)
     slider.pack()
 
     new_points = fonction(
-        points, start_slider)
+        points, end_slider)
     if len(new_points)==2 or len(new_points)==3:
         plot_3Darray_Tkinter(ax, new_points[0])
     else:
