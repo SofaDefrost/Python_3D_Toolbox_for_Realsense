@@ -4,8 +4,6 @@ import matplotlib.axes._axes
 import matplotlib.pyplot as plt
 import sys
 
-from tkinter import ttk
-from tkinter import Scale, Button
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from typing import Any, Optional
@@ -62,7 +60,7 @@ def update_display_Tkinter(event: Any, ax: Axes3D, canvas: Any, points: np.ndarr
     canvas.draw()
 
 
-def get_parameter_using_preview(points: np.ndarray, fonction,name_slider:str="", start_slider: int = 0.01, end_slider: int = 1, resolution: float = 0.01) -> float:
+def get_parameter_using_preview(points: np.ndarray, fonction,name_slider:str="", start_slider: float = 0.01, end_slider: float = 1, resolution: float = 0.01) -> float:
     """
     Get a parameter value interactively using Tkinter GUI.
 
@@ -85,16 +83,21 @@ def get_parameter_using_preview(points: np.ndarray, fonction,name_slider:str="",
     canvas.get_tk_widget().pack()
     if len(name_slider)==0:
         name_slider = fonction.__code__.co_varnames[:fonction.__code__.co_argcount][1]
-    slider_label = ttk.Label(
+    slider_label = tk.Label(
         root, text=f"{name_slider}")
     slider_label.pack()
-    slider = Scale(root, from_=start_slider, to=end_slider, resolution=resolution, orient="horizontal", command=lambda event: update_display_Tkinter(
+    slider = tk.Scale(root, from_=start_slider, to=end_slider, resolution=resolution, orient="horizontal", command=lambda event: update_display_Tkinter(
         event, ax, canvas, points, fonction, slider))
     slider.pack()
 
-    plot_3Darray_Tkinter(ax, points)
+    new_points = fonction(
+        points, start_slider)
+    if len(new_points)==2 or len(new_points)==3:
+        plot_3Darray_Tkinter(ax, new_points[0])
+    else:
+        plot_3Darray_Tkinter(ax, new_points)
 
-    export_button = Button(root, text=f"Export value of the {fonction.__code__.co_varnames[:fonction.__code__.co_argcount][1]}",
+    export_button = tk.Button(root, text=f"Export value of the {fonction.__code__.co_varnames[:fonction.__code__.co_argcount][1]}",
                            command=root.quit)
     export_button.pack()
 
@@ -128,4 +131,4 @@ if __name__ == '__main__':
     get_parameter_using_preview(
         points, pc.filter_with_sphere_on_barycentre,"Rayon")
     get_parameter_using_preview(
-        points, pc.remove_points_threshold,"Threshold")
+        points, pc.remove_points_threshold,"Threshold",0.20,0.23,0.01)
