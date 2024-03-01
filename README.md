@@ -43,6 +43,8 @@ pip3 install open3d
 
 - Please be careful to the type of lists of colors when working with images. Indeed all this repository has been built for RGB's images but because of OpenCV (one of the libraries used which is working with BGR's images) you might encounter problems of colors : red and blue pixels could be exchanged. If you are facing this problem you can switch between an RGB and an BGR list by using the code ```[:, :, ::-1]```. For example if ```colors``` is a RGB list, ```colors[:, :, ::-1]``` will be an BGR list (and vice versa).
 
+- If you are experiencing unexpected errors while using functions in *previsualisation_application_function.py* it is possible that you are encountering a compatibility issue related to the locale settings on your system. Specifically, if your language setting uses a comma (,) as the decimal separator for floats, Tkinter may not handle float values correctly within the Scale widget. To resolve this issue, consider adjusting the locale settings on your computer to use a period (.) as the decimal separator instead of a comma.
+
 For additional information about Realsense with Python, visit: https://dev.intelrealsense.com/docs/python2
 
 Authors: Thibaud Piccinali, Tinhinane Smail

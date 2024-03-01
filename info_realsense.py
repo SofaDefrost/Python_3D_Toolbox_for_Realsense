@@ -55,7 +55,7 @@ def get_serial_number() -> List[str]:
 
 if __name__ == '__main__':
     print("Serial number(s) of camera(s) connected")
-    serial_number = get_matrix_calib()
+    serial_number = get_serial_number()
     print(serial_number)
     print("Calibration matrix (640,480)")
     calibration_matrix = get_matrix_calib(640, 480, serial_number[0])
