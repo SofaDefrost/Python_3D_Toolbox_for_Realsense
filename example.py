@@ -16,24 +16,6 @@ from functions import processing_pixel_list as pixels
 from functions import previsualisation_application_function as aTk
 from functions import processing_point_cloud as pc
 
-pipeline = aq.init_realsense(1280, 720)
-# Acquisition
-points, colors = aq.get_points_and_colors_from_realsense(pipeline)
-# Choose mask
-maskhsv = pixels.get_hsv_mask_with_sliders(colors)
-
-points_hsv, colors_hsv, _ = pc.apply_hsv_mask(
-    points, colors, maskhsv,(1280,720))
-
-pos_laser = pc.get_mean_point(points_hsv)
-
-while True:
-    points, colors = aq.get_points_and_colors_from_realsense(pipeline)
-    points_hsv, colors_hsv, _ = pc.apply_hsv_mask(
-    points, colors, maskhsv,(1280,720))
-    pos_laser = pc.get_mean_point(points_hsv)
-    print(pos_laser)
-
 # Init acquisition
 pipeline = aq.init_realsense(640, 480)
 # Acquisition
