@@ -17,7 +17,7 @@ from functions import previsualisation_application_function as aTk
 from functions import processing_point_cloud as pc
 
 # Init acquisition
-pipeline = aq.init_realsense(640, 480)
+pipeline = aq.init_realsense(1280, 720)
 # Acquisition
 points, colors = aq.get_points_and_colors_from_realsense(pipeline)
 img.save(colors, "example/output/capture_realsense_out.png")
