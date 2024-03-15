@@ -14,7 +14,7 @@ Thanks to this repository you should be able to:
 
 <img src="media/acquisition.png" alt="Acquisition using the Realsense" width="796" height="230">
 <img src="media/select_zone.png" alt="filtering with zone of interest" width="739" height="230">
-<img src="media/hsv_mask.png" alt="Filtering with a hsv mask" width="230" height="230"><img src="media/remove_noisy_values.png" alt="Filtering of noisy values" width="521" height="230">
+<img src="media/hsv_mask.png" alt="Filtering with a hsv mask" width="1109" height="230"><img src="media/remove_noisy_values.png" alt="Filtering of noisy values" width="521" height="230">
 
 ## Usage
 
