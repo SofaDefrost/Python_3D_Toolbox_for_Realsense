@@ -60,13 +60,13 @@ def get_points_colors_from_realsense_with_interface() -> None:
     """
     Capture 3D points and color information from a RealSense depth camera and save as a PLY file.
     This version runs with an interface. It is not recommended to use this version (except for tests).
-        
+
     Returns:
     None
     """
     state = AppState()
 
-# Configure depth and color streams
+    # Configure depth and color streams
     pipeline = rs.pipeline()
     config = rs.config()
 
@@ -76,7 +76,7 @@ def get_points_colors_from_realsense_with_interface() -> None:
 
     found_rgb = False
     for s in device.sensors:
-        if s.get_info(rs.camera_info.name) == 'RGB Camera':
+        if s.get_info(rs.camera_info.name) == "RGB Camera":
             found_rgb = True
             break
     if not found_rgb:
@@ -85,20 +85,19 @@ def get_points_colors_from_realsense_with_interface() -> None:
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
     config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
-# Start streaming
+    # Start streaming
     pipeline.start(config)
 
-# Get stream profile and camera intrinsics
+    # Get stream profile and camera intrinsics
     profile = pipeline.get_active_profile()
-    depth_profile = rs.video_stream_profile(
-        profile.get_stream(rs.stream.depth))
+    depth_profile = rs.video_stream_profile(profile.get_stream(rs.stream.depth))
     depth_intrinsics = depth_profile.get_intrinsics()
     w, h = depth_intrinsics.width, depth_intrinsics.height
 
-# Processing blocks
+    # Processing blocks
     pc = rs.pointcloud()
     decimate = rs.decimation_filter()
-    decimate.set_option(rs.option.filter_magnitude, 2 ** state.decimate)
+    decimate.set_option(rs.option.filter_magnitude, 2**state.decimate)
     colorizer = rs.colorizer()
 
     def mouse_cb(event: int, x: int, y: int, flags: int, param: dict) -> None:
@@ -148,12 +147,14 @@ def get_points_colors_from_realsense_with_interface() -> None:
 
     def project(v: np.ndarray) -> np.ndarray:
         h, w = out.shape[:2]
-        view_aspect = float(h)/w
+        view_aspect = float(h) / w
 
         # ignore divide by zero for invalid depth
-        with np.errstate(divide='ignore', invalid='ignore'):
-            proj = v[:, :-1] / v[:, -1, np.newaxis] * \
-                (w*view_aspect, h) + (w/2.0, h/2.0)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            proj = v[:, :-1] / v[:, -1, np.newaxis] * (w * view_aspect, h) + (
+                w / 2.0,
+                h / 2.0,
+            )
 
         # near clipping
         znear = 0.03
@@ -163,7 +164,13 @@ def get_points_colors_from_realsense_with_interface() -> None:
     def view(v: np.ndarray) -> np.ndarray:
         return np.dot(v - state.pivot, state.rotation) + state.pivot - state.translation
 
-    def line3d(out: np.ndarray, pt1: np.ndarray, pt2: np.ndarray, color: np.ndarray = (0x80, 0x80, 0x80), thickness: int = 1) -> int:
+    def line3d(
+        out: np.ndarray,
+        pt1: np.ndarray,
+        pt2: np.ndarray,
+        color: np.ndarray = (0x80, 0x80, 0x80),
+        thickness: int = 1,
+    ) -> int:
         p0 = project(pt1.reshape(-1, 3))[0]
         p1 = project(pt2.reshape(-1, 3))[0]
         if np.isnan(p0).any() or np.isnan(p1).any():
@@ -175,33 +182,54 @@ def get_points_colors_from_realsense_with_interface() -> None:
         if inside:
             cv2.line(out, p0, p1, color, thickness, cv2.LINE_AA)
 
-    def grid(out: np.ndarray, pos: np.ndarray, rotation: np.ndarray = np.eye(3), size: float = 1, n: np.ndarray = 10, color: np.ndarray = (0x80, 0x80, 0x80)) -> None:
+    def grid(
+        out: np.ndarray,
+        pos: np.ndarray,
+        rotation: np.ndarray = np.eye(3),
+        size: float = 1,
+        n: np.ndarray = 10,
+        color: np.ndarray = (0x80, 0x80, 0x80),
+    ) -> None:
         pos = np.array(pos)
         s = size / float(n)
         s2 = 0.5 * size
-        for i in range(0, n+1):
-            x = -s2 + i*s
-            line3d(out, view(pos + np.dot((x, 0, -s2), rotation)),
-                   view(pos + np.dot((x, 0, s2), rotation)), color)
-        for i in range(0, n+1):
-            z = -s2 + i*s
-            line3d(out, view(pos + np.dot((-s2, 0, z), rotation)),
-                   view(pos + np.dot((s2, 0, z), rotation)), color)
+        for i in range(0, n + 1):
+            x = -s2 + i * s
+            line3d(
+                out,
+                view(pos + np.dot((x, 0, -s2), rotation)),
+                view(pos + np.dot((x, 0, s2), rotation)),
+                color,
+            )
+        for i in range(0, n + 1):
+            z = -s2 + i * s
+            line3d(
+                out,
+                view(pos + np.dot((-s2, 0, z), rotation)),
+                view(pos + np.dot((s2, 0, z), rotation)),
+                color,
+            )
 
-    def axes(out: np.ndarray, pos: np.ndarray, rotation: np.ndarray = np.eye(3), size: float = 0.075, thickness: int = 2) -> None:
-        line3d(out, pos, pos +
-               np.dot((0, 0, size), rotation), (0xff, 0, 0), thickness)
-        line3d(out, pos, pos +
-               np.dot((0, size, 0), rotation), (0, 0xff, 0), thickness)
-        line3d(out, pos, pos +
-               np.dot((size, 0, 0), rotation), (0, 0, 0xff), thickness)
+    def axes(
+        out: np.ndarray,
+        pos: np.ndarray,
+        rotation: np.ndarray = np.eye(3),
+        size: float = 0.075,
+        thickness: int = 2,
+    ) -> None:
+        line3d(out, pos, pos + np.dot((0, 0, size), rotation), (0xFF, 0, 0), thickness)
+        line3d(out, pos, pos + np.dot((0, size, 0), rotation), (0, 0xFF, 0), thickness)
+        line3d(out, pos, pos + np.dot((size, 0, 0), rotation), (0, 0, 0xFF), thickness)
 
-    def frustum(out: np.ndarray, intrinsics, color: np.ndarray = (0x40, 0x40, 0x40)) -> None:
+    def frustum(
+        out: np.ndarray, intrinsics, color: np.ndarray = (0x40, 0x40, 0x40)
+    ) -> None:
 
         orig = view([0, 0, 0])
         w, h = intrinsics.width, intrinsics.height
 
         for d in range(1, 6, 2):
+
             def get_point(x, y):
                 p = rs.rs2_deproject_pixel_to_point(intrinsics, [x, y], d)
                 line3d(out, orig, view(p), color)
@@ -217,7 +245,13 @@ def get_points_colors_from_realsense_with_interface() -> None:
             line3d(out, view(bottom_right), view(bottom_left), color)
             line3d(out, view(bottom_left), view(top_left), color)
 
-    def pointcloud(out: np.ndarray, verts: np.ndarray, texcoords: np.ndarray, color: np.ndarray, painter: bool = True) -> None:
+    def pointcloud(
+        out: np.ndarray,
+        verts: np.ndarray,
+        texcoords: np.ndarray,
+        color: np.ndarray,
+        painter: bool = True,
+    ) -> None:
         if painter:
             v = view(verts)
             s = v[:, 2].argsort()[::-1]
@@ -235,10 +269,10 @@ def get_points_colors_from_realsense_with_interface() -> None:
 
         h, w = out.shape[:2]
 
-    # proj now contains 2d image coordinates
+        # proj now contains 2d image coordinates
         j, i = proj.astype(np.uint32).T
 
-    # create a mask to ignore out-of-bound indices
+        # create a mask to ignore out-of-bound indices
         im = (i >= 0) & (i < h)
         jm = (j >= 0) & (j < w)
         m = im & jm
@@ -251,11 +285,11 @@ def get_points_colors_from_realsense_with_interface() -> None:
             v, u = (texcoords[s] * (cw, ch) + 0.5).astype(np.uint32).T
         else:
             v, u = (texcoords * (cw, ch) + 0.5).astype(np.uint32).T
-    # clip texcoords to image
-        np.clip(u, 0, ch-1, out=u)
-        np.clip(v, 0, cw-1, out=v)
+        # clip texcoords to image
+        np.clip(u, 0, ch - 1, out=u)
+        np.clip(v, 0, cw - 1, out=v)
 
-    # perform uv-mapping
+        # perform uv-mapping
         out[i[m], j[m]] = color[u[m], v[m]]
 
     out = np.empty((h, w, 3), dtype=np.uint8)
@@ -275,14 +309,14 @@ def get_points_colors_from_realsense_with_interface() -> None:
 
             # Grab new intrinsics (may be changed by decimation)
             depth_intrinsics = rs.video_stream_profile(
-                depth_frame.profile).get_intrinsics()
+                depth_frame.profile
+            ).get_intrinsics()
             w, h = depth_intrinsics.width, depth_intrinsics.height
 
             depth_image = np.asanyarray(depth_frame.get_data())
             color_image = np.asanyarray(color_frame.get_data())
 
-            depth_colormap = np.asanyarray(
-                colorizer.colorize(depth_frame).get_data())
+            depth_colormap = np.asanyarray(colorizer.colorize(depth_frame).get_data())
 
             if state.color:
                 mapped_frame, color_source = color_frame, color_image
@@ -311,8 +345,7 @@ def get_points_colors_from_realsense_with_interface() -> None:
         else:
             tmp = np.zeros((h, w, 3), dtype=np.uint8)
             pointcloud(tmp, verts, texcoords, color_source)
-            tmp = cv2.resize(
-                tmp, out.shape[:2][::-1], interpolation=cv2.INTER_NEAREST)
+            tmp = cv2.resize(tmp, out.shape[:2][::-1], interpolation=cv2.INTER_NEAREST)
             np.putmask(out, tmp > 0, tmp)
 
         if any(state.mouse_btns):
@@ -321,8 +354,10 @@ def get_points_colors_from_realsense_with_interface() -> None:
         dt = time.time() - now
 
         cv2.setWindowTitle(
-            state.WIN_NAME, "RealSense (%dx%d) %dFPS (%.2fms) %s" %
-            (w, h, 1.0/dt, dt*1000, "PAUSED" if state.paused else ""))
+            state.WIN_NAME,
+            "RealSense (%dx%d) %dFPS (%.2fms) %s"
+            % (w, h, 1.0 / dt, dt * 1000, "PAUSED" if state.paused else ""),
+        )
 
         cv2.imshow("Color Image", color_image)
         cv2.imshow(state.WIN_NAME, out)
@@ -337,8 +372,7 @@ def get_points_colors_from_realsense_with_interface() -> None:
 
         if key == ord("d"):
             state.decimate = (state.decimate + 1) % 3
-            decimate.set_option(rs.option.filter_magnitude,
-                                2 ** state.decimate)
+            decimate.set_option(rs.option.filter_magnitude, 2**state.decimate)
 
         if key == ord("z"):
             state.scale ^= True
@@ -346,13 +380,21 @@ def get_points_colors_from_realsense_with_interface() -> None:
         if key == ord("c"):
             state.color ^= True
 
-        if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
+        if (
+            key in (27, ord("q"))
+            or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0
+        ):
             depth_frame = frames.get_depth_frame()
             pc = rs.pointcloud()
             pc.map_to(depth_frame)
             points = pc.calculate(depth_frame)
             vertices = np.array(points.get_vertices())
-            return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)), color_image
+            return (
+                vertices.astype([("f0", "<f8"), ("f1", "<f8"), ("f2", "<f8")])
+                .view(float)
+                .reshape(vertices.shape + (-1,)),
+                color_image,
+            )
 
 
 def init_realsense(width: int, height: int, serial_number: str = ""):
@@ -375,8 +417,7 @@ def init_realsense(width: int, height: int, serial_number: str = ""):
         if len(serial_number) > 0:
             config.enable_device(serial_number)
         config.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
-        config.enable_stream(rs.stream.color, width,
-                             height, rs.format.rgb8, 30)
+        config.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
         # Start streaming
         pipeline.start(config)
         time.sleep(2)  # Because the camera need time to be fully operationnal
@@ -413,7 +454,72 @@ def get_points_and_colors_from_realsense(pipeline) -> Tuple[np.ndarray]:
     return vertices.astype([('f0', '<f8'), ('f1', '<f8'), ('f2', '<f8')]).view(float).reshape(vertices.shape + (-1,)), color_image
 
 
-if __name__ == '__main__':
+def get_points_and_colors_from_realsense_w_filter(pipeline, filtered=False):
+    """
+    Capture les coordonnées 3D et les couleurs associées à partir d'une caméra Intel RealSense.
+    
+    Args:
+        pipeline (rs.pipeline): Objet de pipeline RealSense.
+        filtered (bool): Indique si les données doivent être filtrées. Defaults to False.
+    
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: Tuple contenant les coordonnées 3D (vertices) et l'image couleur
+    """
+    # This call waits until a new coherent set of frames is available on a device
+    # Calls to get_frame_data(...) and get_frame_timestamp(...) on a device will return stable values until wait_for_frames(...) is called
+    frames = pipeline.wait_for_frames()
+    depth_frame = frames.get_depth_frame()
+    color_frame = frames.get_color_frame()
+
+    if filtered is True:
+        # Post processing filters
+        dec_filter = rs.decimation_filter()
+        spat_filter = rs.spatial_filter()
+        temp_filter = rs.temporal_filter()
+        hole_filter = rs.hole_filling_filter()
+
+        # Configure filter parameters
+        dec_filter.set_option(rs.option.filter_magnitude, 3)
+
+        spat_filter.set_option(rs.option.filter_magnitude,2)
+        spat_filter.set_option(rs.option.filter_smooth_alpha, 1)
+        spat_filter.set_option(rs.option.filter_smooth_delta, 50)
+        
+        temp_filter.set_option(rs.option.filter_smooth_alpha, 0.5)
+        temp_filter.set_option(rs.option.filter_smooth_delta, 20)
+        
+        hole_filter.set_option(rs.option.holes_fill, 1)
+
+        filtered_frame = depth_frame
+        # Note the concatenation of output/input frame to build up a chain
+        filtered_frame = dec_filter.process(filtered_frame)
+        filtered_frame = spat_filter.process(filtered_frame)
+        filtered_frame = temp_filter.process(filtered_frame)
+        filtered_frame = hole_filter.process(filtered_frame)
+
+        # Get the 3D and 2D coordinates
+        pc = rs.pointcloud()
+        pc.map_to(filtered_frame)
+        points = pc.calculate(filtered_frame)
+
+    else:
+        pc = rs.pointcloud()
+        pc.map_to(depth_frame)
+        points = pc.calculate(depth_frame)
+
+    # Convert the coordinates to NumPy arrays
+    vertices = np.array(points.get_vertices())
+    color_image = np.array(color_frame.get_data())
+
+    return (
+        vertices.astype([("f0", "<f8"), ("f1", "<f8"), ("f2", "<f8")])
+        .view(float)
+        .reshape(vertices.shape + (-1,)),
+        color_image,
+    )
+
+
+if __name__ == "__main__":
     ## Help to deal with several cameras
     
     serial_numbers = ir.get_serial_number()

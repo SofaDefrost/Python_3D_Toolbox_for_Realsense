@@ -495,6 +495,148 @@ def crop_from_zone_selection(points: np.ndarray, colors: np.ndarray, shape: Tupl
     cv2.destroyAllWindows()
     return np.array(points_cloud_crop), np.array(colors_crop), np.array(tab_index_crop), new_shape
 
+def crop_color_image_from_zone_selection(colors: np.ndarray, shape: Tuple[int, int] = []):
+    """
+    Crop a region of interest (ROI) from a color image based on user selection.
+    """
+    # Global variables to store information of mouseclick
+    start_x, start_y = -1, -1
+    end_x, end_y = -1, -1
+    cropping = False
+
+    def mouse_click(event, x, y, flags, param):
+
+        nonlocal start_x, start_y, end_x, end_y, cropping
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            # Start cropping
+            start_x, start_y = x, y
+            end_x, end_y = x, y
+            cropping = True
+
+        elif event == cv2.EVENT_LBUTTONUP:
+            # End cropping
+            end_x, end_y = x, y
+            cropping = False
+            # Draw selection
+            cv2.rectangle(colors_image, (start_x, start_y),
+                          (end_x, end_y), (0, 255, 0), 2)
+            cv2.imshow("Cropping", colors_image[:, :, ::-1])
+    if shape != []:
+        if np.shape(shape) != (2,):
+            raise ValueError(f"Incorrect shape {shape} for the display")
+        if shape[0] == np.shape(colors)[0] and shape[1] == np.shape(colors)[1] and 3 == np.shape(colors)[2]:
+            colors_image = colors.astype(np.uint8)
+            colors = array.to_line(colors)
+            height, length = np.shape(colors_image)[
+                0], np.shape(colors_image)[1]
+        else:
+            height, length = shape
+            colors_image = array.line_to_2Darray(
+                colors, (length, height)).astype(np.uint8)
+            colors = array.to_line(colors)
+    else:
+        if len(np.shape(colors)) != 3:
+            raise ValueError(
+                f"Incorrect shape for the display got {np.shape(colors)} and expected (x,y,z)")
+        if np.shape(colors)[2] != 3:
+            raise ValueError(
+                f"Incorrect dimension for the array, expected 3 and given {np.shape(colors)[2]}")
+        colors_image = colors.astype(np.uint8)
+        colors = array.to_line(colors)
+        length, height = np.shape(colors_image)[0], np.shape(colors_image)[1]
+
+    # Create a window for the display
+    cv2.namedWindow("Cropping")
+    cv2.setMouseCallback("Cropping", mouse_click)
+
+    # User's instructions
+    print("Use the mouse to select the cropping rectangle. Press the 'q' to finish cropping.")
+
+    while True:
+        cv2.imshow("Cropping", colors_image[:, :, ::-1])
+        key = cv2.waitKey(1) & 0xFF
+
+        # Leave the programm if key 'c'
+        if key == ord("q"):
+            break
+
+    # Check if the selection has a valid shape
+    if start_x == end_x or start_y == end_y:
+        raise ValueError("Incorrect values for cropping selected")
+
+    # Get the data for the cropping
+    x_min, y_min = min(start_x, end_x), min(start_y, end_y)
+    x_max, y_max = max(start_x, end_x), max(start_y, end_y)
+
+    # Filtering of the points
+    bottom_left_corner = (y_min-1)*height + x_min
+    top_left_corner = (y_max-1)*height + x_min
+    bottom_right_corner = (y_min-1)*height + x_max
+
+    new_shape = (abs(x_max-x_min), abs(y_max-y_min)+1)
+
+    i = 0
+
+    colors_crop = []
+
+    while (bottom_left_corner != top_left_corner):
+        for j in range(bottom_left_corner, bottom_right_corner):
+            colors_crop.append(colors[j])
+        bottom_left_corner = (y_min+i-1)*height + x_min
+        bottom_right_corner = (y_min+i-1)*height + x_max
+        i += 1
+
+    cv2.destroyAllWindows()
+    return np.array(colors_crop), new_shape, [x_min, y_min, x_max, y_max]
+
+
+def check_if_point_is_in_zone(point: np.ndarray, camera_matrix:np.ndarray, zone:np.ndarray) -> bool:
+    """
+    Check if a 3d point is projected in a specific zone on the image.
+    
+    Args:
+        point (np.ndarray): Input 3D point.
+        camera_matrix (np.ndarray): Camera matrix.
+        zone (np.ndarray): A mask indicate the selected zone in image, 1 if in the zone, 0 if not.
+    
+    Returns:
+        bool: True if the point is in the zone, False otherwise.
+    """
+    point_2D = np.dot(camera_matrix, point)
+    if point_2D[2] == 0:
+        return False
+    point_2D/=point_2D[2]
+    if point_2D[0] < 0 or point_2D[0] >= zone.shape[1] or point_2D[1] < 0 or point_2D[1] >= zone.shape[0]:
+        return False
+    if zone[int(point_2D[1]), int(point_2D[0])] == 1:
+        return True
+    return False
+
+
+
+
+def apply_binary_mask_to_point_cloud(points: np.ndarray, 
+                                     camera_matrix: np.ndarray,
+                                     mask: np.ndarray, ) ->  np.ndarray:
+    """
+    Apply a binary mask to filter points and colors.
+
+    Args:
+        points (np.ndarray): Input array of 3D coordinates.
+        mask (np.ndarray): Binary mask to apply.
+
+    Returns:
+        filtered_points(np.ndarray): Filtered points
+    """
+    points_filter = []
+    for p in points:
+        if check_if_point_is_in_zone(p, camera_matrix, mask):
+            points_filter.append(p)
+
+
+    return np.array(points_filter)
+
 
 def apply_binary_mask(points: np.ndarray, colors: np.ndarray, mask: np.ndarray, shape: Tuple[int, int], tab_index: Optional[List[int]] = []) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -560,6 +702,64 @@ def apply_hsv_mask(points: np.ndarray, colors: np.ndarray, maskhsv: Tuple[np.nda
     binary_mask = mask > 0
 
     return apply_binary_mask(points, colors, binary_mask, shape, tab_index)
+
+
+def apply_hsv_mask_f(points: np.ndarray, 
+                     colors: np.ndarray, 
+                     maskhsv: Tuple[np.ndarray, np.ndarray], 
+                     original_shape: Tuple[int, int],
+                     shape: Tuple[int, int], 
+                     selection_zone: np.ndarray,
+                     camera_matrix: np.ndarray,
+                     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Apply an HSV mask to filter points and colors using filtered point cloud.
+
+    Args:
+        points (np.ndarray): Input array of 3D coordinates.
+        colors (np.ndarray): Input array of colors.
+        maskhsv (Tuple[np.ndarray, np.ndarray]): Tuple containing lower and upper HSV values.
+        shape (Tuple[int, int]): Shape of the original data.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: Filtered points, colors, and indices.
+    """
+    colors = cv2.convertScaleAbs(colors)
+    cv2.normalize(colors, colors, 0, 255, cv2.NORM_MINMAX)
+    colors = colors.astype(np.uint8)
+    colors_3D = array.line_to_2Darray(colors, (shape[1], shape[0]))
+
+    # Mask reconstruction
+    lower_hsv, upper_hsv = maskhsv
+    image = colors_3D[:, :, ::-1]  # Conversion RGB to BGR
+    hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv_img, lower_hsv, upper_hsv)
+
+    binary_mask = np.zeros((original_shape[1], original_shape[0]))
+    # binary_mask[selection_zone[1]:selection_zone[3], selection_zone[0]:selection_zone[2]] = 1
+    for i in range(mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if mask[i][j] > 0:
+                try:
+                    binary_mask[selection_zone[1]+i][selection_zone[0]+j] = 1
+                except IndexError:
+                    print(f"selection_zone{selection_zone}")
+                    print(f"IndexError: {selection_zone[1]+j} {selection_zone[0]+i}")
+    # binary_mask = mask > 0
+    print(np.sum(binary_mask))
+    cv2.imshow("mask", binary_mask.astype(np.uint8)*255)
+    while(1):
+        keys = cv2.waitKey(1)
+        if keys & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+            break
+    
+    return apply_binary_mask_to_point_cloud(points, camera_matrix, binary_mask)
+
+
+
+
+
 
 
 def center_on_image(points: np.ndarray, colors: np.ndarray, shape_pc: Tuple[int, int], image_target: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
