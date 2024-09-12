@@ -747,12 +747,12 @@ def apply_hsv_mask_f(points: np.ndarray,
                     print(f"IndexError: {selection_zone[1]+j} {selection_zone[0]+i}")
     # binary_mask = mask > 0
     print(np.sum(binary_mask))
-    cv2.imshow("mask", binary_mask.astype(np.uint8)*255)
-    while(1):
-        keys = cv2.waitKey(1)
-        if keys & 0xFF == ord('q'):
-            cv2.destroyAllWindows()
-            break
+    # cv2.imshow("mask", binary_mask.astype(np.uint8)*255)
+    # while(1):
+    #     keys = cv2.waitKey(1)
+    #     if keys & 0xFF == ord('q'):
+    #         cv2.destroyAllWindows()
+    #         break
     
     return apply_binary_mask_to_point_cloud(points, camera_matrix, binary_mask)
 
