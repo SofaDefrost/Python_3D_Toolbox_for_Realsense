@@ -418,8 +418,22 @@ def init_realsense(width: int, height: int, serial_number: str = ""):
             config.enable_device(serial_number)
         config.enable_stream(rs.stream.depth, width, height, rs.format.z16, 30)
         config.enable_stream(rs.stream.color, width, height, rs.format.rgb8, 30)
+        # for d435i
+        config.enable_stream(rs.stream.accel)
+        config.enable_stream(rs.stream.gyro)
+
+        # first_frame = True
+        # alpha = 0.98
+        # totalgyroangleY = 0
+        
+        
         # Start streaming
-        pipeline.start(config)
+        profile = pipeline.start(config)
+        
+        depth_sensor = profile.get_device().first_depth_sensor()
+                # Using preset HighAccuracy for recording
+        depth_sensor.set_option(rs.option.visual_preset, 3)
+        
         time.sleep(2)  # Because the camera need time to be fully operationnal
     except Exception as e:
         raise ValueError(f"Error: {e}")
@@ -470,6 +484,22 @@ def get_points_and_colors_from_realsense_w_filter(pipeline, filtered=False):
     frames = pipeline.wait_for_frames()
     depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
+
+    for frame in frames:
+
+        pr = frame.get_profile()
+
+        if pr.stream_type() == rs.stream.accel and pr.format() == rs.format.motion_xyz32f:
+            data = frame.as_motion_frame().get_motion_data()
+            print(type(data))
+            print(pr.stream_type(), data)
+
+        if pr.stream_type() == rs.stream.gyro and pr.format() == rs.format.motion_xyz32f:
+            data = frame.as_motion_frame().get_motion_data()
+            print(type(data))
+            print(pr.stream_type(), data)
+
+
 
     if filtered is True:
         # Post processing filters
