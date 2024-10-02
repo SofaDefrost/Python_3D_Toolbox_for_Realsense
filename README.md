@@ -49,6 +49,8 @@ pip3 install open3d
 
 - If you are experiencing unexpected errors while using functions in *previsualisation_application_function.py* it is possible that you are encountering a compatibility issue related to the locale settings on your system. Specifically, if your language setting uses a comma (,) as the decimal separator for floats, Tkinter may not handle float values correctly within the Scale widget. To resolve this issue, consider adjusting the locale settings on your computer to use a period (.) as the decimal separator instead of a comma.
 
+- The folder "SOFA" contains a SOFA scene and a controller that display the points captured by the camera. You may need to rework the imports for these files. 
+
 For additional information about Realsense with Python, visit: https://dev.intelrealsense.com/docs/python2
 
 Authors: Thibaud Piccinali, Tinhinane Smail
